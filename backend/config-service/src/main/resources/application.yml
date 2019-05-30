@@ -10,7 +10,9 @@ spring:
       server:
         git:
           uri: git@github.com:szattila98/config-repo.git
-          search-paths: 'studentTaskChecker/'
+          search-paths: studentTaskChecker #directory in config repo
+          refresh-rate: 60 #seconds
+          force-pull: true
           ignoreLocalSshSettings: true
           privateKey: |
             -----BEGIN RSA PRIVATE KEY-----
@@ -40,14 +42,3 @@ spring:
             7l7+GK2w1zMnNMY+tnsLPApnYfbQWZuZqfxVXb8qnsuDfhJrcnvGNVXVfc3pXle8
             N+pgQqjLIodVQriZ5N8NGA8zHGk/ihtzrRH0OAcUAiD9KaSIta+muA==
             -----END RSA PRIVATE KEY-----
-
-# refresh doesnt work on native, I think because the yml file in the built jar doesnt change.
-#spring:
-#  profiles:
-#    active: native
-#  cloud:
-#    config:
-#      server:
-#        native:
-#          searchLocations: classpath:client-configs/
-

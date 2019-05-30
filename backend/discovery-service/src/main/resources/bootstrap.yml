@@ -6,3 +6,4 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
+      fail-fast: true #if it cannot get its config files it retries (spring retry default values apply) and then fails
