@@ -1,0 +1,47 @@
+version: '2'
+
+networks:
+  studentTaskChecker:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.22/16
+          gateway: 172.18.0.1
+
+services:
+  config-service:
+    container_name: config-service
+    build:
+      context: ./config-service
+      dockerfile: dockerfile
+    image: config-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8888"
+
+  discovery-service-peer1:
+    container_name: discovery-service-peer1
+    build:
+      context: ./discovery-service
+      dockerfile: dockerfile-p1
+    image: discovery-service-peer1:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8761"
+    depends_on:
+      - config-service
+
+  discovery-service-peer2:
+    container_name: discovery-service-peer2
+    build:
+      context: ./discovery-service
+      dockerfile: dockerfile-p2
+    image: discovery-service-peer2:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8761"
+    depends_on:
+      - config-service

@@ -1,10 +1,11 @@
 # How to run backend
 
-You must use Linux (some Ubuntu is preferred) for now, and have docker installed (please configure so it doesnt need sudo) <br>
-and cd into the 'backend' directory. After that run 'mvn clean install' and just run 'bash setup_docker.sh'. <br>
-The file deletes previous versions of docker artifacts, creates them again and sets them up. <br>
-Windows docker had a strange behaviour when I tried so it's not advised as of yet. <br>
-It may take some time (and luck :D) and you can view the 'peer1' eureka instance web-page on '172.18.0.11/8761'. There you can check if everything is in order <br>
-More services will be getting Docker files after they are more or less done. Until then you run in-prod services from intellij in conjunction with the ones running on docker. <br>
-If you dont want to use Docker there is a way, it involves some property changes but that is it. <br>
-Docker-compose might be used to counter 'slow-pc-config-server-did-not-start-fast-enough-and-everything-fails' types of problems but it's hard dude. <br>
+You must use Linux (some Ubuntu is preferred) for now, and have Docker and Docker-Compose installed (please configure so they doesnt need sudo) <br>
+and cd into the 'backend' directory. After that run 'mvn clean install' and just run 'bash docker_script.sh $arg', in which $arg is either 'start' or 'stop'. <br>
+Start creates a network, images of the services, and containers from the images on said network. Services can reach each other by container name, so IP is <br>
+dynamically set. Docker-compose should always rebuilds images, so if there are changes in the source code be sure to run 'mvn clean install'. <br>
+Windows docker had a strange behaviour when I tried so it's not advised as of yet. When the containers are running you can 'docker inspect container_name', <br>
+and search for its IP address, so you can reach it from a browser. It may take some time (and luck :D) and you can view the 'peer1' eureka instance web-page <br>
+usually on '172.18.0.3/8761', but as I mentioned it's dynamic so beware. There you can check if everything is in order. <br>
+More services will be getting Docker files after they are more or less done. Until then you run in-prod services from intellij in conjunction with the ones <br>
+running on docker. If you dont want to use Docker there is a way, it involves some property changes but that is it. <br>
