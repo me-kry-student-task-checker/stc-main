@@ -7,3 +7,4 @@ Windows docker had a strange behaviour when I tried so it's not advised as of ye
 It may take some time (and luck :D) and you can view the 'peer1' eureka instance web-page on '172.18.0.11/8761'. There you can check if everything is in order <br>
 More services will be getting Docker files after they are more or less done. Until then you run in-prod services from intellij in conjunction with the ones running on docker. <br>
 If you dont want to use Docker there is a way, it involves some property changes but that is it. <br>
+Docker-compose might be used to counter 'slow-pc-config-server-did-not-start-fast-enough-and-everything-fails' types of problems but it's hard dude. <br>
