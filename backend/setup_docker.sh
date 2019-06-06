@@ -6,12 +6,14 @@ NOCOLOR='\033[0m'
 
 # Variables
 CONFIG_SERVICE="config-service"
-CONFIG_IP="172.18.0.8"
 DISCOVERY_SERVICE="discovery-service"
-DISCOVERY_IP_PEER1="172.18.0.11"
-DISCOVERY_IP_PEER2="172.18.0.12" # For one of the clustered discovery services
+
 NETWORK_MASK="172.18.0.22/16"
 NETWORK_NAME="studentTaskChecker"
+
+#CONFIG_IP="172.18.0.8"
+#DISCOVERY_IP_PEER1="172.18.0.11"
+#DISCOVERY_IP_PEER2="172.18.0.12" # For one of the clustered discovery services
 
 echo -e "\n${YELLOW}Image deletion${NOCOLOR} \n"
 
@@ -45,6 +47,6 @@ docker network create --subnet=${NETWORK_MASK} ${NETWORK_NAME}
 
 echo -e "\n${YELLOW}Running docker images${NOCOLOR} \n"
 
-docker run --detach --name ${CONFIG_SERVICE} --net ${NETWORK_NAME} --ip ${CONFIG_IP} -it ${CONFIG_SERVICE}
-docker run --detach --name "${DISCOVERY_SERVICE}-peer1" --net ${NETWORK_NAME} --ip ${DISCOVERY_IP_PEER1} -it "${DISCOVERY_SERVICE}-peer1"
-docker run --detach --name "${DISCOVERY_SERVICE}-peer2" --net ${NETWORK_NAME} --ip ${DISCOVERY_IP_PEER2} -it "${DISCOVERY_SERVICE}-peer2"
+docker run --detach --name ${CONFIG_SERVICE} --net ${NETWORK_NAME} -it ${CONFIG_SERVICE}
+docker run --detach --name "${DISCOVERY_SERVICE}-peer1" --net ${NETWORK_NAME} -it "${DISCOVERY_SERVICE}-peer1"
+docker run --detach --name "${DISCOVERY_SERVICE}-peer2" --net ${NETWORK_NAME} -it "${DISCOVERY_SERVICE}-peer2"
