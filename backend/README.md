@@ -7,5 +7,5 @@ dynamically set. Docker-compose should always rebuilds images, so if there are c
 Windows docker had a strange behaviour when I tried so it's not advised as of yet. When the containers are running you can 'docker inspect container_name', <br>
 and search for its IP address, so you can reach it from a browser. It may take some time (and luck :D) and you can view the 'peer1' eureka instance web-page <br>
 usually on '172.18.0.3/8761', but as I mentioned it's dynamic so beware. There you can check if everything is in order. <br>
-More services will be getting Docker files after they are more or less done. Until then you run in-prod services from intellij in conjunction with the ones <br>
+More services will be getting Docker files after they are more or less done. Until then you run in-dev services from intellij in conjunction with the ones <br>
 running on docker. If you dont want to use Docker there is a way, it involves some property changes but that is it. <br>

@@ -12,7 +12,12 @@ cond="$1"
 
 if [[ "${cond}" == "start" ]]; then
     echo -e "\n${YELLOW}Running docker-compose build and init!${NOCOLOR} \n"
-    docker-compose up --build -d && echo -e "\n${GREEN}Everything Docker related is UP and running!${NOCOLOR} \n"
+
+    # In development use - this line always rebuilds the images and containers
+    docker-compose build --no-cache && docker-compose up -d --force-recreate && echo -e "\n${GREEN}Everything Docker related is UP and running!${NOCOLOR} \n"
+
+    # In production use - it uses the cache to speed up image creation, and does not pick up on changes
+    #docker-compose up --build --force-recreate -d && echo -e "\n${GREEN}Everything Docker related is UP and running!${NOCOLOR} \n"
 else
     if [[ "${cond}" == "stop" ]]; then
         echo -e "\n${YELLOW}Shutting down everything!${NOCOLOR} \n"
