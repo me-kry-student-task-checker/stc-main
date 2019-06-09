@@ -9,3 +9,7 @@ and search for its IP address, so you can reach it from a browser. It may take s
 usually on '172.18.0.3/8761', but as I mentioned it's dynamic so beware. There you can check if everything is in order. <br>
 More services will be getting Docker files after they are more or less done. Until then you run in-dev services from intellij in conjunction with the ones <br>
 running on docker. If you dont want to use Docker there is a way, it involves some property changes but that is it. <br>
+
+# How to use email-service
+'sudo ufw allow 25' - on linux use this command for email-service to work. <br>
+'sudo apt install postfix' - this sends the emails

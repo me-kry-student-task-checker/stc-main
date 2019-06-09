@@ -46,17 +46,18 @@ services:
     depends_on:
       - config-service
 
-  email-service:
-    container_name: email-service
-    build:
-      context: ./email-service
-      dockerfile: dockerfile
-    image: email-service:latest
-    networks:
-      - studentTaskChecker
-    ports:
-      - "8080"
-    depends_on:
-      - config-service
-      - discovery-service-peer1
-      - discovery-service-peer2
+# In docker it doesnt really work yet
+#  email-service:
+#    container_name: email-service
+#    build:
+#      context: ./email-service
+#      dockerfile: dockerfile
+#    image: email-service:latest
+#    networks:
+#      - studentTaskChecker
+#    ports:
+#      - "8080"
+#    depends_on:
+#      - config-service
+#      - discovery-service-peer1
+#      - discovery-service-peer2
