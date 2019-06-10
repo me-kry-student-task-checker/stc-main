@@ -21,9 +21,4 @@ public class EmailServiceApplication {
 		SpringApplication.run(EmailServiceApplication.class, args);
 	}
 
-	@Bean
-	public JavaMailSender javaMailSender(){
-		return new JavaMailSenderImpl();
-	}
-
 }

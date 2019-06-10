@@ -1,5 +1,5 @@
 consts:
-  config-host: 172.18.0.2 # a dockerized service can find it's config server on a docker network by docker it's container name
+  config-host: config-service # a dockerized service can find it's config server on a docker network by docker it's container name
   config-port: 8888
 
 # Name of the service, by which it finds its property file and the uri of the config server to fetch from.

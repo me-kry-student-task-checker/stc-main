@@ -1,6 +1,3 @@
-# The config server clones the config repo here
-cfgdir: "/config-service/cfgdir" # TODO: Valaki megtalálhatné hogy docker esetében hova a fenébe rakja ezt
-
 # Port of the config server.
 server:
   port: 8888
@@ -16,7 +13,7 @@ spring:
           search-paths: studentTaskChecker #directory in config repo
           refresh-rate: 60 #seconds
           force-pull: true
-          basedir: ${cfgdir}
+          basedir: var/cfgdir/
           ignoreLocalSshSettings: true
           privateKey: |
             -----BEGIN RSA PRIVATE KEY-----
