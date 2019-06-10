@@ -2,12 +2,11 @@ package hu.me.iit.malus.thesis.emailservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 /**
  * The type Email service application.
+ *
+ * @author Szőke Attila
  */
 @SpringBootApplication
 public class EmailServiceApplication {

@@ -2,6 +2,8 @@ package hu.me.iit.malus.thesis.emailservice.model;
 
 /**
  * The type Mail.
+ *
+ * @author Szőke Attila
  */
 public class Mail {
 

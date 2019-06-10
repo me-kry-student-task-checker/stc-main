@@ -3,13 +3,14 @@ package hu.me.iit.malus.thesis.emailservice.controller;
 import hu.me.iit.malus.thesis.emailservice.model.Mail;
 import hu.me.iit.malus.thesis.emailservice.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The type Mail controller.
+ *
+ * @author Szőke Attila
  */
 @RestController
 public class MailController {
@@ -34,11 +35,7 @@ public class MailController {
      */
     @PostMapping("/sendMail")
     public String send(@RequestBody Mail mail) {
-        try {
-            mailService.sendEmail(mail);
-        } catch (MailException e) {
-            e.printStackTrace();
-        }
+        mailService.sendEmail(mail);
         return "Mail Sent";
     }
 }

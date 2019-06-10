@@ -5,6 +5,8 @@ import org.springframework.mail.MailException;
 
 /**
  * The interface Mail service.
+ *
+ * @author Szőke Attila
  */
 public interface MailService {
     /**
