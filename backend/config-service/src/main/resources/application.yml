@@ -43,3 +43,8 @@ spring:
             7l7+GK2w1zMnNMY+tnsLPApnYfbQWZuZqfxVXb8qnsuDfhJrcnvGNVXVfc3pXle8
             N+pgQqjLIodVQriZ5N8NGA8zHGk/ihtzrRH0OAcUAiD9KaSIta+muA==
             -----END RSA PRIVATE KEY-----
+logging:
+  file: service.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"

@@ -1,14 +1,15 @@
 package hu.me.iit.malus.thesis.emailservice.model;
 
+import java.util.Arrays;
+
 /**
  * The type Mail.
- *
- * @author Szőke Attila
  */
 public class Mail {
 
     private String to;
     private String subject;
+    private String[] ccs;
     private String[] bccs;
     private String text;
 
@@ -24,12 +25,14 @@ public class Mail {
      * @param to      the to
      * @param subject the subject
      * @param bccs    the bccs
+     * @param ccs     the ccs
      * @param text    the text
      */
-    public Mail(String to, String subject, String[] bccs, String text) {
+    public Mail(String to, String subject, String[] bccs, String[] ccs, String text) {
         this.to = to;
         this.subject = subject;
         this.bccs = bccs;
+        this.ccs = ccs;
         this.text = text;
     }
 
@@ -103,5 +106,34 @@ public class Mail {
      */
     public void setText(String text) {
         this.text = text;
+    }
+
+    /**
+     * Get ccs string [ ].
+     *
+     * @return the string [ ]
+     */
+    public String[] getCcs() {
+        return ccs;
+    }
+
+    /**
+     * Sets ccs.
+     *
+     * @param ccs the ccs
+     */
+    public void setCcs(String[] ccs) {
+        this.ccs = ccs;
+    }
+
+    @Override
+    public String toString() {
+        return "Mail{" +
+                "to='" + to + '\'' +
+                ", subject='" + subject + '\'' +
+                ", ccs=" + Arrays.toString(ccs) +
+                ", bccs=" + Arrays.toString(bccs) +
+                ", text='" + text + '\'' +
+                '}';
     }
 }

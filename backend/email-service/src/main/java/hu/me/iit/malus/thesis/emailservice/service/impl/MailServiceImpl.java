@@ -42,6 +42,9 @@ public class MailServiceImpl implements hu.me.iit.malus.thesis.emailservice.serv
         mail.setTo(mailParameters.getTo());
         mail.setSubject(mailParameters.getSubject());
         mail.setText(mailParameters.getText());
+        if (mailParameters.getCcs().length != 0) {
+            mail.setCc(mailParameters.getCcs());
+        }
         if (mailParameters.getBccs().length != 0) {
             mail.setBcc(mailParameters.getBccs());
         }
@@ -50,7 +53,7 @@ public class MailServiceImpl implements hu.me.iit.malus.thesis.emailservice.serv
         } catch (MailException e) {
             LOGGER.error(e.getMessage());
         }
-        LOGGER.info("E-mail sent: {}", mailParameters);
+        LOGGER.info("E-mail sent: {}", mailParameters.toString());
     }
 
 }
