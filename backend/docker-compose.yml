@@ -9,6 +9,24 @@ networks:
           gateway: 172.18.0.1
 
 services:
+  zipkin-storage:
+    image: openzipkin/zipkin-mysql
+    container_name: mysql
+    networks:
+      - studentTaskChecker
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    networks:
+      - studentTaskChecker
+    environment:
+      - STORAGE_TYPE=mysql
+      - MYSQL_HOST=mysql
+    ports:
+      - "9411"
+    depends_on:
+      - zipkin-storage
+
   config-service:
     container_name: config-service
     build:
