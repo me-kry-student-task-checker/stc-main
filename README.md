@@ -13,3 +13,8 @@ Javorek Dénes - Spring Data használata a Google Cloudban<br>
 A vonatkozó technológiák használatához szükséges dokumentáció elkészítése a kezdeti lépését képezi a feladatunknak.
 Ezeket, az összes projekthez készülő különálló dokumentációval együtt a projekt 
 [Wiki](https://github.com/djavorek/StudentTaskChecker/wiki) oldalán közzéteszünk vagy behivatkozunk.
+
+### Konfiguráció
+A projekthez tartozó konfigurációs tulajdonságok (property-k) egy külön repositoryban találhatóak.
+Ennek a repositorynak biztonsági okokból privátnak kell lennie. A fejlesztők számára a következő linken elérhető:
+[Config-repo](https://github.com/szattila98/config-repo)
