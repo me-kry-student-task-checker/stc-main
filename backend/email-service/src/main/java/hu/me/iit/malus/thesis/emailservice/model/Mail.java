@@ -1,17 +1,21 @@
 package hu.me.iit.malus.thesis.emailservice.model;
 
-import java.util.Arrays;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.Collection;
 
 /**
  * The type Mail.
  */
 public class Mail {
 
-    private String to;
+    private String from;
+    private String[] to;
     private String subject;
     private String[] ccs;
     private String[] bccs;
     private String text;
+    private String replyTo;
+    private Collection<MultipartFile> attachments;
 
     /**
      * Instantiates a new Mail.
@@ -19,121 +23,101 @@ public class Mail {
     public Mail() {
     }
 
-    /**
-     * Instantiates a new Mail.
-     *
-     * @param to      the to
-     * @param subject the subject
-     * @param bccs    the bccs
-     * @param ccs     the ccs
-     * @param text    the text
-     */
-    public Mail(String to, String subject, String[] bccs, String[] ccs, String text) {
+
+    public Mail(String from, String[] to, String subject, String[] ccs, String[] bccs, String text, String replyTo, Collection<MultipartFile> attachments) {
+        this.from = from;
         this.to = to;
         this.subject = subject;
-        this.bccs = bccs;
         this.ccs = ccs;
+        this.bccs = bccs;
         this.text = text;
+        this.replyTo = replyTo;
+        this.attachments = attachments;
     }
 
-    /**
-     * Gets to.
-     *
-     * @return the to
-     */
-    public String getTo() {
+    public Mail(String from, String[] to, String subject, String[] ccs, String[] bccs, String text, String replyTo) {
+        this.from = from;
+        this.to = to;
+        this.subject = subject;
+        this.ccs = ccs;
+        this.bccs = bccs;
+        this.text = text;
+        this.replyTo = replyTo;
+        this.attachments = null;
+    }
+
+    public Mail(String from, String[] to, String subject, String[] ccs, String[] bccs, String text) {
+        this.from = from;
+        this.to = to;
+        this.subject = subject;
+        this.ccs = ccs;
+        this.bccs = bccs;
+        this.text = text;
+        this.replyTo = "";
+        this.attachments = null;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String[] getTo() {
         return to;
     }
 
-    /**
-     * Sets to.
-     *
-     * @param to the to
-     */
-    public void setTo(String to) {
+    public void setTo(String[] to) {
         this.to = to;
     }
 
-    /**
-     * Gets subject.
-     *
-     * @return the subject
-     */
     public String getSubject() {
         return subject;
     }
 
-    /**
-     * Sets subject.
-     *
-     * @param subject the subject
-     */
     public void setSubject(String subject) {
         this.subject = subject;
     }
 
-    /**
-     * Get bccs string [ ].
-     *
-     * @return the string [ ]
-     */
-    public String[] getBccs() {
-        return bccs;
-    }
-
-    /**
-     * Sets bccs.
-     *
-     * @param bccs the bccs
-     */
-    public void setBccs(String[] bccs) {
-        this.bccs = bccs;
-    }
-
-    /**
-     * Gets text.
-     *
-     * @return the text
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * Sets text.
-     *
-     * @param text the text
-     */
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    /**
-     * Get ccs string [ ].
-     *
-     * @return the string [ ]
-     */
     public String[] getCcs() {
         return ccs;
     }
 
-    /**
-     * Sets ccs.
-     *
-     * @param ccs the ccs
-     */
     public void setCcs(String[] ccs) {
         this.ccs = ccs;
     }
 
-    @Override
-    public String toString() {
-        return "Mail{" +
-                "to='" + to + '\'' +
-                ", subject='" + subject + '\'' +
-                ", ccs=" + Arrays.toString(ccs) +
-                ", bccs=" + Arrays.toString(bccs) +
-                ", text='" + text + '\'' +
-                '}';
+    public String[] getBccs() {
+        return bccs;
+    }
+
+    public void setBccs(String[] bccs) {
+        this.bccs = bccs;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo;
+    }
+
+    public Collection<MultipartFile> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(Collection<MultipartFile> attachments) {
+        this.attachments = attachments;
     }
 }

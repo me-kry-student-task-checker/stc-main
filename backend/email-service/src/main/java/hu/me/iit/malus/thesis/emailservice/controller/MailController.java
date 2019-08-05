@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * The type Mail controller.
  *
- * @author Szőke Attila
+ * @author Ilku Krisztián
  */
 @RestController
 public class MailController {

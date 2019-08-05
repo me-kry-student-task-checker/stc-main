@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * The type Email service application.
  *
- * @author Szőke Attila
+ * @author Ilku Krisztián
  */
 @SpringBootApplication
 public class EmailServiceApplication {

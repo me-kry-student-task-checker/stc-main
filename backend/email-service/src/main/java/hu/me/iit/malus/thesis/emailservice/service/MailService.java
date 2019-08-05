@@ -6,14 +6,14 @@ import org.springframework.mail.MailException;
 /**
  * The interface Mail service.
  *
- * @author Szőke Attila
+ * @author Ilku Krisztián
  */
 public interface MailService {
     /**
      * Send email.
      *
-     * @param mailParameters the mail parameters
+     * @param mail the mail parameters
      * @throws MailException the mail exception
      */
-    void sendEmail(Mail mailParameters) throws MailException;
+    void sendEmail(Mail mail) throws MailException;
 }
