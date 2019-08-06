@@ -1,5 +1,5 @@
 FROM java:8
-EXPOSE 8081
+EXPOSE 8080
 ADD /target/course-service-0.0.1-SNAPSHOT.jar course-service.jar
 #RUN bash -c "apt-get update &> /dev/null; exit 0"
 #RUN bash -c "apt-get install nano &> /dev/null"
