@@ -78,3 +78,18 @@ services:
       - config-service
       - discovery-service-peer1
       - discovery-service-peer2
+
+  course-service:
+    container_name: course-service
+    build:
+      context: ./course-service
+      dockerfile: dockerfile
+    image: course-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8081"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
