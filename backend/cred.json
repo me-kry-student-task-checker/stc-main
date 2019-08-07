@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "studenttaskchecker",
+  "private_key_id": "728a657c6a883e626698318978d6cdc6fd8053aa",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCpFIXT19fapUYK\nfxb+4/iCwCTESDUF2Ad/PEyhFKQeucpazt/tzY6of6sh0c0jwajm1BHLFUs/sLxN\n8h6T8DKL8aHd8GgRwMUGK8D79V7z9ACTUpD9xO3XCgKPrCwMZkcJuiMnc1/V/WOS\nBwm1cAFK18v9akZnvNN3AsYS+HmlG0u/5499M82z0P0/nCmjG55lGqfeRs1o/8xm\neKFuINQBWx0rn+gdAcznOtLu3AygHbFfZkJECZSWBTRs2IIgExcBGd7g3y5hEKyp\nkeFfysLJwsncv1Hc6qphjwU8kwVDRlLFh0ZD8nbpFfqW8iUvNIQHrNYl4EumM2fX\nVK+bRZevAgMBAAECggEARXspCaabzf53+21Bkmo1X+m80ipIG8gsQIWTiehVD0lT\nFiEIVY1Qz/5y4Vl5fvWgxoakbzunahtjLnbOSQX+h5K67VzTL2Rzsrb9Pa0WIZMG\nP4RBD//Cq0kyRz899LR9AcrLknUvj1zq84HP5A8MgOiQK+nl19B5Z+Esa3RPbODQ\nsPZ8uwQBMww+SNw7ymUKm8QJlwV51ZiT/NFLuqPbcT8vrtVlNFtNFh2EQZtavYsp\nhFMJ8B88zmekG3cSvvJ7Mo3jmvTvyqAP5JBcJXRZUes0J0a3boiOSRIKZdbU3uwt\noxA5f7Z9vvqL2F2hAhmk8V0eGQ24YsnbeKb6akmYpQKBgQDgjZkOU6Ex/5Iw08x2\nQKrIN9Ez4BBtndqwFGY5Cx1zVbfr2/B+4B6Cp2hqC5M077Bp9k9hq+uF6M2JCLO+\nhEJsomKDPeQMSP/J+QuKGrcYH3FpdVmR4oxWg1PuGQghK+JWDEzcVsHrSUOSBDgV\nF3rkfT0ESstGT4MxMD+pYG+JTQKBgQDAwi1Lfmc1V7HRXik/LDGktPRFInYcUAd/\n+Thrkl6H4BQhGWrAdXSiy3QSmEeR+xghyZgrgtP1BkCMMCQ60qo83XtozaklIWWo\nADP6R0DvOM1DKP1cukleltX/qAn0fuCnDVNVBQGJLoC+KZJGDIzAanH0QUJvNj5Q\noGoYEvXG6wKBgAxF8P2leIQBEf51NRGpiywSUO7i6kLzg8Zn9wZbIyrwnnLXvJdS\nrJg7iitxooQcLao8+i2+dcsF5GX/AcQB+pdxcKz3rwU04DYr1IOh3iwFW++FqHWe\nykjYOLgkyhr2CRLm7TSF0WeIw5axgFc2x1LBvZoEdIPNSMBhgLlDOhVpAoGAQDQt\nLBklPWJBSzBm4rDQtEDFoAVze8i4Rsr3HPV64R0k90VlBkfZGqRTvCHWrOwKxK5G\nLi/8c3+qnkcmuiUTKQTIp0bhUQnHt2ah6Xo0SboMvJL5mRo/d+8bxnTtI+/i2iGZ\nIRdyxIOlxDFKlGR3uVt7K1VVUH+rz+UukWg3TxMCgYEAp0SuKRrpuHfluH7UI+XL\nHfpxAbiFVBV4UyBuQDCCQubPVfRYDzY5LedVuq+BiGBQhRZskC19AbMpi2iVeE8S\n4GP+14Kzugj6mS+MEnd8sPSgdElLmQtzIAuuqTK4L3U5U8zbPpufC7MxJ67/6pfb\n8fBz3qFFDbpUmaTFgh9ZPY8=\n-----END PRIVATE KEY-----\n",
+  "client_email": "sqlclient@studenttaskchecker.iam.gserviceaccount.com",
+  "client_id": "102340574774008099487",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sqlclient%40studenttaskchecker.iam.gserviceaccount.com"
+}
