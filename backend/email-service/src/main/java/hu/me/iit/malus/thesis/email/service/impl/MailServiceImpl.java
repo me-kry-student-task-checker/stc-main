@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
 
 /**
@@ -38,11 +39,10 @@ public class MailServiceImpl implements hu.me.iit.malus.thesis.email.service.Mai
     @Override
     public void sendEmail(Mail mail) {
         MailService.Message email = new MailService.Message();
-        if (mail.getFrom() != null && !mail.getFrom().equals(""))
-            email.setSender(mail.getFrom());
-
-        if (mail.getTo() != null)
-            email.setTo(mail.getTo());
+        email.setSender(mail.getFrom());
+        email.setTo(mail.getTo());
+        email.setSubject(mail.getSubject());
+        email.setTextBody(mail.getText());
 
         if (mail.getReplyTo() != null && !mail.getReplyTo().equals(""))
             email.setReplyTo(mail.getReplyTo());
@@ -52,12 +52,6 @@ public class MailServiceImpl implements hu.me.iit.malus.thesis.email.service.Mai
 
         if (mail.getBccs() != null)
             email.setBcc(mail.getBccs());
-
-        if (mail.getSubject() != null && !mail.getSubject().equals(""))
-            email.setSubject(mail.getSubject());
-
-        if (mail.getText() != null && !mail.getText().equals(""))
-            email.setTextBody(mail.getText());
 
         if (mail.getAttachments() != null) {
             try {
@@ -71,7 +65,8 @@ public class MailServiceImpl implements hu.me.iit.malus.thesis.email.service.Mai
         }
         try {
             mailService.send(email);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             LOGGER.error(e.getMessage());
         }
     }

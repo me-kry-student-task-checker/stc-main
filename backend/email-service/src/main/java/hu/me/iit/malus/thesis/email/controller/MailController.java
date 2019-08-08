@@ -3,9 +3,14 @@ package hu.me.iit.malus.thesis.email.controller;
 import hu.me.iit.malus.thesis.email.model.Mail;
 import hu.me.iit.malus.thesis.email.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 /**
  * Mail controller.
@@ -13,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Ilku Krisztián
  */
 @RestController
+@Validated
 public class MailController {
 
     private MailService mailService;
@@ -34,8 +40,10 @@ public class MailController {
      * @return the string
      */
     @PostMapping("/sendMail")
-    public String send(@RequestBody Mail mail) {
+    public ResponseEntity<String> send(@Valid @RequestBody Mail mail) {
         mailService.sendEmail(mail);
-        return "Mail Sent";
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Email successfully sent!");
     }
 }
