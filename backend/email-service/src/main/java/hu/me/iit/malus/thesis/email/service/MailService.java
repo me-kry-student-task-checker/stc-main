@@ -1,6 +1,6 @@
-package hu.me.iit.malus.thesis.emailservice.service;
+package hu.me.iit.malus.thesis.email.service;
 
-import hu.me.iit.malus.thesis.emailservice.model.Mail;
+import hu.me.iit.malus.thesis.email.model.Mail;
 import org.springframework.mail.MailException;
 
 /**

@@ -1,8 +1,8 @@
-package hu.me.iit.malus.thesis.emailservice.service.impl;
+package hu.me.iit.malus.thesis.email.service.impl;
 
 import com.google.appengine.api.mail.MailService;
 import com.google.appengine.api.mail.MailServiceFactory;
-import hu.me.iit.malus.thesis.emailservice.model.Mail;
+import hu.me.iit.malus.thesis.email.model.Mail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.io.IOException;
  * @author Ilku Krisztián
  */
 @Service
-public class MailServiceImpl implements hu.me.iit.malus.thesis.emailservice.service.MailService {
+public class MailServiceImpl implements hu.me.iit.malus.thesis.email.service.MailService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailServiceImpl.class);
     private MailService mailService;
@@ -60,7 +60,6 @@ public class MailServiceImpl implements hu.me.iit.malus.thesis.emailservice.serv
             email.setTextBody(mail.getText());
 
         if (mail.getAttachments() != null) {
-
             try {
                 for (MultipartFile file : mail.getAttachments()) {
                     email.getAttachments().add(new MailService.Attachment(file.getName(), file.getBytes()));

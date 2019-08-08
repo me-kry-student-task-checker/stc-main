@@ -1,14 +1,14 @@
-package hu.me.iit.malus.thesis.emailservice.controller;
+package hu.me.iit.malus.thesis.email.controller;
 
-import hu.me.iit.malus.thesis.emailservice.model.Mail;
-import hu.me.iit.malus.thesis.emailservice.service.MailService;
+import hu.me.iit.malus.thesis.email.model.Mail;
+import hu.me.iit.malus.thesis.email.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The type Mail controller.
+ * Mail controller.
  *
  * @author Ilku Krisztián
  */
@@ -18,9 +18,9 @@ public class MailController {
     private MailService mailService;
 
     /**
-     * Sets notification service.
+     * Sets mail service.
      *
-     * @param mailService the notification service
+     * @param mailService the mail service
      */
     @Autowired
     public MailController(MailService mailService) {
@@ -30,7 +30,7 @@ public class MailController {
     /**
      * Send string.
      *
-     * @param mail the mail
+     * @param mail the mail to be sent
      * @return the string
      */
     @PostMapping("/sendMail")
