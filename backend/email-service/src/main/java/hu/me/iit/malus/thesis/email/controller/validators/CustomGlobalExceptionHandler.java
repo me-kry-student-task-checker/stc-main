@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.email.controller.validators;
 
+import hu.me.iit.malus.thesis.email.model.exception.MailCouldNotBeSentException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,19 +12,24 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
-import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * @author Ilku Krisztian
+ * The exception handler. Handles the thrown exceptions to return with ResponseEntity
+ */
+
 @ControllerAdvice
 public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public void constraintViolationException(HttpServletResponse response) throws IOException {
-        response.sendError(HttpStatus.BAD_REQUEST.value());
+    public void constraintViolationException(HttpServletResponse response,
+                                             ConstraintViolationException ex) {
+        response.setStatus(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     @Override
@@ -48,5 +54,9 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
 
     }
 
-
+    @ExceptionHandler(MailCouldNotBeSentException.class)
+    public void mailNotSentExceptionHandler(HttpServletResponse response,
+                                            MailCouldNotBeSentException ex) {
+        response.setStatus(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
 }

@@ -12,7 +12,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * Email Microservice
+ * Email microservice to send mails using google's mail API
  *
  * @author Ilku Krisztián
  */
@@ -29,6 +29,7 @@ public class EmailServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(EmailServiceApplication.class, args);
 	}
+
 	/**
 	 * Swagger config bean.
 	 *
@@ -43,5 +44,4 @@ public class EmailServiceApplication {
 				.build()
 				.apiInfo(new ApiInfoBuilder().version("1.0").title("Email-service API").description("Email service API v1.0").build());
 	}
-
 }
