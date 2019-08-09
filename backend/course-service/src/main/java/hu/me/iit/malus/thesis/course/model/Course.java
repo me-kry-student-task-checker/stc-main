@@ -1,5 +1,8 @@
 package hu.me.iit.malus.thesis.course.model;
 
+import hu.me.iit.malus.thesis.course.client.dto.Student;
+import hu.me.iit.malus.thesis.course.client.dto.Task;
+import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -10,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Data model for course object, foundation of this service
+ * Data model for course object, foundation of this service.
  * @author Javorek Dénes
  */
 @Entity
@@ -24,16 +27,29 @@ public class Course {
     private String name;
     private String description;
 
-    //TODO: Change types to valid Teacher and Student objects when those are available
-    @Transient private Object creator;
-    @Transient private Set<Object> students = new HashSet<>();
+    @Transient private Teacher creator;
+    @Transient private Set<Student> students = new HashSet<>();
+    @Transient private Set<Task> tasks = new HashSet<>();
 
-    //TODO: Change type to Task object when available
-    @Transient private Set<Object> tasks = new HashSet<>();
-
-    public Course(String name, String description, Object creator) {
+    public Course(String name, String description, Teacher creator) {
         this.name = name;
         this.description = description;
         this.creator = creator;
+    }
+
+    /**
+     * Adds a new student for this course.
+     * @param studentToAdd This student will be added
+     */
+    public void addStudent(Student studentToAdd) {
+        students.add(studentToAdd);
+    }
+
+    /**
+     * Adds a task under this course.
+     * @param taskToAdd
+     */
+    public void addTask(Task taskToAdd) {
+        tasks.add(taskToAdd);
     }
 }
