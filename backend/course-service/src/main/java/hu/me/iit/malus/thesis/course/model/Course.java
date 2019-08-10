@@ -27,11 +27,11 @@ public class Course {
     private String name;
     @Transient private Set<String> tags = new HashSet<>();
 
-    //TODO: If fileupload is ready, create a new CourseDescription class next to courese and use that here
+    //TODO: If fileupload is ready, create a new CourseDescription class next to course and use that here
     private String description;
 
-    @Transient private Teacher creator;
     private Date creationDate;
+    @Transient private Teacher creator;
     @Transient private Set<Student> students = new HashSet<>();
     @Transient private Set<Task> tasks = new HashSet<>();
     @Transient private List<CourseComment> comments = new ArrayList<>();

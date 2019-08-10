@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.course.client;
+package hu.me.iit.malus.thesis.course.client.dto;
 
 import lombok.*;
 
@@ -8,17 +8,18 @@ import lombok.*;
  * Aggregator class for Student and Teacher objects.
  * It is not a real DTO, so it should not be used in inter-service communication,
  * use one of its child class instead.
+ *
  * @author Javorek Dénes
- */
-public class User
+ */ class User
 {
+    // the id of a user is it's e-mail address
+    private String id;
     private String firstName;
     private String lastName;
-    private String emailAddress;
 
-    public User(String firstName, String lastName, String emailAddress) {
+    User(String id, String firstName, String lastName) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.emailAddress = emailAddress;
     }
 }
