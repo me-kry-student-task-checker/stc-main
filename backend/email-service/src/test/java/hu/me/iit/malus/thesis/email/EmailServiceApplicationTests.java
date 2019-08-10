@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.emailservice;
+package hu.me.iit.malus.thesis.email;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
