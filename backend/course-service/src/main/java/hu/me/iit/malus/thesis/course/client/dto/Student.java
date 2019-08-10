@@ -8,15 +8,9 @@ import lombok.*;
  */
 @Getter @Setter @NoArgsConstructor
 @ToString @EqualsAndHashCode
-public class Student {
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private String emailAddress;
+public class Student extends User {
 
     public Student(String firstName, String lastName, String emailAddress) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.emailAddress = emailAddress;
+        super(firstName, lastName, emailAddress);
     }
 }
