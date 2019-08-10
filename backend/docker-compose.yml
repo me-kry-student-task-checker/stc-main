@@ -27,6 +27,17 @@ services:
     depends_on:
       - zipkin-storage
 
+  cloud-sql-proxy:
+    image: gcr.io/cloudsql-docker/gce-proxy:1.12
+    container_name: cloud-sql-proxy
+    command: /cloud_sql_proxy -instances=studenttaskchecker:europe-west6:course-database=tcp:cloud-sql-proxy:3306 -credential_file=/credential/cred.json
+    volumes:
+      - .:/credential
+    networks:
+      - studentTaskChecker
+    ports:
+      - "3306"
+
   config-service:
     container_name: config-service
     build:
@@ -78,3 +89,19 @@ services:
       - config-service
       - discovery-service-peer1
       - discovery-service-peer2
+
+  course-service:
+    container_name: course-service
+    build:
+      context: ./course-service
+      dockerfile: dockerfile
+    image: course-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - cloud-sql-proxy
