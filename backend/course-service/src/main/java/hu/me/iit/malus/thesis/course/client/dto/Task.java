@@ -9,10 +9,13 @@ import lombok.*;
 @Getter @Setter @NoArgsConstructor
 @ToString @EqualsAndHashCode
 public class Task {
+
     private Long id;
     private String name;
+    private Long courseId;
 
-    public Task(String name) {
+    public Task(String name, Long courseId) {
         this.name = name;
+        this.courseId = courseId;
     }
 }
