@@ -2,6 +2,8 @@ package hu.me.iit.malus.thesis.course.client.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 /**
  * Data Transfer Object for Teacher entity
  *
@@ -11,7 +13,10 @@ import lombok.*;
 @ToString @EqualsAndHashCode
 public class Teacher extends User {
 
-    public Teacher(String id, String firstName, String lastName) {
+    private List<Long> createdCourseIds;
+
+    public Teacher(String id, String firstName, String lastName, List<Long> createdCourseIds) {
         super(id, firstName, lastName);
+        this.createdCourseIds = createdCourseIds;
     }
 }
