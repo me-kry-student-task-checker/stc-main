@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.course.client.dto;
 
+import hu.me.iit.malus.thesis.course.client.User;
 import lombok.*;
 
 import java.util.Date;
