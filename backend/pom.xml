@@ -147,26 +147,6 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<profiles>
-		<profile>
-			<id>local</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<database>docker-mysql</database>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>cloud</id>
-			<properties>
-				<database>gcp-mysql</database>
-			</properties>
-		</profile>
-
-	</profiles>
-
 	<build>
 		<plugins>
 			<plugin>
