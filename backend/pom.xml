@@ -139,7 +139,6 @@
 				<version>1.18.8</version>
 				<scope>provided</scope>
 			</dependency>
-			<!--Database related-->
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
@@ -147,6 +146,26 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<profiles>
+		<profile>
+			<id>local</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<database>docker-mysql</database>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>cloud</id>
+			<properties>
+				<database>gcp-mysql</database>
+			</properties>
+		</profile>
+
+	</profiles>
 
 	<build>
 		<plugins>
@@ -161,6 +180,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.18.1</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
