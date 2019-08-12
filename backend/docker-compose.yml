@@ -11,7 +11,7 @@ networks:
 services:
   zipkin-storage:
     image: openzipkin/zipkin-mysql
-    container_name: mysql
+    container_name: zipkin-storage
     networks:
       - studentTaskChecker
   zipkin:
@@ -21,18 +21,31 @@ services:
       - studentTaskChecker
     environment:
       - STORAGE_TYPE=mysql
-      - MYSQL_HOST=mysql
+      - MYSQL_HOST=zipkin-storage
     ports:
       - "9411"
     depends_on:
       - zipkin-storage
 
-  cloud-sql-proxy:
-    image: gcr.io/cloudsql-docker/gce-proxy:1.12
-    container_name: cloud-sql-proxy
-    command: /cloud_sql_proxy -instances=studenttaskchecker:europe-west6:course-database=tcp:cloud-sql-proxy:3306 -credential_file=/credential/cred.json
+#  cloud-sql-proxy:
+#    image: gcr.io/cloudsql-docker/gce-proxy:1.12
+#    container_name: cloud-sql-proxy
+#    command: /cloud_sql_proxy -instances=studenttaskchecker:europe-west6:database1=tcp:cloud-sql-proxy:3306 -credential_file=/credential/cred.json
+#    volumes:
+#      - ./docker/provision/gcp/credential:/credential
+#    networks:
+#      - studentTaskChecker
+#    ports:
+#      - "3306"
+
+  mysql-database:
+    image: mysql:5.7
+    container_name: mysql-database
+    command: mysqld --character-set-server=utf8mb4
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
     volumes:
-      - .:/credential
+      - ./docker/provision/mysql/init:/docker-entrypoint-initdb.d
     networks:
       - studentTaskChecker
     ports:
@@ -104,4 +117,4 @@ services:
       - config-service
       - discovery-service-peer1
       - discovery-service-peer2
-      - cloud-sql-proxy
+      - mysql-database
