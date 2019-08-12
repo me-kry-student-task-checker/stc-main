@@ -2,5 +2,5 @@
 CREATE DATABASE IF NOT EXISTS `courses`;
 
 # create root user and grant rights
-CREATE USER 'courseservice'@'localhost' IDENTIFIED BY 'course';
-GRANT ALL PRIVILEGES ON courses.* TO 'courseservice'@'localhost';
+CREATE USER 'courseservice'@'%' IDENTIFIED BY 'course';
+GRANT ALL PRIVILEGES ON courses.* TO 'courseservice'@'%';
