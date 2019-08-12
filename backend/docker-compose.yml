@@ -79,8 +79,13 @@ services:
     container_name: email-service
     build:
       context: ./email-service
-      dockerfile: dockerfile
+      dockerfile: dockerfile_Local
     image: email-service:latest
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /credential/cred.json
+      GOOGLE_CLOUD_PROJECT: studenttaskchecker
+    volumes:
+      - .:/credential
     networks:
       - studentTaskChecker
     ports:
