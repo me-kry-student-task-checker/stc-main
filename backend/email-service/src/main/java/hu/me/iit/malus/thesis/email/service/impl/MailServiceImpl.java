@@ -1,14 +1,14 @@
 package hu.me.iit.malus.thesis.email.service.impl;
 
-import com.google.appengine.api.mail.MailService;
-import com.google.appengine.api.mail.MailServiceFactory;
 import hu.me.iit.malus.thesis.email.model.Mail;
 import hu.me.iit.malus.thesis.email.model.exception.MailCouldNotBeSentException;
+import hu.me.iit.malus.thesis.email.service.MailService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 /**
  * The type Mail service.
@@ -17,9 +17,16 @@ import java.io.IOException;
  */
 @Service
 @Slf4j
-public class MailServiceImpl implements hu.me.iit.malus.thesis.email.service.MailService {
+public class MailServiceImpl implements MailService {
 
-    private MailService mailService = MailServiceFactory.getMailService();
+
+    private JavaMailSender javaMailSender;
+
+
+    @Autowired
+    public MailServiceImpl(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+    }
 
     /**
      * Sends an email.
@@ -28,13 +35,14 @@ public class MailServiceImpl implements hu.me.iit.malus.thesis.email.service.Mai
      */
     @Override
     public void sendEmail(Mail mail) throws MailCouldNotBeSentException {
-        MailService.Message email = new MailService.Message();
-        email.setSender(mail.getFrom());
-        email.setTo(mail.getTo());
-        email.setSubject(mail.getSubject());
-        email.setTextBody(mail.getText());
+        SimpleMailMessage email = new SimpleMailMessage();
+        String[] toAddresses = new String[mail.getTo().size()];
+        for (int i = 0; i < mail.getTo().size(); i++)
+            toAddresses[i] = mail.getTo().get(i);
 
-        if (mail.getReplyTo() != null && !mail.getReplyTo().isEmpty())
+        email.setTo(toAddresses);
+
+        if (mail.getReplyTo() != null)
             email.setReplyTo(mail.getReplyTo());
 
         if (mail.getCcs() != null)
@@ -43,24 +51,14 @@ public class MailServiceImpl implements hu.me.iit.malus.thesis.email.service.Mai
         if (mail.getBccs() != null)
             email.setBcc(mail.getBccs());
 
-        if (mail.getAttachments() != null) {
-            try {
-                for (MultipartFile file : mail.getAttachments()) {
-                    email.getAttachments().add(new MailService.Attachment(file.getName(), file.getBytes()));
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage());
-                throw new MailCouldNotBeSentException();
-            }
-        }
+        email.setSubject(mail.getSubject());
+        email.setText(mail.getText());
+
         try {
-            mailService.send(email);
-        }
-        catch (IOException e) {
+            javaMailSender.send(email);
+        } catch (MailException e) {
             log.error(e.getMessage());
             throw new MailCouldNotBeSentException(e);
         }
-
     }
-
 }

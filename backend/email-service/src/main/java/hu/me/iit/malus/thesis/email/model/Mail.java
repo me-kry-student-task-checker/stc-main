@@ -1,28 +1,23 @@
 package hu.me.iit.malus.thesis.email.model;
 
-import org.springframework.web.multipart.MultipartFile;
-import java.util.Collection;
-import java.util.List;
-
 import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author Ilku Krisztián
  * The type Mail.
  */
 
-@Getter @Setter @ToString
-@EqualsAndHashCode @NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
+@NoArgsConstructor
 public class Mail {
-
-    @NotNull(message = "Sender cannot be null")
-    @NotEmpty(message = "Sender cannot be empty")
-    @Email(message = "Please provide a valid email")
-    private String from;
 
     @NotNull(message = "To cannot be null")
     @NotEmpty(message = "To cannot be empty")
@@ -41,6 +36,4 @@ public class Mail {
     private String text;
 
     private String replyTo;
-
-    private Collection<MultipartFile> attachments;
 }
