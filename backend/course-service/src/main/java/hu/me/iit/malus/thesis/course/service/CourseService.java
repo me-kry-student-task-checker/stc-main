@@ -3,6 +3,8 @@ package hu.me.iit.malus.thesis.course.service;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 
+import java.util.List;
+
 /**
  * Interface of the Course Service
  * Should define all the possible operations for the service
@@ -54,7 +56,16 @@ public interface CourseService {
      * @param courseId  the courses id
      * @return the UUID of the invitation
      */
-    String inviteStudent(String studentId, Long courseId);
+    void inviteStudent(String studentId, Long courseId);
+
+    /**
+     * Sends multiple invitation e-mails to multiple students
+     *
+     * @param studentIds the assignees id
+     * @param courseIds  the courses id
+     * @return the UUID of the invitation
+     */
+    void inviteStudents(List<String> studentIds, List<Long> courseIds);
 
     /**
      * Based on the UUID assigns a student to a course

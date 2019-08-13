@@ -1,10 +1,9 @@
 package hu.me.iit.malus.thesis.course.client;
 
-import hu.me.iit.malus.thesis.course.client.dto.CourseComment;
 import hu.me.iit.malus.thesis.course.client.dto.Task;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Mocked Feign client class for Task service
@@ -12,26 +11,30 @@ import java.util.List;
  */
 public class TaskClient {
 
-    private List<Task> tasks = new ArrayList<>();
+    //FIXME when task service is ready, replace this with a Feign interface
+    private static Set<Task> tasks = new HashSet<>();
 
     {
         tasks.add(new Task("irj meg mindent", 1L));
+        tasks.add(new Task("irj meg mindent majd", 2L));
+        tasks.add(new Task("irj meg mindent most", 3L));
     }
 
-    public void save(Task task){
-        tasks.add(task);
+    public static void save(Set<Task> task) {
+        tasks.addAll(task);
     }
 
-    public List<Task> getAll(){
+    public static Set<Task> getAll() {
         return tasks;
     }
 
-    public Task getByCourseId(Long courseId){
+    public static Set<Task> getAllByCourseId(Long courseId) {
+        Set<Task> filteredTasks = new HashSet<>();
         for (Task task: tasks) {
-            if (task.getCourseId() == courseId){
-                return task;
+            if (task.getCourseId().equals(courseId)) {
+                filteredTasks.add(task);
             }
         }
-        return new Task();
+        return filteredTasks;
     }
 }

@@ -12,27 +12,30 @@ import java.util.List;
  */
 public class FeedbackClient {
 
-    private List<CourseComment> comments = new ArrayList<>();
+    //FIXME when feedback service is ready, replace this with a Feign interface
+    private static List<CourseComment> comments = new ArrayList<>();
 
     {
         comments.add(new CourseComment(1L, new Date(), "lala@lali.com", "minden jó"));
+        comments.add(new CourseComment(3L, new Date(), "a@b.com", "minden jó, nem"));
     }
 
-    public void save(CourseComment courseComment){
-        comments.add(courseComment);
+    public static void save(List<CourseComment> courseComment) {
+        comments.addAll(courseComment);
     }
 
-    public List<CourseComment> getAll(){
+    public static List<CourseComment> getAll() {
         return comments;
     }
 
-    public CourseComment getByCourseId(Long courseId){
+    public static List<CourseComment> getByCourseId(Long courseId) {
+        List<CourseComment> filteredComments = new ArrayList<>();
         for (CourseComment comment: comments) {
-            if (comment.getCourseId() == courseId){
-                return comment;
+            if (comment.getCourseId().equals(courseId)) {
+                filteredComments.add(comment);
             }
         }
-        return new CourseComment();
+        return filteredComments;
     }
 
 }
