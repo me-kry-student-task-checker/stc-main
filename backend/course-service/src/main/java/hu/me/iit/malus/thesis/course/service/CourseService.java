@@ -57,7 +57,7 @@ public interface CourseService {
      * @param courseId  the courses id
      * @return the UUID of the invitation
      */
-    void inviteStudent(String studentId, Long courseId);
+    void invite(Long courseId, String studentId);
 
     /**
      * Sends multiple invitation e-mails to multiple students
@@ -66,7 +66,7 @@ public interface CourseService {
      * @param courseId  the courses id
      * @return the UUID of the invitation
      */
-    void inviteStudents(List<String> studentIds, Long courseId);
+    void invite(Long courseId, List<String> studentIds);
 
     /**
      * Based on the UUID assigns a student to a course

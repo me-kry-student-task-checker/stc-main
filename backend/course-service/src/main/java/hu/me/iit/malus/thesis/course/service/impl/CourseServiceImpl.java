@@ -138,7 +138,7 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public void inviteStudent(String studentId, Long courseId) {
+    public void invite(Long courseId, String studentId) {
         String invitationUuid = UUID.randomUUID().toString(); // for the email
         invitationRepository.save(new Invitation(invitationUuid, studentId, courseId));
         //TODO send email with email service
@@ -149,7 +149,7 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public void inviteStudents(List<String> studentIds, Long courseId) {
+    public void invite(Long courseId, List<String> studentIds) {
         List<String> invitationUuids = new ArrayList<>(); //for the emails
         List<Invitation> invitations = new ArrayList<>();
         for (String studentId : studentIds) {
