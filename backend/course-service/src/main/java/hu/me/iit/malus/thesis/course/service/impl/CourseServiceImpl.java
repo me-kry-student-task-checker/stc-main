@@ -6,17 +6,17 @@ import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import hu.me.iit.malus.thesis.course.model.Course;
+import hu.me.iit.malus.thesis.course.model.Invitation;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
+import hu.me.iit.malus.thesis.course.repository.InvitationRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
+import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Default implementation for Course service.
@@ -27,16 +27,19 @@ import java.util.Set;
 @Slf4j
 public class CourseServiceImpl implements CourseService {
 
-    private final CourseRepository repository;
+    private final CourseRepository courseRepository;
+    private final InvitationRepository invitationRepository;
 
     /**
      * Instantiates a new Course service.
      *
-     * @param repository the repository
+     * @param courseRepository the course repository
+     * @param invitationRepository the invitation repository
      */
     @Autowired
-    public CourseServiceImpl(CourseRepository repository) {
-        this.repository = repository;
+    public CourseServiceImpl(CourseRepository courseRepository, InvitationRepository invitationRepository) {
+        this.courseRepository = courseRepository;
+        this.invitationRepository = invitationRepository;
     }
 
     /**
@@ -49,7 +52,7 @@ public class CourseServiceImpl implements CourseService {
         UserClient.save(course.getCreator());
         TaskClient.save(course.getTasks());
         FeedbackClient.save(course.getComments());
-        return repository.save(course);
+        return courseRepository.save(course);
     }
 
     /**
@@ -62,7 +65,7 @@ public class CourseServiceImpl implements CourseService {
         UserClient.save(course.getCreator());
         TaskClient.save(course.getTasks());
         FeedbackClient.save(course.getComments());
-        return repository.save(course);
+        return courseRepository.save(course);
     }
 
     /**
@@ -72,7 +75,7 @@ public class CourseServiceImpl implements CourseService {
     public Course get(Long courseId) throws CourseNotFoundException {
         Teacher creator = null;
         Set<Student> students = new HashSet<>();
-        Optional<Course> opt = repository.findById(courseId);
+        Optional<Course> opt = courseRepository.findById(courseId);
         if (opt.isPresent()) {
             for (Teacher teacher : UserClient.getAllTeachers()) {
                 for (Long createdCourseId : teacher.getCreatedCourseIds()) {
@@ -107,7 +110,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Iterable<Course> getAll() {
         Set<Student> students;
-        Iterable<Course> courses = repository.findAll();
+        Iterable<Course> courses = courseRepository.findAll();
         for (Course course : courses) {
             for (Teacher teacher : UserClient.getAllTeachers()) {
                 for (Long createdCourseId : teacher.getCreatedCourseIds()) {
@@ -136,22 +139,43 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public void inviteStudent(String studentId, Long courseId) {
-        return;
+        String invitationUuid = UUID.randomUUID().toString(); // for the email
+        invitationRepository.save(new Invitation(invitationUuid, studentId, courseId));
+        //TODO send email with email service
+        //TODO remove this from the database after 24 hours - FOR DENIS
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void inviteStudents(List<String> studentIds, List<Long> courseIds) {
-        return;
+    public void inviteStudents(List<String> studentIds, Long courseId) {
+        List<String> invitationUuids = new ArrayList<>(); //for the emails
+        List<Invitation> invitations = new ArrayList<>();
+        for (String studentId : studentIds) {
+            String uuid = UUID.randomUUID().toString();
+            invitationUuids.add(uuid);
+            invitations.add(new Invitation(uuid, studentId, courseId));
+        }
+        invitationRepository.saveAll(invitations);
+        //TODO send emails with email service
+        //TODO remove these from the database after 24 hours - FOR DENIS
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void acceptInvite(String inviteUUID) {
-
+    public void acceptInvite(String inviteUUID) throws InvitationNotFoundException {
+        Optional<Invitation> opt = invitationRepository.findById(inviteUUID);
+        if (opt.isPresent()) {
+            Invitation invitation = opt.get();
+            Student student = UserClient.getStudentById(invitation.getStudentId());
+            student.getAssignedCourseIds().add(invitation.getCourseId());
+            UserClient.save(student);
+            invitationRepository.delete(invitation);
+        } else {
+            throw new InvitationNotFoundException();
+        }
     }
 }

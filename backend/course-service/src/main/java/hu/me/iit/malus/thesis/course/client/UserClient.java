@@ -2,7 +2,7 @@ package hu.me.iit.malus.thesis.course.client;
 
 import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang.RandomStringUtils;
 
 import java.util.*;
 
@@ -30,8 +30,12 @@ public class UserClient {
         }
     }
 
-    public static void save(Set<Student> students) {
-        students.addAll(students);
+    public static void save(Student student) {
+        students.add(student);
+    }
+
+    public static void save(Set<Student> studentsToAdd) {
+        students.addAll(studentsToAdd);
     }
 
     public static void save(Teacher teacher) {
