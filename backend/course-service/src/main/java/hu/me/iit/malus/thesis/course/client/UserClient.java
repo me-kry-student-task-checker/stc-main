@@ -4,7 +4,10 @@ import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import org.apache.commons.lang.RandomStringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Mocked Feign client class for User service
@@ -20,7 +23,7 @@ public class UserClient {
         teachers.add(new Teacher("lala@lali.com", RandomStringUtils.randomAlphabetic(5),
                 RandomStringUtils.randomAlphabetic(5), new ArrayList<>(Arrays.asList(1L, 2L))));
         teachers.add(new Teacher("a@b.com", RandomStringUtils.randomAlphabetic(5),
-                RandomStringUtils.randomAlphabetic(5), new ArrayList<>(Collections.singletonList(3L))));
+                RandomStringUtils.randomAlphabetic(5), new ArrayList<>(Arrays.asList(3L))));
         for (int i = 0; i < 5; i++) {
             students.add(new Student(
                     RandomStringUtils.randomAlphabetic(5) + "@mail.com",

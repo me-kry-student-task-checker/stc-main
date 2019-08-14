@@ -25,7 +25,6 @@ public class Course {
     @GeneratedValue
     private Long id;
     private String name;
-    @Transient private Set<String> tags = new HashSet<>();
 
     //TODO: If fileupload is ready, create a new CourseDescription class next to course and use that here
     private String description;
@@ -36,9 +35,8 @@ public class Course {
     @Transient private Set<Task> tasks = new HashSet<>();
     @Transient private List<CourseComment> comments = new ArrayList<>();
 
-    public Course(String name, Set<String> tags, String description, Teacher creator) {
+    public Course(String name, String description, Teacher creator) {
         this.name = name;
-        this.tags = tags;
         this.description = description;
         this.creator = creator;
     }

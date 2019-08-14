@@ -47,12 +47,13 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public Course create(Course course) {
+        course.setCreationDate(new Date());
+        Teacher teacher = UserClient.getTeacherById(course.getCreator().getId());
+        Course newCourse = courseRepository.save(course);
+        teacher.getCreatedCourseIds().add(newCourse.getId());
+        UserClient.save(teacher);
         log.info("Created course: {}", course);
-        UserClient.save(course.getStudents());
-        UserClient.save(course.getCreator());
-        TaskClient.save(course.getTasks());
-        FeedbackClient.save(course.getComments());
-        return courseRepository.save(course);
+        return newCourse;
     }
 
     /**
@@ -60,11 +61,10 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public Course edit(Course course) {
+        //TODO what do we want to edit here? basic course fields are easy
+        // comment(history)/creator(history)/task(flagged as done) editing has no purpose
+        // student editing sounds mind shattering if you think about it
         log.info("Modified course: {}", course);
-        UserClient.save(course.getStudents());
-        UserClient.save(course.getCreator());
-        TaskClient.save(course.getTasks());
-        FeedbackClient.save(course.getComments());
         return courseRepository.save(course);
     }
 
