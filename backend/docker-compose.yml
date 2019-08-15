@@ -27,16 +27,16 @@ services:
     depends_on:
       - zipkin-storage
 
-#  cloud-sql-proxy:
-#    image: gcr.io/cloudsql-docker/gce-proxy:1.12
-#    container_name: cloud-sql-proxy
-#    command: /cloud_sql_proxy -instances=studenttaskchecker:europe-west6:database1=tcp:cloud-sql-proxy:3306 -credential_file=/credential/cred.json
-#    volumes:
-#      - ./docker/provision/gcp/credential:/credential
-#    networks:
-#      - studentTaskChecker
-#    ports:
-#      - "3306"
+  #  cloud-sql-proxy:
+  #    image: gcr.io/cloudsql-docker/gce-proxy:1.12
+  #    container_name: cloud-sql-proxy
+  #    command: /cloud_sql_proxy -instances=studenttaskchecker:europe-west6:database1=tcp:cloud-sql-proxy:3306 -credential_file=/credential/cred.json
+  #    volumes:
+  #      - ./docker/provision/gcp/credential:/credential
+  #    networks:
+  #      - studentTaskChecker
+  #    ports:
+  #      - "3306"
 
   mysql-database:
     image: mysql:5.7
