@@ -75,9 +75,10 @@ public class CourseServiceImpl implements CourseService {
     public Course get(Long courseId) throws CourseNotFoundException {
         Teacher creator = null;
         Set<Student> students = new HashSet<>();
+        Set<Teacher> teachers = UserClient.getAllTeachers();
         Optional<Course> opt = courseRepository.findById(courseId);
         if (opt.isPresent()) {
-            for (Teacher teacher : UserClient.getAllTeachers()) {
+            for (Teacher teacher : teachers) {
                 for (Long createdCourseId : teacher.getCreatedCourseIds()) {
                     if (createdCourseId.equals(courseId)) {
                         creator = teacher;
@@ -98,8 +99,10 @@ public class CourseServiceImpl implements CourseService {
             course.setStudents(students);
             course.setTasks(TaskClient.getAllByCourseId(courseId));
             course.setComments(FeedbackClient.getByCourseId(courseId));
+            log.info("Course found: {}", courseId);
             return course;
         } else {
+            log.error("No course found with this id: {}", courseId);
             throw new CourseNotFoundException();
         }
     }
@@ -131,6 +134,7 @@ public class CourseServiceImpl implements CourseService {
             course.setTasks(TaskClient.getAllByCourseId(course.getId()));
             course.setComments(FeedbackClient.getByCourseId(course.getId()));
         }
+        log.info("Courses found: {}", courses);
         return courses;
     }
 
@@ -143,6 +147,7 @@ public class CourseServiceImpl implements CourseService {
         invitationRepository.save(new Invitation(invitationUuid, studentId, courseId));
         //TODO send email with email service
         //TODO remove this from the database after 24 hours - FOR DENIS
+        log.info("Invitation saved to database and e-mail sent - courseId: {}, studentId{}", courseId, studentId);
     }
 
     /**
@@ -160,6 +165,7 @@ public class CourseServiceImpl implements CourseService {
         invitationRepository.saveAll(invitations);
         //TODO send emails with email service
         //TODO remove these from the database after 24 hours - FOR DENIS
+        log.info("Invitations saved to database and e-mails sent - courseId: {}, studentId{}", courseId, studentIds);
     }
 
     /**
@@ -173,8 +179,10 @@ public class CourseServiceImpl implements CourseService {
             Student student = UserClient.getStudentById(invitation.getStudentId());
             student.getAssignedCourseIds().add(invitation.getCourseId());
             UserClient.save(student);
+            log.info("Invitation accepted: {}", invitation);
             invitationRepository.delete(invitation);
         } else {
+            log.warn("Invitation not found: {}", inviteUUID);
             throw new InvitationNotFoundException();
         }
     }

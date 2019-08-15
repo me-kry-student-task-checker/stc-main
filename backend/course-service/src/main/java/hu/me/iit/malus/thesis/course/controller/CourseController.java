@@ -57,7 +57,7 @@ public class CourseController {
         service.invite(courseId, studentIds);
     }
 
-    @PostMapping("/acceptInvitation")
+    @PostMapping("/acceptInvitation/{invitationUuid}")
     //TODO exception handling with controller advice?
     public void acceptInvite(@PathVariable String invitationUuid) throws InvitationNotFoundException {
         service.acceptInvite(invitationUuid);
