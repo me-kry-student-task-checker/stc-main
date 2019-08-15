@@ -36,11 +36,7 @@ public class MailServiceImpl implements MailService {
     @Override
     public void sendEmail(Mail mail) throws MailCouldNotBeSentException {
         SimpleMailMessage email = new SimpleMailMessage();
-        /*String[] toAddresses = new String[mail.getTo().size()];
-        for (int i = 0; i < mail.getTo().size(); i++)
-            toAddresses[i] = mail.getTo().get(i);
-
-        email.setTo(toAddresses);*/
+        
         email.setTo(mail.getTo().toArray(new String[0]));
         if (mail.getReplyTo() != null)
             email.setReplyTo(mail.getReplyTo());
