@@ -61,9 +61,7 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public Course edit(Course course) {
-        //TODO what do we want to edit here? basic course fields are easy
-        // comment(history)/creator(history)/task(flagged as done) editing has no purpose
-        // student editing sounds mind shattering if you think about it
+        //TODO do the 'task flag as done' thingy, when the task service is ready
         log.info("Modified course: {}", course);
         return courseRepository.save(course);
     }

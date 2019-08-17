@@ -10,7 +10,8 @@ import lombok.*;
  * use one of its child class instead.
  *
  * @author Javorek Dénes
- */ class User
+ */
+public class User
 {
     // the id of a user is it's e-mail address
     private String id;

@@ -1,8 +1,16 @@
 package hu.me.iit.malus.thesis.course.service.exception;
 
+/**
+ * Custom exception class, is thrown if an invitation can not be found in the database
+ *
+ * @author Attila Szőke
+ */
 public class InvitationNotFoundException extends Exception {
 
+    private static final String errorMessage = "Invitation can not be found!";
+
     public InvitationNotFoundException() {
+        super(errorMessage);
     }
 
     public InvitationNotFoundException(String message) {
