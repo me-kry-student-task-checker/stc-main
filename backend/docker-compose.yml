@@ -88,6 +88,21 @@ services:
     depends_on:
       - config-service
 
+  gateway-service:
+    container_name: gateway-service
+    build:
+      context: ./gateway-service
+      dockerfile: dockerfile
+    image: gateway-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8060"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+
   email-service:
     container_name: email-service
     build:
