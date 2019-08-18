@@ -1,17 +1,22 @@
 package hu.me.iit.malus.thesis.course.client.dto;
 
-import hu.me.iit.malus.thesis.course.client.User;
 import lombok.*;
+
+import java.util.List;
 
 /**
  * Data Transfer Object for Student entity
+ *
  * @author Javorek Dénes
  */
 @Getter @Setter @NoArgsConstructor
 @ToString @EqualsAndHashCode
 public class Student extends User {
 
-    public Student(String firstName, String lastName, String emailAddress) {
-        super(firstName, lastName, emailAddress);
+    private List<Long> assignedCourseIds;
+
+    public Student(String id, String firstName, String lastName, List<Long> assignedCourseIds) {
+        super(id, firstName, lastName);
+        this.assignedCourseIds = assignedCourseIds;
     }
 }
