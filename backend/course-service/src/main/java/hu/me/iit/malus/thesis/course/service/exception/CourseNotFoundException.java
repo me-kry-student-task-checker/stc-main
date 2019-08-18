@@ -7,10 +7,10 @@ package hu.me.iit.malus.thesis.course.service.exception;
  */
 public class CourseNotFoundException extends Exception {
 
-    private static final String errorMessage = "Course can not be found!";
+    private static final String ERROR_MESSAGE = "Course can not be found!";
 
     public CourseNotFoundException() {
-        super(errorMessage);
+        super(ERROR_MESSAGE);
     }
 
     public CourseNotFoundException(String message) {

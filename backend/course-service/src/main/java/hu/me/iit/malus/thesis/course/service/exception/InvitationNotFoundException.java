@@ -7,10 +7,10 @@ package hu.me.iit.malus.thesis.course.service.exception;
  */
 public class InvitationNotFoundException extends Exception {
 
-    private static final String errorMessage = "Invitation can not be found!";
+    private static final String ERROR_MESSAGE = "Invitation can not be found!";
 
     public InvitationNotFoundException() {
-        super(errorMessage);
+        super(ERROR_MESSAGE);
     }
 
     public InvitationNotFoundException(String message) {
