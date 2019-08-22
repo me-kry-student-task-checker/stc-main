@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * Interface of the Course Service
- * Should define all the possible operations for the service
+ * Defines all the possible operations for the service
  *
  * @author Javorek Dénes
  * @author Attila Szőke

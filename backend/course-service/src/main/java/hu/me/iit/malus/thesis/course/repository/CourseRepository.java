@@ -1,11 +1,7 @@
 package hu.me.iit.malus.thesis.course.repository;
 
 import hu.me.iit.malus.thesis.course.model.Course;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-/**
- *
- * @author Javorek Dénes
- */
-public interface CourseRepository extends CrudRepository<Course, Long> {
+public interface CourseRepository extends JpaRepository<Course, Long> {
 }

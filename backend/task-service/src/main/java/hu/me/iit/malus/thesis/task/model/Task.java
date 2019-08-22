@@ -11,6 +11,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Data model for task object, foundation of this service.
+ *
+ * @author Attila Szőke
+ */
 @Entity
 @Getter
 @Setter
@@ -26,12 +31,11 @@ public class Task {
     private String description;
     private Date creationDate;
     private boolean isDone;
+    private Long courseId;
+    private Set<Long> helpNeededStudentIds;
+    private Set<Long> completedStudentIds;
 
     @Transient
     private List<TaskComment> comments;
-    @Transient
-    private Set<Long> completedStudentIds;
-    @Transient
-    private Set<Long> helpNeededStudentIds;
 
 }
