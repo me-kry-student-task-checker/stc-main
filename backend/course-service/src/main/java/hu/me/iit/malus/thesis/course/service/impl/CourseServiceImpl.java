@@ -53,7 +53,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course create(Course course) {
         course.setCreationDate(new Date());
-        Teacher teacher = UserClient.getTeacherById(course.getCreator().getId());
+        Teacher teacher = UserClient.getTeacherById(course.getCreator().getEmail());
         Course newCourse = courseRepository.save(course);
         teacher.getCreatedCourseIds().add(newCourse.getId());
         UserClient.save(teacher);
@@ -104,7 +104,7 @@ public class CourseServiceImpl implements CourseService {
             log.info("Course found: {}", courseId);
             return course;
         } else {
-            log.error("No course found with this id: {}", courseId);
+            log.error("No course found with this email: {}", courseId);
             throw new CourseNotFoundException();
         }
     }

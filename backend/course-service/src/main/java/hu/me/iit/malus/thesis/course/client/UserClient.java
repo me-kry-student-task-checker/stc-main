@@ -62,7 +62,7 @@ public class UserClient {
     public static Student getStudentById(String studentId) {
         init();
         for (Student student : students) {
-            if (student.getId().equals(studentId)) {
+            if (student.getEmail().equals(studentId)) {
                 return student;
             }
         }
@@ -72,7 +72,7 @@ public class UserClient {
     public static Teacher getTeacherById(String teacherId) {
         init();
         for (Teacher teacher : teachers) {
-            if (teacher.getId().equals(teacherId)) {
+            if (teacher.getEmail().equals(teacherId)) {
                 return teacher;
             }
         }

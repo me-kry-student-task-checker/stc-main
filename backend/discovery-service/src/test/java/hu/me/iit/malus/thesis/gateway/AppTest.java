@@ -1,4 +1,4 @@
-package ren.practice;
+package hu.me.iit.malus.thesis.gateway;
 
 import static org.junit.Assert.assertTrue;
 

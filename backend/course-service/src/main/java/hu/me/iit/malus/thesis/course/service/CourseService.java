@@ -32,9 +32,9 @@ public interface CourseService {
     Course edit(Course course);
 
     /**
-     * Gets a course by it's id
+     * Gets a course by it's email
      *
-     * @param courseId the id of the course
+     * @param courseId the email of the course
      * @return the course
      */
     Course get(Long courseId) throws CourseNotFoundException;
@@ -53,8 +53,8 @@ public interface CourseService {
     /**
      * Sends an invitation email to a student, which if accepted assigns a student to a course
      *
-     * @param studentId the assignees id
-     * @param courseId  the courses id
+     * @param studentId the assignees email
+     * @param courseId  the courses email
      * @return the UUID of the invitation
      */
     void invite(Long courseId, String studentId);
@@ -62,8 +62,8 @@ public interface CourseService {
     /**
      * Sends multiple invitation e-mails to multiple students
      *
-     * @param studentIds the assignees id
-     * @param courseId  the courses id
+     * @param studentIds the assignees email
+     * @param courseId  the courses email
      * @return the UUID of the invitation
      */
     void invite(Long courseId, List<String> studentIds);

@@ -165,3 +165,19 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
+
+  user-service:
+    container_name: user-service
+    build:
+      context: ./user-service
+      dockerfile: dockerfile
+    image: user-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
