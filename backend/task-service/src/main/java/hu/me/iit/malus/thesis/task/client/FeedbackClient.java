@@ -29,10 +29,10 @@ public class FeedbackClient {
         return comments;
     }
 
-    public static List<TaskComment> getByCourseId(Long courseId) {
+    public static List<TaskComment> getByTaskId(Long taskId) {
         List<TaskComment> filteredComments = new ArrayList<>();
         for (TaskComment comment : comments) {
-            if (comment.getCourseId().equals(courseId)) {
+            if (comment.getCourseId().equals(taskId)) {
                 filteredComments.add(comment);
             }
         }
