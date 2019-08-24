@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.task.service;
 
 import hu.me.iit.malus.thesis.task.model.Task;
+import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public interface TaskService {
      * @param taskId    id of the task
      * @param studentId id of the student
      */
-    void requestHelp(Long taskId, String studentId);
+    void requestHelp(Long taskId, String studentId) throws TaskNotFoundException;
 
     /**
      * Removes a student id from a task's 'help needed' list
@@ -75,6 +76,6 @@ public interface TaskService {
      * @param taskId    id of the task
      * @param studentId id of the student
      */
-    void resolveHelp(Long taskId, String studentId);
+    void resolveHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException;
 
 }

@@ -4,6 +4,7 @@ import hu.me.iit.malus.thesis.task.client.FeedbackClient;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.repository.TaskRepository;
 import hu.me.iit.malus.thesis.task.service.TaskService;
+import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,14 +97,12 @@ public class TaskServiceImpl implements TaskService {
         if (opt.isPresent()) {
             Task task = opt.get();
             Set<String> completedStudentIds = task.getCompletedStudentIds();
-            for (String currentStudentId : completedStudentIds) {
-                if (currentStudentId.equals(studentId)) {
-                    completedStudentIds.remove(currentStudentId);
-                    task.setCompletedStudentIds(completedStudentIds);
-                    repository.save(task);
-                    log.info("From task's ({}) completion list this student was removed: {}", task, studentId);
-                    return;
-                }
+            if (completedStudentIds.contains(studentId)) {
+                completedStudentIds.remove(studentId);
+                task.setCompletedStudentIds(completedStudentIds);
+                repository.save(task);
+                log.info("From a task's ({}) completion list this student was removed: {}", task, studentId);
+                return;
             }
             task.addStudentIdToCompleted(studentId);
             repository.save(task);
@@ -135,15 +134,37 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public void requestHelp(Long taskId, String studentId) {
-
+    public void requestHelp(Long taskId, String studentId) throws TaskNotFoundException {
+        Optional<Task> opt = repository.findById(taskId);
+        if (opt.isPresent()) {
+            Task task = opt.get();
+            task.addStudentIdToHelp(studentId);
+            log.info("Added an id ({}) to a task's ({}) help needed list", studentId, task);
+        } else {
+            log.error("No task found with this task id: {}", taskId);
+            throw new TaskNotFoundException();
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void resolveHelp(Long taskId, String studentId) {
-
+    public void resolveHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
+        Optional<Task> opt = repository.findById(taskId);
+        if (opt.isPresent()) {
+            Task task = opt.get();
+            if (task.getHelpNeededStudentIds().contains(studentId)) {
+                task.getHelpNeededStudentIds().remove(studentId);
+                repository.save(task);
+                log.info("Removed an id ({}) from a task's ({}) help needed list", studentId, task);
+            } else {
+                log.error("No student with this id ({}) found in the help needed list of this task: {}", studentId, task);
+                throw new StudentIdNotFoundException();
+            }
+        } else {
+            log.error("No task found with this task id: {}", taskId);
+            throw new TaskNotFoundException();
+        }
     }
 }
