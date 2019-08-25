@@ -15,8 +15,8 @@ public class Teacher extends User {
 
     private List<Long> createdCourseIds;
 
-    public Teacher(String id, String firstName, String lastName, List<Long> createdCourseIds) {
-        super(id, firstName, lastName);
+    public Teacher(String id, String password, String firstName, String lastName, List<Long> createdCourseIds) {
+        super(id, password, firstName, lastName);
         this.createdCourseIds = createdCourseIds;
     }
 }

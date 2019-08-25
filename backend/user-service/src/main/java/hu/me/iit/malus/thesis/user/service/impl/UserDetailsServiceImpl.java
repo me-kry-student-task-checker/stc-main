@@ -5,6 +5,8 @@ import hu.me.iit.malus.thesis.user.model.Teacher;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,20 +18,23 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of a common Spring interface, used to load user data by its identifier during authentication.
+ * @author Javorek Dénes
+ */
 @Service
+@Qualifier("customUserDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private UserRepository repository;
-    private BCryptPasswordEncoder encoder;
 
     @Autowired
-    public UserDetailsServiceImpl(UserRepository repository, BCryptPasswordEncoder encoder) {
+    public UserDetailsServiceImpl(UserRepository repository) {
         this.repository = repository;
-        this.encoder = encoder;
     }
 
     /**
-     * Purpose of this functional interface implementation, loads the user objects by username.
+     * Functional interface implementation, loads the user objects by username.
      * In our case the username equals to the user's email, because we dont use separate username field.
      * @param email
      * @return The corresponding UserDetails object, which holds the data of the give user
@@ -39,7 +44,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         if("admin@admin.com".equalsIgnoreCase(email)) {
             return new org.springframework.security.core.userdetails.User
-                    (email, encoder.encode("admin123"), AuthorityUtils.createAuthorityList("ROLE_Admin"));
+                    (email, passwordEncoder().encode("admin123"), AuthorityUtils.createAuthorityList("ROLE_Admin"));
         }
 
         Optional<User> userToLoad = repository.findById(email);
@@ -60,5 +65,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User
                 (user.getEmail(), user.getPassword(), grantedAuthorities);
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

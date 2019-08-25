@@ -27,6 +27,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
+        // Parsing the token
         String tokenHeader = request.getHeader(jwtGatewayConfig.getHeader());
 
         if(tokenHeader == null || !tokenHeader.startsWith(jwtGatewayConfig.getPrefix())) {
@@ -36,6 +37,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 
         String token = tokenHeader.replace(jwtGatewayConfig.getPrefix(), "");
 
+        // Getting and validating claims
         try {
             Claims claims = Jwts.parser()
                     .setSigningKey(jwtGatewayConfig.getSecret().getBytes())

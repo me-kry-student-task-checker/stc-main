@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hu.me.iit.malus.thesis.user.security.config.JwtAuthConfig;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
     private AuthenticationManager authManager;
     private final JwtAuthConfig jwtConfig;
 
+    @Autowired
     public JwtUsernameAndPasswordAuthenticationFilter(AuthenticationManager authManager, JwtAuthConfig jwtAuthConfig) {
         this.authManager = authManager;
         this.jwtConfig = jwtAuthConfig;
@@ -40,15 +42,11 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
             throws AuthenticationException {
 
         try {
-
-            // 1. Get credentials from request
             UserCredentials creds = new ObjectMapper().readValue(request.getInputStream(), UserCredentials.class);
 
-            // 2. Create auth object (contains credentials) which will be used by auth manager
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     creds.getUsername(), creds.getPassword(), Collections.emptyList());
 
-            // 3. Authentication manager authenticate the user, and use UserDetailsServiceImpl::loadUserByUsername() method to load the user.
             return authManager.authenticate(authToken);
 
         } catch (IOException e) {
@@ -56,7 +54,6 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
         }
     }
 
-    // Upon successful authentication, generate a token.
     // The 'auth' passed to successfulAuthentication() is the current authenticated user.
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
