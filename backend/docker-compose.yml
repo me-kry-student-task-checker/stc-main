@@ -51,6 +51,7 @@ services:
     ports:
       - "3306"
 
+
   config-service:
     container_name: config-service
     build:
