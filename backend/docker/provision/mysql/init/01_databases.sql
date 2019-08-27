@@ -6,4 +6,4 @@ CREATE DATABASE IF NOT EXISTS `tasks`;
 CREATE USER 'courseservice'@'%' IDENTIFIED BY 'course';
 GRANT ALL PRIVILEGES ON courses.* TO 'courseservice'@'%';
 CREATE USER 'taskservice'@'%' IDENTIFIED BY 'task';
-GRANT ALL PRIVILEGES ON courses.* TO 'taskservice'@'%';
+GRANT ALL PRIVILEGES ON tasks.* TO 'taskservice'@'%';

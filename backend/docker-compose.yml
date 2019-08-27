@@ -118,21 +118,21 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
 
-  #  task-service:
-  #    container_name: task-service
-  #    build:
-  #      context: ./task-service
-  #      dockerfile: dockerfile
-  #    image: task-service:latest
-  #    networks:
-  #      - studentTaskChecker
-  #    ports:
-  #      - "8080"
-  #    depends_on:
-  #      - config-service
-  #      - discovery-service-peer1
-  #      - discovery-service-peer2
-  #      - mysql-database
+  task-service:
+    container_name: task-service
+    build:
+      context: ./task-service
+      dockerfile: dockerfile
+    image: task-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
 
   course-service:
     container_name: course-service

@@ -3,10 +3,7 @@ package hu.me.iit.malus.thesis.task.model;
 import hu.me.iit.malus.thesis.task.client.dto.TaskComment;
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +29,9 @@ public class Task {
     private Date creationDate;
     private boolean isDone;
     private Long courseId;
+    @ElementCollection
     private Set<String> helpNeededStudentIds;
+    @ElementCollection
     private Set<String> completedStudentIds;
 
     @Transient
