@@ -4,7 +4,6 @@ import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,7 +36,7 @@ public interface TaskService {
      * @param courseId the id of the course to get all tasks from
      * @return the list of tasks
      */
-    List<Task> getAll(Long courseId) throws TaskNotFoundException;
+    Set<Task> getAll(Long courseId) throws TaskNotFoundException;
 
     /**
      * Negates the done flag of a task

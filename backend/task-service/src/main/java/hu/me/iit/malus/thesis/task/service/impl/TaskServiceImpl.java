@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,10 +55,10 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public List<Task> getAll(Long courseId) throws TaskNotFoundException {
-        Optional<List<Task>> opt = repository.findAllByCourseId(courseId);
+    public Set<Task> getAll(Long courseId) throws TaskNotFoundException {
+        Optional<Set<Task>> opt = repository.findAllByCourseId(courseId);
         if (opt.isPresent()) {
-            List<Task> tasks = opt.get();
+            Set<Task> tasks = opt.get();
             for (Task task : tasks) {
                 task.setComments(FeedbackClient.getByTaskId(task.getId()));
             }

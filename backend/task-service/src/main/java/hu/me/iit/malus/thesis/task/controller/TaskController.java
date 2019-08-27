@@ -7,7 +7,6 @@ import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,7 +36,7 @@ public class TaskController {
     }
 
     @GetMapping("/getAll/{courseId}")
-    public List<Task> getAllTasks(@PathVariable Long courseId) throws TaskNotFoundException {
+    public Set<Task> getAllTasks(@PathVariable Long courseId) throws TaskNotFoundException {
         return service.getAll(courseId);
     }
 
