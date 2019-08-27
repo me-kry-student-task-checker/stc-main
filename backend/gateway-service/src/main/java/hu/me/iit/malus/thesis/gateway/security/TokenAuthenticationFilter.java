@@ -1,11 +1,11 @@
 package hu.me.iit.malus.thesis.gateway.security;
 
-import hu.me.iit.malus.thesis.gateway.security.config.JwtGatewayConfig;
 import io.jsonwebtoken.*;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
-import org.springframework.cloud.gateway.filter.factory.AbstractNameValueGatewayFilterFactory;
+import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -17,32 +17,30 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class TokenAuthenticationFilter extends AbstractNameValueGatewayFilterFactory {
+public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<TokenAuthenticationFilter.Config> {
     private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
     private static final String X_JWT_SUB_HEADER = "X-jwt-sub";
 
-    private final JwtGatewayConfig jwtGatewayConfig;
-
-    @Autowired
-    public TokenAuthenticationFilter(JwtGatewayConfig jwtGatewayConfig) {
-        this.jwtGatewayConfig = jwtGatewayConfig;
+    public TokenAuthenticationFilter() {
+        super(Config.class);
     }
 
     @Override
-    public GatewayFilter apply(NameValueConfig config) {
+    public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
 
             try {
-                String token = this.extractJWTToken(exchange.getRequest());
+                String token = this.extractJWTToken(exchange.getRequest(), config);
+
                 try {
                     Claims claims = Jwts.parser()
-                            .setSigningKey(jwtGatewayConfig.getSecret().getBytes())
+                            .setSigningKey(config.getSecret().getBytes())
                             .parseClaimsJws(token)
                             .getBody();
 
                     ServerHttpRequest request = exchange.getRequest().mutate().
                             header(X_JWT_SUB_HEADER, claims.getSubject()).
-                            //TODO: Set Authorities header, check what SecurityContext.setAuthentication did
+                            //TODO: Check what SecurityContext.setAuthentication did, how to send SecurityContext with request
                             build();
 
                     return chain.filter(exchange.mutate().request(request).build());
@@ -67,29 +65,20 @@ public class TokenAuthenticationFilter extends AbstractNameValueGatewayFilterFac
         return response.setComplete();
     }
 
-    private String extractJWTToken(ServerHttpRequest request)
+    private String extractJWTToken(ServerHttpRequest request, Config config)
     {
-        if (!request.getHeaders().containsKey("Authorization")) {
-            throw new JwtException("Authorization header is missing");
-        }
-
-        List<String> headers = request.getHeaders().get("Authorization");
+        List<String> headers = request.getHeaders().get(config.getHeader());
         if (headers.isEmpty()) {
-            throw new JwtException("Authorization header is empty");
+            throw new JwtException("Token header is missing");
         }
 
-        String credential = headers.get(0).trim();
-        String[] components = credential.split("\\s");
+        String header = headers.get(0).trim();
 
-        if (components.length != 2) {
-            throw new MalformedJwtException("Malformat Authorization content");
+        if (!header.startsWith(config.getPrefix())) {
+            throw new JwtException("Token header is invalid");
         }
 
-        if (!components[0].equals("Bearer")) {
-            throw new MalformedJwtException("Bearer is needed");
-        }
-
-        return components[1].trim();
+        return header.replace(config.getPrefix(), "");
     }
 
     private String formatErrorMsg(String msg)
@@ -98,4 +87,23 @@ public class TokenAuthenticationFilter extends AbstractNameValueGatewayFilterFac
                 "error=\"https://tools.ietf.org/html/rfc7519\", " +
                 "error_description=\"%s\" ",  msg);
     }
+
+    @Getter
+    public static class Config {
+        private static final String name = "TokenAuthenticationFilter";
+        private static final String value = "Validates request, on sending JWT token in header";
+
+        @Value("${security.jwt.uri}")
+        private String Uri;
+
+        @Value("${security.jwt.header}")
+        private String header;
+
+        @Value("${security.jwt.prefix}")
+        private String prefix;
+
+        @Value("${security.jwt.secret}")
+        private String secret;
+    }
+
 }
