@@ -1,10 +1,8 @@
 package hu.me.iit.malus.thesis.user.security;
 
 import hu.me.iit.malus.thesis.user.security.config.JwtAuthConfig;
-import hu.me.iit.malus.thesis.user.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

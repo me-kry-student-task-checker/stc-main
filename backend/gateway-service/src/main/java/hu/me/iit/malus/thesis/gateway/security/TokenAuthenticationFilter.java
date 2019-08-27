@@ -4,18 +4,19 @@ import hu.me.iit.malus.thesis.gateway.security.config.JwtGatewayConfig;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.endpoint.SecurityContext;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractNameValueGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 @Slf4j
+@Component
 public class TokenAuthenticationFilter extends AbstractNameValueGatewayFilterFactory {
     private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
     private static final String X_JWT_SUB_HEADER = "X-jwt-sub";
