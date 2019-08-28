@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -67,14 +68,17 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
 
     private String extractJWTToken(ServerHttpRequest request, Config config)
     {
-        List<String> headers = request.getHeaders().get(config.getHeader());
+        List<String> headers = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
+        for (String s : headers) {
+            log.info("-- Header: " + s);
+        }
         if (headers.isEmpty()) {
             throw new JwtException("Token header is missing");
         }
 
-        String header = headers.get(0).trim();
+        String header = headers.get(0);
 
-        if (!header.startsWith(config.getPrefix())) {
+        if (!header.startsWith("Bearer")) {
             throw new JwtException("Token header is invalid");
         }
 
@@ -89,6 +93,8 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
     }
 
     @Getter
+    @Component
+    // Value annotations only work if this component is wired by spring... not working correctly
     public static class Config {
         private static final String name = "TokenAuthenticationFilter";
         private static final String value = "Validates request, on sending JWT token in header";
