@@ -36,7 +36,7 @@ public class TaskController {
     }
 
     @GetMapping("/getAll/{courseId}")
-    public Set<Task> getAllTasks(@PathVariable Long courseId) throws TaskNotFoundException {
+    public Set<Task> getAllTasks(@PathVariable Long courseId) {
         return service.getAll(courseId);
     }
 

@@ -36,7 +36,7 @@ public interface TaskService {
      * @param courseId the id of the course to get all tasks from
      * @return the list of tasks
      */
-    Set<Task> getAll(Long courseId) throws TaskNotFoundException;
+    Set<Task> getAll(Long courseId);
 
     /**
      * Negates the done flag of a task

@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,6 +40,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task create(Task task) {
         task.setDone(false);
+        task.setCreationDate(new Date());
         log.info("Task created: {}", task);
         return repository.save(task);
     }
@@ -55,7 +58,7 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public Set<Task> getAll(Long courseId) throws TaskNotFoundException {
+    public Set<Task> getAll(Long courseId) {
         Optional<Set<Task>> opt = repository.findAllByCourseId(courseId);
         if (opt.isPresent()) {
             Set<Task> tasks = opt.get();
@@ -66,7 +69,7 @@ public class TaskServiceImpl implements TaskService {
             return tasks;
         } else {
             log.error("No task found with this course id: {}", courseId);
-            throw new TaskNotFoundException();
+            return new HashSet<>();
         }
     }
 
@@ -138,6 +141,7 @@ public class TaskServiceImpl implements TaskService {
         if (opt.isPresent()) {
             Task task = opt.get();
             task.addStudentIdToHelp(studentId);
+            repository.save(task);
             log.info("Added an id ({}) to a task's ({}) help needed list", studentId, task);
         } else {
             log.error("No task found with this task id: {}", taskId);
