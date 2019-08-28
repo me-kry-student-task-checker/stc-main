@@ -14,7 +14,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 /**
  * Task Microservice
  *
- * @author Javorek Dénes
  * @author Szőke Attila
  */
 @SpringBootApplication

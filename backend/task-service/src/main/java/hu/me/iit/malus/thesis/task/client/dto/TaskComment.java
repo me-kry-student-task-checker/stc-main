@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * Data Transfer Object for Course Comment entity
  *
- * @author Javorek Dénes
+ * @author Attila Szőke
  */
 @Getter
 @Setter
