@@ -2,20 +2,30 @@ package hu.me.iit.malus.thesis.course.client.dto;
 
 import lombok.*;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Data Transfer Object for Task entity
- * @author Javorek Dénes
+ *
+ * @author Attila Szőke
  */
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @ToString @EqualsAndHashCode
 public class Task {
 
     private Long id;
     private String name;
+    private String description;
+    private Date creationDate;
+    private boolean isDone;
     private Long courseId;
+    private Set<String> helpNeededStudentIds;
+    private Set<String> completedStudentIds;
+    private List<TaskComment> comments;
 
-    public Task(String name, Long courseId) {
-        this.name = name;
-        this.courseId = courseId;
-    }
 }

@@ -27,19 +27,21 @@ import java.util.*;
 @Slf4j
 public class CourseServiceImpl implements CourseService {
 
-    private final CourseRepository courseRepository;
-    private final InvitationRepository invitationRepository;
+    private CourseRepository courseRepository;
+    private InvitationRepository invitationRepository;
+    private TaskClient taskClient;
 
     /**
      * Instantiates a new Course service.
-     *
-     * @param courseRepository the course repository
+     *  @param courseRepository the course repository
      * @param invitationRepository the invitation repository
+     * @param taskClient the task client
      */
     @Autowired
-    public CourseServiceImpl(CourseRepository courseRepository, InvitationRepository invitationRepository) {
+    public CourseServiceImpl(CourseRepository courseRepository, InvitationRepository invitationRepository, TaskClient taskClient) {
         this.courseRepository = courseRepository;
         this.invitationRepository = invitationRepository;
+        this.taskClient = taskClient;
     }
 
     /**
@@ -61,7 +63,6 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public Course edit(Course course) {
-        //TODO do the 'task flag as done' thingy, when the task service is ready
         log.info("Modified course: {}", course);
         return courseRepository.save(course);
     }
@@ -95,7 +96,7 @@ public class CourseServiceImpl implements CourseService {
             Course course = opt.get();
             course.setCreator(creator);
             course.setStudents(students);
-            course.setTasks(TaskClient.getAllByCourseId(courseId));
+            course.setTasks(taskClient.getAllTasks(courseId));
             course.setComments(FeedbackClient.getByCourseId(courseId));
             log.info("Course found: {}", courseId);
             return course;
@@ -129,7 +130,7 @@ public class CourseServiceImpl implements CourseService {
                 }
             }
             course.setStudents(students);
-            course.setTasks(TaskClient.getAllByCourseId(course.getId()));
+            course.setTasks(taskClient.getAllTasks(course.getId()));
             course.setComments(FeedbackClient.getByCourseId(course.getId()));
         }
         log.info("Courses found: {}", courses);
