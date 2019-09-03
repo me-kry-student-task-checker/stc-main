@@ -149,3 +149,19 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
+
+  feedback-service:
+    container_name: feedback-service
+    build:
+      context: ./feedback-service
+      dockerfile: dockerfile
+    image: feedback-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
