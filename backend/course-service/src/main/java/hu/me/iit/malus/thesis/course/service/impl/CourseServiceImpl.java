@@ -21,7 +21,7 @@ import java.util.*;
 /**
  * Default implementation for Course service.
  *
- * @author Javorek Dénes
+ * @author Attila Szőke
  */
 @Service
 @Slf4j

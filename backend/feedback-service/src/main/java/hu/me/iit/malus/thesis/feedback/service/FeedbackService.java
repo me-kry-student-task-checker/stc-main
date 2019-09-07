@@ -1,6 +1,5 @@
 package hu.me.iit.malus.thesis.feedback.service;
 
-import hu.me.iit.malus.thesis.feedback.model.Comment;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 
