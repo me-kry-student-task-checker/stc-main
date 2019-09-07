@@ -24,14 +24,16 @@ import java.util.Set;
 @Slf4j
 public class TaskServiceImpl implements TaskService {
 
-    private final TaskRepository repository;
+    private TaskRepository repository;
+    private FeedbackClient feedbackClient;
 
     /**
      * Instantiates a new TaskServiceImpl class
      */
     @Autowired
-    public TaskServiceImpl(TaskRepository repository) {
+    public TaskServiceImpl(TaskRepository repository, FeedbackClient feedbackClient) {
         this.repository = repository;
+        this.feedbackClient = feedbackClient;
     }
 
     /**
@@ -63,7 +65,7 @@ public class TaskServiceImpl implements TaskService {
         if (opt.isPresent()) {
             Set<Task> tasks = opt.get();
             for (Task task : tasks) {
-                task.setComments(FeedbackClient.getByTaskId(task.getId()));
+                task.setComments(feedbackClient.getAllTaskComments(task.getId()));
             }
             log.info("Task queried: {}", tasks);
             return tasks;

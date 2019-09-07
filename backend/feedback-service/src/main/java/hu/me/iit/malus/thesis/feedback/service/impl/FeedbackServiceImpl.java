@@ -25,28 +25,43 @@ public class FeedbackServiceImpl implements FeedbackService {
     private CourseCommentRepository courseCommentRepository;
     private TaskCommentRepository taskCommentRepository;
 
+    /**
+     * Instantiates a new FeedbackServiceImpl
+     */
     @Autowired
     public FeedbackServiceImpl(CourseCommentRepository courseCommentRepository, TaskCommentRepository taskCommentRepository) {
         this.courseCommentRepository = courseCommentRepository;
         this.taskCommentRepository = taskCommentRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CourseComment createCourseComment(CourseComment courseComment) {
         return courseCommentRepository.save(courseComment);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TaskComment createTaskComment(TaskComment taskComment) {
         return taskCommentRepository.save(taskComment);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<CourseComment> getAllCourseComments(Long courseId) {
         Optional<List<CourseComment>> opt = courseCommentRepository.findAllByCourseId(courseId);
         return opt.orElseGet(ArrayList::new);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<TaskComment> getAllTaskComments(Long taskId) {
         Optional<List<TaskComment>> opt = taskCommentRepository.findAllByTaskId(taskId);

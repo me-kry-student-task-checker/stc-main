@@ -13,9 +13,8 @@ import java.util.Date;
 public class TaskComment {
 
     private Long id;
-    private Long courseId;
-    private Date creationDate;
     private String authorId;
-    private String body;
-
+    private String text;
+    private Date createDate;
+    private Long taskId;
 }
