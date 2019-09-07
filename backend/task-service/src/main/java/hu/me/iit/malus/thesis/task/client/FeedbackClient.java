@@ -15,7 +15,7 @@ import java.util.List;
 @FeignClient(name = "feedback-service")
 public interface FeedbackClient {
 
-    @GetMapping("/getAllTaskComments/{taskId}")
+    @GetMapping("/api/feedback/getAllTaskComments/{taskId}")
     List<TaskComment> getAllTaskComments(@PathVariable Long taskId);
 
 }
