@@ -21,7 +21,7 @@ import java.util.*;
 /**
  * Default implementation for Course service.
  *
- * @author Javorek Dénes
+ * @author Attila Szőke
  */
 @Service
 @Slf4j
@@ -30,18 +30,21 @@ public class CourseServiceImpl implements CourseService {
     private CourseRepository courseRepository;
     private InvitationRepository invitationRepository;
     private TaskClient taskClient;
+    private FeedbackClient feedbackClient;
 
     /**
      * Instantiates a new Course service.
-     *  @param courseRepository the course repository
+     * @param courseRepository the course repository
      * @param invitationRepository the invitation repository
      * @param taskClient the task client
+     * @param feedbackClient the feedback client
      */
     @Autowired
-    public CourseServiceImpl(CourseRepository courseRepository, InvitationRepository invitationRepository, TaskClient taskClient) {
+    public CourseServiceImpl(CourseRepository courseRepository, InvitationRepository invitationRepository, TaskClient taskClient, FeedbackClient feedbackClient) {
         this.courseRepository = courseRepository;
         this.invitationRepository = invitationRepository;
         this.taskClient = taskClient;
+        this.feedbackClient = feedbackClient;
     }
 
     /**
@@ -97,7 +100,7 @@ public class CourseServiceImpl implements CourseService {
             course.setCreator(creator);
             course.setStudents(students);
             course.setTasks(taskClient.getAllTasks(courseId));
-            course.setComments(FeedbackClient.getByCourseId(courseId));
+            course.setComments(feedbackClient.getAllCourseComments(courseId));
             log.info("Course found: {}", courseId);
             return course;
         } else {
@@ -131,7 +134,7 @@ public class CourseServiceImpl implements CourseService {
             }
             course.setStudents(students);
             course.setTasks(taskClient.getAllTasks(course.getId()));
-            course.setComments(FeedbackClient.getByCourseId(course.getId()));
+            course.setComments(feedbackClient.getAllCourseComments(course.getId()));
         }
         log.info("Courses found: {}", courses);
         return courses;
