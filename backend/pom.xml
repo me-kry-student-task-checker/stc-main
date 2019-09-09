@@ -163,6 +163,11 @@
 				<artifactId>spring-cloud-starter-openfeign</artifactId>
 				<version>2.1.2.RELEASE</version>
 			</dependency>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>google-cloud-storage</artifactId>
+				<version>1.90.0</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -209,6 +214,16 @@
 				</configuration>
 			</plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.google.appengine</groupId>
+					<artifactId>appengine-maven-plugin</artifactId>
+					<version>1.9.76</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 </project>
