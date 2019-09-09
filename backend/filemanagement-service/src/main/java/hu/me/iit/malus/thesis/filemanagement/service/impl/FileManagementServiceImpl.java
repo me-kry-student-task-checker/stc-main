@@ -9,11 +9,13 @@ import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Default implementation for FileDescription management service.
@@ -24,9 +26,9 @@ import java.util.*;
 public class FileManagementServiceImpl implements FileManagementService {
 
 
+    private static Storage storage = null;
     @Value("google-cloud-bucket-name")
     private String BUCKET_NAME;
-    private static Storage storage = null;
     private FileDescriptionRepository fileDescriptionRepository;
 
     @Autowired
@@ -73,7 +75,7 @@ public class FileManagementServiceImpl implements FileManagementService {
     @Override
     public Set<FileDescription> getFileByFileName(String filename) {
         log.info("Files found by file name: {}", filename);
-        return (Set<FileDescription>) fileDescriptionRepository.findAllByFileName(filename);
+        return (Set<FileDescription>) fileDescriptionRepository.findAllByName(filename);
     }
 
     @Override
