@@ -1,12 +1,11 @@
 package hu.me.iit.malus.thesis.gateway.security;
 
+import hu.me.iit.malus.thesis.gateway.security.config.TokenAuthenticationFilterConfig;
 import io.jsonwebtoken.*;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -18,16 +17,24 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<TokenAuthenticationFilter.Config> {
+public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<TokenAuthenticationFilterConfig> {
     private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
     private static final String X_JWT_SUB_HEADER = "X-jwt-sub";
+    private TokenAuthenticationFilterConfig config;
 
-    public TokenAuthenticationFilter() {
-        super(Config.class);
+    @Autowired
+    public TokenAuthenticationFilter(TokenAuthenticationFilterConfig config) {
+        super(TokenAuthenticationFilterConfig.class);
+        this.config = config;
     }
 
     @Override
-    public GatewayFilter apply(Config config) {
+    public TokenAuthenticationFilterConfig newConfig() {
+        return config;
+    }
+
+    @Override
+    public GatewayFilter apply(TokenAuthenticationFilterConfig config) {
         return (exchange, chain) -> {
 
             try {
@@ -41,7 +48,6 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
 
                     ServerHttpRequest request = exchange.getRequest().mutate().
                             header(X_JWT_SUB_HEADER, claims.getSubject()).
-                            //TODO: Check what SecurityContext.setAuthentication did, how to send SecurityContext with request
                             build();
 
                     return chain.filter(exchange.mutate().request(request).build());
@@ -66,23 +72,25 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
         return response.setComplete();
     }
 
-    private String extractJWTToken(ServerHttpRequest request, Config config)
+    private String extractJWTToken(ServerHttpRequest request, TokenAuthenticationFilterConfig config)
     {
-        List<String> headers = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
-        for (String s : headers) {
-            log.info("-- Header: " + s);
-        }
-        if (headers.isEmpty()) {
+        if (!request.getHeaders().containsKey(config.getHeader())) {
             throw new JwtException("Token header is missing");
         }
 
-        String header = headers.get(0);
+        List<String> headers = request.getHeaders().get(config.getHeader());
 
-        if (!header.startsWith("Bearer")) {
+        if (headers.isEmpty()) {
+            throw new JwtException("Token header is empty");
+        }
+
+        String tokenHeader = headers.get(0);
+
+        if (!tokenHeader.startsWith(config.getPrefix())) {
             throw new JwtException("Token header is invalid");
         }
 
-        return header.replace(config.getPrefix(), "");
+        return tokenHeader.replace(config.getPrefix(), "");
     }
 
     private String formatErrorMsg(String msg)
@@ -92,24 +100,5 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
                 "error_description=\"%s\" ",  msg);
     }
 
-    @Getter
-    @Component
-    // Value annotations only work if this component is wired by spring... not working correctly
-    public static class Config {
-        private static final String name = "TokenAuthenticationFilter";
-        private static final String value = "Validates request, on sending JWT token in header";
-
-        @Value("${security.jwt.uri}")
-        private String Uri;
-
-        @Value("${security.jwt.header}")
-        private String header;
-
-        @Value("${security.jwt.prefix}")
-        private String prefix;
-
-        @Value("${security.jwt.secret}")
-        private String secret;
-    }
 
 }

@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Default configuration class, that loads all the required JWT properties used in this microservice
+ * Default configuration class, that provides all the required JWT properties,
+ * used in the authentication process
  * @author Javorek Dénes
  */
 @Getter
-@ToString
 @Component
 public class JwtAuthConfig {
     @Value("${security.jwt.uri}")

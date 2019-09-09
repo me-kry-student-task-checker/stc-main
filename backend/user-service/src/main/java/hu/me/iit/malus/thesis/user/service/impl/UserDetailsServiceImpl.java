@@ -42,6 +42,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
+        //TODO: Just create an entry in the db
         if("admin@admin.com".equalsIgnoreCase(email)) {
             return new org.springframework.security.core.userdetails.User
                     (email, passwordEncoder().encode("admin123"), AuthorityUtils.createAuthorityList("ROLE_Admin"));

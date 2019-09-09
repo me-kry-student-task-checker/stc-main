@@ -1,15 +1,10 @@
 package hu.me.iit.malus.thesis.user.security;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hu.me.iit.malus.thesis.user.security.config.JwtAuthConfig;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -85,13 +80,6 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
         private String username, password;
 
         public UserCredentials() {
-        }
-
-        // Empty constr should be enough
-        @JsonCreator
-        public UserCredentials(@JsonProperty("username") String username, @JsonProperty("password") String password) {
-            this.username = username;
-            this.password = password;
         }
 
         public String getUsername() {
