@@ -27,7 +27,7 @@ public class FileManagementServiceImpl implements FileManagementService {
 
 
     private static Storage storage = null;
-    @Value("google-cloud-bucket-name")
+    @Value("${google-cloud-bucket-name}")
     private String BUCKET_NAME;
     private FileDescriptionRepository fileDescriptionRepository;
 

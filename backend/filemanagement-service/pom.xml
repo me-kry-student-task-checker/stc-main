@@ -80,13 +80,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.google.appengine</groupId>
-                <artifactId>appengine-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

@@ -156,7 +156,7 @@ services:
     volumes:
       - ./docker/provision/gcp/credential:/credential
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS="/credential/cred.json"
+      - GOOGLE_APPLICATION_CREDENTIALS=/credential/cred.json
     build:
       context: ./filemanagement-service
       dockerfile: dockerfile
