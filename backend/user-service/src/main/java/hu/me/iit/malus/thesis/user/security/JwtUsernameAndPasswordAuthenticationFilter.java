@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.user.security;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hu.me.iit.malus.thesis.user.controller.dto.LoginRequest;
 import hu.me.iit.malus.thesis.user.security.config.JwtAuthConfig;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -43,10 +44,10 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
             throws AuthenticationException {
 
         try {
-            UserCredentials creds = new ObjectMapper().readValue(request.getInputStream(), UserCredentials.class);
+            LoginRequest requestCredentials = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    creds.getUsername(), creds.getPassword(), Collections.emptyList());
+                    requestCredentials.getUsername(), requestCredentials.getPassword(), Collections.emptyList());
 
             return authManager.authenticate(authToken);
 
@@ -55,47 +56,19 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
         }
     }
 
-    // The 'auth' passed to successfulAuthentication() is the current authenticated user.
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
-
+                                            Authentication authenticatedUser) throws IOException, ServletException {
         Long now = System.currentTimeMillis();
         String token = Jwts.builder()
-                .setSubject(auth.getName())
-                // Convert to list of strings.
-                // This is important because it affects the way we get them back in the Gateway.
-                .claim("authorities", auth.getAuthorities().stream()
+                .setSubject(authenticatedUser.getName())
+                .claim("roles", authenticatedUser.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(now + jwtConfig.getExpiration() * 1000))  // in milliseconds
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())
                 .compact();
 
-        // Add token to header
         response.addHeader(jwtConfig.getHeader(), jwtConfig.getPrefix() + token);
-    }
-
-    private static class UserCredentials {
-        private String username, password;
-
-        public UserCredentials() {
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
     }
 }

@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.List;
 
 /**
- * Data Transfer Object for Student entity
+ * Representation of a Student type User
  *
  * @author Javorek Dénes
  */
@@ -17,7 +17,7 @@ public class Student extends User {
     private List<Long> assignedCourseIds;
 
     public Student(String id, String password, String firstName, String lastName, List<Long> assignedCourseIds) {
-        super(id, password, firstName, lastName);
+        super(id, password, firstName, lastName, UserRole.STUDENT);
         this.assignedCourseIds = assignedCourseIds;
     }
 }

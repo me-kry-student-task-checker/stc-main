@@ -3,6 +3,8 @@ package hu.me.iit.malus.thesis.user.model;
 import lombok.*;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
 @Entity
@@ -23,9 +25,13 @@ public class User
     private String firstName;
     private String lastName;
 
-    User(String email, String password, String firstName, String lastName) {
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+    User(String email, String password, String firstName, String lastName, UserRole role) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.role = role;
     }
 }

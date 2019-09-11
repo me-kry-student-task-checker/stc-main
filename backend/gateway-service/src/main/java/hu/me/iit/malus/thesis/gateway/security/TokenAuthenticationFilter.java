@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<TokenAuthenticationFilterConfig> {
     private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
-    private static final String X_JWT_SUB_HEADER = "X-jwt-sub";
+    private static final String X_AUTH_TOKEN = "X-Auth-Token";
     private TokenAuthenticationFilterConfig config;
 
     @Autowired
@@ -41,19 +41,18 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
                 String token = this.extractJWTToken(exchange.getRequest(), config);
 
                 try {
-                    Claims claims = Jwts.parser()
+                    Jwts.parser()
                             .setSigningKey(config.getSecret().getBytes())
-                            .parseClaimsJws(token)
-                            .getBody();
+                            .parseClaimsJws(token);
 
                     ServerHttpRequest request = exchange.getRequest().mutate().
-                            header(X_JWT_SUB_HEADER, claims.getSubject()).
+                            header(X_AUTH_TOKEN, token).
                             build();
 
                     return chain.filter(exchange.mutate().request(request).build());
                 } catch (Exception e) {
                     //TODO: Catch the possible exceptions one by one (dont catch Exception class)
-                    throw new JwtException("Something went wrong during parsing JWT claims.");
+                    throw new JwtException("Something went wrong during parsing JWT claims");
                 }
 
             } catch (JwtException e) {
@@ -99,6 +98,4 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
                 "error=\"https://tools.ietf.org/html/rfc7519\", " +
                 "error_description=\"%s\" ",  msg);
     }
-
-
 }

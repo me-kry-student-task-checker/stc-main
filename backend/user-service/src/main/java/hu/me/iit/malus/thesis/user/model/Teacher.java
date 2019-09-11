@@ -5,7 +5,7 @@ import lombok.*;
 import java.util.List;
 
 /**
- * Data Transfer Object for Teacher entity
+ * Representation of a Teacher type User
  *
  * @author Javorek Dénes
  */
@@ -16,7 +16,7 @@ public class Teacher extends User {
     private List<Long> createdCourseIds;
 
     public Teacher(String id, String password, String firstName, String lastName, List<Long> createdCourseIds) {
-        super(id, password, firstName, lastName);
+        super(id, password, firstName, lastName, UserRole.TEACHER);
         this.createdCourseIds = createdCourseIds;
     }
 }

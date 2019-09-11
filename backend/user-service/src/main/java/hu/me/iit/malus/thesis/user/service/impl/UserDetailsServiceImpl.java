@@ -42,13 +42,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-
-        //TODO: Just create an entry in the db
-        if("admin@admin.com".equalsIgnoreCase(email)) {
-            return new org.springframework.security.core.userdetails.User
-                    (email, passwordEncoder().encode("admin123"), AuthorityUtils.createAuthorityList("ROLE_Admin"));
-        }
-
         Optional<User> userToLoad = repository.findById(email);
 
         if(!userToLoad.isPresent()) {
@@ -56,14 +49,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
         User user = userToLoad.get();
 
-        List<GrantedAuthority> grantedAuthorities = AuthorityUtils.NO_AUTHORITIES;
-
-        //TODO: This is disgusting, needs better role handling
-        if (user instanceof Teacher) {
-            grantedAuthorities = AuthorityUtils.createAuthorityList("ROLE_Teacher");
-        } else if (user instanceof Student) {
-            grantedAuthorities = AuthorityUtils.createAuthorityList("ROLE_Student");
-        }
+        List<GrantedAuthority> grantedAuthorities =
+                AuthorityUtils.createAuthorityList(user.getRole().getRoleString());
 
         return new org.springframework.security.core.userdetails.User
                 (user.getEmail(), user.getPassword(), grantedAuthorities);
