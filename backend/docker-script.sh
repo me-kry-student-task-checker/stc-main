@@ -1,5 +1,5 @@
 #!/bin/bash
-# First argument must be either 'init', 'start', 'stop' or 'recreate + ${containerName}'
+# First argument must be either 'init', 'start', 'stop', 'restart + ${containerName}' or 'recreate + ${containerName}'
 
 # Colors
 YELLOW='\033[1;33m'
@@ -42,7 +42,15 @@ else
         docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{ .Name }}' "${contName}" | sed 's/ \// /'
         echo && read -n 1 -s -r -p "Press any key to continue..." && echo -e "\n"
       else
-        echo -e "${RED}Write either 'start' or 'stop' as first argument please!\n"
+        if [[ "${cond}" == "restart" ]]; then
+          # Restarts a container
+          echo -e "\n${YELLOW}Restarting container: ${contName}!${NOCOLOR} \n"
+          docker-compose restart "${contName}"
+          docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{ .Name }}' "${contName}" | sed 's/ \// /'
+          echo && read -n 1 -s -r -p "Press any key to continue..." && echo -e "\n"
+        else
+          echo -e "${RED}Write either 'init', 'start', 'stop', 'restart + {containerName}' or 'recreate + {containerName}' as first argument please!${NOCOLOR}"
+        fi
       fi
     fi
   fi
