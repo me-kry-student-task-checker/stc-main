@@ -5,18 +5,18 @@ import lombok.*;
 import java.util.List;
 
 /**
- * Representation of a Teacher type User
+ * Representation of Teacher type User
  *
  * @author Javorek Dénes
  */
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter
 @ToString @EqualsAndHashCode
 public class Teacher extends User {
 
     private List<Long> createdCourseIds;
 
-    public Teacher(String id, String password, String firstName, String lastName, List<Long> createdCourseIds) {
-        super(id, password, firstName, lastName, UserRole.TEACHER);
+    public Teacher(String email, String password, String firstName, String lastName, List<Long> createdCourseIds) {
+        super(email, password, firstName, lastName, UserRole.TEACHER, false);
         this.createdCourseIds = createdCourseIds;
     }
 }

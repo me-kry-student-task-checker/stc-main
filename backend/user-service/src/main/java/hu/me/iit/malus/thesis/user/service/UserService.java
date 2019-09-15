@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.user.service;
 
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
-import hu.me.iit.malus.thesis.user.controller.validation.EmailExistsException;
+import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
 import hu.me.iit.malus.thesis.user.model.User;
 
 /**
@@ -11,4 +11,6 @@ import hu.me.iit.malus.thesis.user.model.User;
 public interface UserService {
     User registerNewUserAccount(RegistrationRequest registrationRequest)
             throws EmailExistsException;
+
+    void createActivationToken(User user, String token);
 }

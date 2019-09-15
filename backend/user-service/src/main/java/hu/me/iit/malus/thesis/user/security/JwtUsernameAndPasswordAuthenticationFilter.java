@@ -7,6 +7,7 @@ import hu.me.iit.malus.thesis.user.security.config.JwtAuthConfig;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -47,7 +48,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
             LoginRequest requestCredentials = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    requestCredentials.getUsername(), requestCredentials.getPassword(), Collections.emptyList());
+                    requestCredentials.getEmail(), requestCredentials.getPassword(), Collections.emptyList());
 
             return authManager.authenticate(authToken);
 
@@ -69,6 +70,6 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())
                 .compact();
 
-        response.addHeader(jwtConfig.getHeader(), jwtConfig.getPrefix() + token);
+        response.addHeader(HttpHeaders.AUTHORIZATION, jwtConfig.getPrefix() + token);
     }
 }

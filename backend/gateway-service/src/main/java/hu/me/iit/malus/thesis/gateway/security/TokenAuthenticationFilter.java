@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -15,6 +16,13 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+/**
+ * Custom filter, that finds and validates the JWT token (by Authorization header) in the incoming request.
+ * If the token is valid, the request will be forwarded to the destination service,
+ * with the same included JWT token (by X-Auth-Token header).
+ * If the token is missing from the request or invalid, the request will be blocked with Unauthorized error
+ * @author Javorek Dénes
+ */
 @Slf4j
 @Component
 public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<TokenAuthenticationFilterConfig> {
@@ -33,28 +41,26 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
         return config;
     }
 
+    /**
+     * @see TokenAuthenticationFilter javaDoc
+     * @param config
+     * @return The filter
+     */
     @Override
     public GatewayFilter apply(TokenAuthenticationFilterConfig config) {
         return (exchange, chain) -> {
-
             try {
                 String token = this.extractJWTToken(exchange.getRequest(), config);
 
-                try {
-                    Jwts.parser()
-                            .setSigningKey(config.getSecret().getBytes())
-                            .parseClaimsJws(token);
+                Jwts.parser()
+                        .setSigningKey(config.getSecret().getBytes())
+                        .parseClaimsJws(token);
 
-                    ServerHttpRequest request = exchange.getRequest().mutate().
-                            header(X_AUTH_TOKEN, token).
-                            build();
+                ServerHttpRequest request = exchange.getRequest().mutate().
+                        header(X_AUTH_TOKEN, token).
+                        build();
 
-                    return chain.filter(exchange.mutate().request(request).build());
-                } catch (Exception e) {
-                    //TODO: Catch the possible exceptions one by one (dont catch Exception class)
-                    throw new JwtException("Something went wrong during parsing JWT claims");
-                }
-
+                return chain.filter(exchange.mutate().request(request).build());
             } catch (JwtException e) {
                 log.error(e.toString());
                 return this.onError(exchange, e.getMessage());
@@ -62,6 +68,13 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
         };
     }
 
+    /**
+     * Handles any error during filter execution, sets Unauthorized status code,
+     * and includes info message about token usage in WWW-Auth header
+     * @param exchange
+     * @param err The error message
+     * @return
+     */
     private Mono<Void> onError(ServerWebExchange exchange, String err)
     {
         ServerHttpResponse response = exchange.getResponse();
@@ -73,11 +86,11 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
 
     private String extractJWTToken(ServerHttpRequest request, TokenAuthenticationFilterConfig config)
     {
-        if (!request.getHeaders().containsKey(config.getHeader())) {
+        if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
             throw new JwtException("Token header is missing");
         }
 
-        List<String> headers = request.getHeaders().get(config.getHeader());
+        List<String> headers = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
 
         if (headers.isEmpty()) {
             throw new JwtException("Token header is empty");
@@ -92,6 +105,11 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
         return tokenHeader.replace(config.getPrefix(), "");
     }
 
+    /**
+     * Simple error message formatter. The error message gets extended with the JWT standard page
+     * @param msg
+     * @return Formatted string
+     */
     private String formatErrorMsg(String msg)
     {
         return String.format("Bearer realm=\"acm.com\", " +

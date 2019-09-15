@@ -8,10 +8,10 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @AllArgsConstructor
 @ToString @EqualsAndHashCode
 /**
- * Aggregator class for Student and Teacher objects.
+ * Aggregator class for all possible User objects.
  * It is not a real DTO, so it should not be used in inter-service communication,
  * use one of its child class instead.
  *
@@ -20,18 +20,15 @@ import javax.persistence.Id;
 public class User
 {
     @Id
-    private String email;
-    private String password;
-    private String firstName;
-    private String lastName;
+    private final String email;
+    private final String password;
+    private final String firstName, lastName;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
+    private boolean enabled;
 
-    User(String email, String password, String firstName, String lastName, UserRole role) {
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.role = role;
+    User withEmail(String email) {
+        return new User(email, this.password, this.firstName, this.lastName, this.role, false);
     }
 }

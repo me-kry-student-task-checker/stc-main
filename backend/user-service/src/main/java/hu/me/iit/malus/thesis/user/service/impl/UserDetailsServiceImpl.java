@@ -12,7 +12,6 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,8 +33,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     /**
-     * Functional interface implementation, loads the user objects by username.
-     * In our case the username equals to the user's email, because we dont use separate username field.
+     * Functional interface implementation, loads the user objects by email.
+     * In our case the email equals to the user's email, because we dont use separate email field.
      * @param email
      * @return The corresponding UserDetails object, which holds the data of the give user
      * @throws UsernameNotFoundException
@@ -54,10 +53,5 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User
                 (user.getEmail(), user.getPassword(), grantedAuthorities);
-    }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

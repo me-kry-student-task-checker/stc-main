@@ -33,6 +33,7 @@
 		<spring.cloud.version>2.1.2.RELEASE</spring.cloud.version>
 		<jjwt.version>0.9.0</jjwt.version>
 		<javax.servlet.version>2.5</javax.servlet.version>
+		<passay.version>1.0</passay.version>
 	</properties>
 
 	<!--Basic dependencies for everybody-->
@@ -120,6 +121,11 @@
 				<groupId>io.jsonwebtoken</groupId>
 				<artifactId>jjwt</artifactId>
 				<version>${jjwt.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.passay</groupId>
+				<artifactId>passay</artifactId>
+				<version>${passay.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

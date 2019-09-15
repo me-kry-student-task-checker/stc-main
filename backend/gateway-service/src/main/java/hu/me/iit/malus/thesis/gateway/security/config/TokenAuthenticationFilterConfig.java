@@ -10,9 +10,6 @@ public class TokenAuthenticationFilterConfig {
     private static final String name = "TokenAuthenticationFilter";
     private static final String value = "Validates request, on sending JWT token in header";
 
-    @Value("${security.jwt.header}")
-    private String header;
-
     @Value("${security.jwt.prefix}")
     private String prefix;
 

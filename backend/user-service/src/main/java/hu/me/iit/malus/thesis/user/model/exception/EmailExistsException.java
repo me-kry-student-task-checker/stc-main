@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.user.controller.validation;
+package hu.me.iit.malus.thesis.user.model.exception;
 
 /**
  * Thrown in scenarios when User tries to register with an already registered email address

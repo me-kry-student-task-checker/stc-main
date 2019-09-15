@@ -16,9 +16,6 @@ public class JwtAuthConfig {
     @Value("${security.jwt.uri}")
     private String Uri;
 
-    @Value("${security.jwt.header}")
-    private String header;
-
     @Value("${security.jwt.prefix}")
     private String prefix;
 

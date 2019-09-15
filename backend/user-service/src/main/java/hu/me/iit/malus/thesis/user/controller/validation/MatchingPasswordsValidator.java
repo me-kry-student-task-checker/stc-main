@@ -19,7 +19,7 @@ public class MatchingPasswordsValidator implements ConstraintValidator<MatchingP
     /**
      * Simply checks the password and the passwordConfirm fields of the request with String.equals()
      * Throws IllegalStateException when used on an invalid class
-     * @see hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest
+     * @see RegistrationRequest
      * @param object
      * @param constraintValidatorContext
      * @return True if the password fields are identical, false otherwise
