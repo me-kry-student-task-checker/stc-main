@@ -12,9 +12,10 @@ public class Converter {
 
     public static File FileDescriptionToFile(FileDescription fileDescription) {
         File file = new File();
-        file.setName(fileDescription.getSubmittedName());
+        file.setName(fileDescription.getName());
         file.setDownloadLink(fileDescription.getDownloadLink());
         file.setSize(fileDescription.getSize());
+        //TODO: As user authentication up it should be evaluated
         file.setCanBeDeleted(true);
         file.setUploadDate(fileDescription.getUploadDate());
         file.setContentType(fileDescription.getContentType());

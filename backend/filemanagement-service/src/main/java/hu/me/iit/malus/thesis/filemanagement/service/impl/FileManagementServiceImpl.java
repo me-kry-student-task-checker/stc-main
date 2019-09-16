@@ -1,7 +1,6 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 
-import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.model.exceptions.FileCouldNotBeUploaded;
@@ -29,24 +28,20 @@ public class FileManagementServiceImpl implements FileManagementService {
     @Value("${google-cloud-bucket-name}")
     private String BUCKET_NAME;
     private FileDescriptionRepository fileDescriptionRepository;
-    //private Bucket bucket;
 
     @Autowired
     public FileManagementServiceImpl(FileDescriptionRepository fileDescriptionRepository) {
         storage = StorageOptions.getDefaultInstance().getService();
         this.fileDescriptionRepository = fileDescriptionRepository;
-        BucketInfo bucketInfo = BucketInfo.newBuilder(BUCKET_NAME).build();
-        //this.bucket = storage.create(bucketInfo, Storage.BucketTargetOption.metagenerationMatch());
     }
 
     @Override
     public FileDescription uploadFile(Part file, String services) throws FileCouldNotBeUploaded, IOException {
-        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, file.getSubmittedFileName()).build(), file.getInputStream());
+        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, services.toLowerCase() + "/" + file.getSubmittedFileName()).build(), file.getInputStream());
         log.info("File successfully uploaded: {}", file.getSubmittedFileName());
         FileDescription fileDescription = new FileDescription();
         fileDescription.setUploadDate(new Date());
-        fileDescription.setName(blob.getName());
-        fileDescription.setSubmittedName(file.getSubmittedFileName());
+        fileDescription.setName(file.getSubmittedFileName());
         fileDescription.setDownloadLink(blob.getMediaLink());
         fileDescription.setSize(file.getSize());
         fileDescription.setBlobId(blob.getBlobId());
@@ -54,8 +49,8 @@ public class FileManagementServiceImpl implements FileManagementService {
         if (fileDescription.getServices() == null) fileDescription.setServices(new HashSet<>());
         fileDescription.getServices().add(services);
 
-        for(FileDescription fd : fileDescriptionRepository.findAll()){
-            if (fd.getSubmittedName().equals(fileDescription.getSubmittedName())) {
+        for(FileDescription fd : fileDescriptionRepository.findAll()) {
+            if (fd.getName().equalsIgnoreCase(fileDescription.getName())) {
                 fileDescription.setId(fd.getId());
                 fileDescription.getServices().addAll(fd.getServices());
                 break;
@@ -64,12 +59,11 @@ public class FileManagementServiceImpl implements FileManagementService {
         fileDescriptionRepository.save(fileDescription);
 
         log.info("File description successfully saved to database: {}", fileDescription);
-
         return fileDescription;
     }
 
     @Override
-    public FileDescription getFileById(Long id) {
+    public FileDescription getById(Long id) {
         boolean isPresent = fileDescriptionRepository.findById(id).isPresent();
         if (isPresent) {
             log.info("File found: {}", id);
@@ -77,11 +71,11 @@ public class FileManagementServiceImpl implements FileManagementService {
         }
 
         log.info("File could not be found: {}", id);
-        return new FileDescription();
+        return null;
     }
 
     @Override
-    public Set<FileDescription> getFileByFileName(String filename) {
+    public Set<FileDescription> getAllByFileName(String filename) {
 
         Iterable<FileDescription> fileDescriptionList = fileDescriptionRepository.findAllByName(filename);
         Set<FileDescription> results = new HashSet<>();
@@ -99,26 +93,27 @@ public class FileManagementServiceImpl implements FileManagementService {
         for (FileDescription i : fileDescriptions) {
             result.add(i);
         }
-        /*Page<Blob> blobs = bucket.list();
-        for (Blob blob : blobs.iterateAll()) {
-            log.info("Ezeket talaltam: " + blob.toString());
-        }*/
         return result;
     }
 
     //TODO: As the authentication is ready, check whether the user can delete the file
     @Override
-    public void deleteFile(Long id) {
+    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service) {
         boolean fileToBeRemovedIsPresent = fileDescriptionRepository.findById(id).isPresent();
         if (fileToBeRemovedIsPresent) {
             FileDescription fileToBeRemoved = fileDescriptionRepository.findById(id).get();
-            BlobId blobId = BlobId.of(BUCKET_NAME, fileToBeRemoved.getName());
-            log.info("blobID: " + fileToBeRemoved.getBlobId().toString());
-            log.info("myBlobID: " + fileToBeRemoved.getBlobId().toString());
+            BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileToBeRemoved.getName());
             boolean successful_delete = storage.delete(blobId);
+
             if (successful_delete) {
-                fileDescriptionRepository.delete(fileToBeRemoved);
-                log.info("File successfully deleted: {}", id);
+                FileDescription fd = fileDescriptionRepository.findById(id).get();
+                fd.getServices().remove(service.toString());
+                if (fd.getServices().isEmpty()) {
+                    fileDescriptionRepository.delete(fileToBeRemoved);
+                }else {
+                    fileDescriptionRepository.save(fd);
+                }
+                log.info("File successfully deleted: {}, {}", id, service);
             }
             else{
                 log.info("File could not be deleted: {}", id);
@@ -135,4 +130,5 @@ public class FileManagementServiceImpl implements FileManagementService {
         }
         return files;
     }
+
 }

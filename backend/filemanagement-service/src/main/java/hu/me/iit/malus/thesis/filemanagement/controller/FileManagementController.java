@@ -7,19 +7,14 @@ import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.model.exceptions.FileCouldNotBeUploaded;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Part;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Controller endpoint of this service, which handles file transfers
@@ -38,19 +33,22 @@ public class FileManagementController {
 
     @PostMapping("/upload")
     public File uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service) throws FileCouldNotBeUploaded, IOException {
-        //List<String> servicesAsStrings = service.stream().map(Enum::toString).collect(Collectors.toList());
         FileDescription fd = fileManagementService.uploadFile(file, service.toString());
+        if (fd == null) return null;
         return Converter.FileDescriptionToFile(fd);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/delete/{id}")
-    public void deleteFile(@PathVariable Long id) {
-        fileManagementService.deleteFile(id);
+    @DeleteMapping("/delete/{id},{service}")
+    public void deleteFile(@PathVariable Long id, @PathVariable Service service) {
+        fileManagementService.deleteFile(id, service);
     }
 
     @GetMapping("/download/getById/{id}")
     public File getFileById(@PathVariable Long id){
-        FileDescription fd = fileManagementService.getFileById(id);
+        FileDescription fd = fileManagementService.getById(id);
+        if(fd == null) {
+            return null;
+        }
         return Converter.FileDescriptionToFile(fd);
     }
 
@@ -58,33 +56,25 @@ public class FileManagementController {
     public Set<File> getFileByFileName(@PathVariable String filename){
         Set<File> files = new HashSet<>();
 
-        fileManagementService.getFileByFileName(filename).stream().forEach(fd -> {
+        fileManagementService.getAllByFileName(filename).forEach(fd -> {
             files.add(Converter.FileDescriptionToFile(fd));
         });
 
         return files;
     }
 
-    @GetMapping("/download/getall")
+    @GetMapping("/download/getByService/{service}")
+    public Set<File> getAllFilesByService(@PathVariable String service) {
+        Set<FileDescription> files = new HashSet<>(fileManagementService.getAllFilesByServices(service));
+        return new HashSet<>(Converter.FileDescriptionsToFiles(files));
+    }
+
+    @GetMapping("/download/getAll")
     public Set<File> getAllFiles() {
         Set<File> files = new HashSet<>();
-        fileManagementService.getAllFiles().stream().forEach(fileDescription -> {
+        fileManagementService.getAllFiles().forEach(fileDescription -> {
            files.add(Converter.FileDescriptionToFile(fileDescription));
         });
         return files;
     }
-
-    @GetMapping("/download/getallTest")
-    public Set<FileDescription> getAllFilesTest() {
-        Set<FileDescription> files = new HashSet<>(fileManagementService.getAllFiles());
-        return files;
-    }
-
-    @GetMapping("/download/getAllByService/{services}")
-    public Set<File> getAllFilesByService(@RequestParam String services) {
-        Set<FileDescription> files = new HashSet<>(fileManagementService.getAllFilesByServices(services));
-        Set<File> result = new HashSet<>(Converter.FileDescriptionsToFiles(files));
-        return result;
-    }
-
 }

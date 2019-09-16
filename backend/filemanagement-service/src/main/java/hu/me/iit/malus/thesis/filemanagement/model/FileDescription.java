@@ -28,7 +28,6 @@ public class FileDescription {
     @Id
     Long id;
     String name;
-    String submittedName;
     String downloadLink;
     long size;
     BlobId blobId;
