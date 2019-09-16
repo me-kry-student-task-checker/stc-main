@@ -42,7 +42,7 @@ else
         docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{ .Name }}' "${contName}" | sed 's/ \// /'
         echo && read -n 1 -s -r -p "Press any key to continue..." && echo -e "\n"
       else
-        echo -e "${RED}Write either 'start' or 'stop' as first argument please!\n"
+        echo -e "${RED}Write either 'start' | 'stop' | 'init' | 'recreate' as first argument please!\n${NOCOLOR}"
       fi
     fi
   fi

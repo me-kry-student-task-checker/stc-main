@@ -5,4 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface FileDescriptionRepository extends CrudRepository<FileDescription, Long> {
     Iterable<FileDescription> findAllByName(String fileName);
+    Iterable<FileDescription> findAllByServices(String service);
 }

@@ -3,7 +3,8 @@ package hu.me.iit.malus.thesis.filemanagement.service;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.model.exceptions.FileCouldNotBeUploaded;
 
-import java.io.InputStream;
+import javax.servlet.http.Part;
+import java.io.IOException;
 import java.util.Set;
 
 
@@ -15,9 +16,10 @@ import java.util.Set;
  */
 public interface FileManagementService {
 
-    FileDescription uploadFile(String name, String submittedFileName, long size, InputStream inputStream) throws FileCouldNotBeUploaded;
+    FileDescription uploadFile(Part file, String services) throws FileCouldNotBeUploaded, IOException;
     FileDescription getFileById(Long id);
     Set<FileDescription> getFileByFileName(String filename);
     Set<FileDescription> getAllFiles();
     void deleteFile(Long id);
+    Set<FileDescription> getAllFilesByServices(String services);
 }

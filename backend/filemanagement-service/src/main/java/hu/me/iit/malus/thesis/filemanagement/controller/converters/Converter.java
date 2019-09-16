@@ -1,0 +1,35 @@
+package hu.me.iit.malus.thesis.filemanagement.controller.converters;
+
+import hu.me.iit.malus.thesis.filemanagement.controller.dto.File;
+import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
+import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class Converter {
+
+    public static File FileDescriptionToFile(FileDescription fileDescription) {
+        File file = new File();
+        file.setName(fileDescription.getSubmittedName());
+        file.setDownloadLink(fileDescription.getDownloadLink());
+        file.setSize(fileDescription.getSize());
+        file.setCanBeDeleted(true);
+        file.setUploadDate(fileDescription.getUploadDate());
+        file.setContentType(fileDescription.getContentType());
+        file.setServices(fileDescription.getServices().stream().map(Service::valueOf).collect(Collectors.toSet()));
+        return file;
+    }
+
+    public static Set<File> FileDescriptionsToFiles(Set<FileDescription> fileDescriptions) {
+        Set<File> result = new HashSet<>();
+        for (FileDescription fd : fileDescriptions) {
+            result.add(FileDescriptionToFile(fd));
+        }
+        return result;
+    }
+
+
+
+}
