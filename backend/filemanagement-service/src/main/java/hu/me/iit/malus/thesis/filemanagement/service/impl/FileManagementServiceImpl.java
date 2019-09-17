@@ -36,8 +36,8 @@ public class FileManagementServiceImpl implements FileManagementService {
     }
 
     @Override
-    public FileDescription uploadFile(Part file, String services) throws FileCouldNotBeUploaded, IOException {
-        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, services.toLowerCase() + "/" + file.getSubmittedFileName()).build(), file.getInputStream());
+    public FileDescription uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service services) throws FileCouldNotBeUploaded, IOException {
+        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, services.toString().toLowerCase() + "/" + file.getSubmittedFileName()).build(), file.getInputStream());
         log.info("File successfully uploaded: {}", file.getSubmittedFileName());
         FileDescription fileDescription = new FileDescription();
         fileDescription.setUploadDate(new Date());
@@ -107,7 +107,7 @@ public class FileManagementServiceImpl implements FileManagementService {
 
             if (successful_delete) {
                 FileDescription fd = fileDescriptionRepository.findById(id).get();
-                fd.getServices().remove(service.toString());
+                fd.getServices().remove(service);
                 if (fd.getServices().isEmpty()) {
                     fileDescriptionRepository.delete(fileToBeRemoved);
                 }else {
@@ -123,7 +123,7 @@ public class FileManagementServiceImpl implements FileManagementService {
     }
 
     @Override
-    public Set<FileDescription> getAllFilesByServices(String service) {
+    public Set<FileDescription> getAllFilesByServices(hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service) {
         Set<FileDescription> files = new HashSet<>();
         for (FileDescription fd : fileDescriptionRepository.findAllByServices(service)) {
             files.add(fd);

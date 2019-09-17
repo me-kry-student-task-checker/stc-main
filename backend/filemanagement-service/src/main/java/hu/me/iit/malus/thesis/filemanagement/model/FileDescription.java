@@ -5,10 +5,7 @@ import com.google.cloud.storage.BlobId;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import lombok.*;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -34,8 +31,9 @@ public class FileDescription {
     Date uploadDate;
     String uploadedBy;
     String contentType;
+    @Enumerated(EnumType.STRING)
     @ElementCollection
-    Set<String> services;
+    Set<Service> services;
 
 
 

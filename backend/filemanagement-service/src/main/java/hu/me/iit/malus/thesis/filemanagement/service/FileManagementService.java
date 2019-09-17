@@ -17,10 +17,10 @@ import java.util.Set;
  */
 public interface FileManagementService {
 
-    FileDescription uploadFile(Part file, String services) throws FileCouldNotBeUploaded, IOException;
+    FileDescription uploadFile(Part file, Service services) throws FileCouldNotBeUploaded, IOException;
     FileDescription getById(Long id);
     Set<FileDescription> getAllByFileName(String filename);
     Set<FileDescription> getAllFiles();
     void deleteFile(Long id, Service service);
-    Set<FileDescription> getAllFilesByServices(String services);
+    Set<FileDescription> getAllFilesByServices(Service services);
 }

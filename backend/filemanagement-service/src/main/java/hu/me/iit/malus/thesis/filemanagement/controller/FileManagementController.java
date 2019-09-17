@@ -33,7 +33,7 @@ public class FileManagementController {
 
     @PostMapping("/upload")
     public File uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service) throws FileCouldNotBeUploaded, IOException {
-        FileDescription fd = fileManagementService.uploadFile(file, service.toString());
+        FileDescription fd = fileManagementService.uploadFile(file, service);
         if (fd == null) return null;
         return Converter.FileDescriptionToFile(fd);
     }
@@ -64,7 +64,7 @@ public class FileManagementController {
     }
 
     @GetMapping("/download/getByService/{service}")
-    public Set<File> getAllFilesByService(@PathVariable String service) {
+    public Set<File> getAllFilesByService(@PathVariable Service service) {
         Set<FileDescription> files = new HashSet<>(fileManagementService.getAllFilesByServices(service));
         return new HashSet<>(Converter.FileDescriptionsToFiles(files));
     }

@@ -19,7 +19,7 @@ public class Converter {
         file.setCanBeDeleted(true);
         file.setUploadDate(fileDescription.getUploadDate());
         file.setContentType(fileDescription.getContentType());
-        file.setServices(fileDescription.getServices().stream().map(Service::valueOf).collect(Collectors.toSet()));
+        file.setServices(fileDescription.getServices());
         return file;
     }
 
