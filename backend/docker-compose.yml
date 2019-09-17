@@ -97,7 +97,7 @@ services:
     networks:
       - studentTaskChecker
     ports:
-      - "8060"
+      - "8060:8060"
     depends_on:
       - config-service
       - discovery-service-peer1
