@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+
 /**
  * Default implementation of UserService
  * @author Javorek Dénes
@@ -25,6 +27,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     public UserServiceImpl(UserRepository userRepository, ActivationTokenRepository tokenRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -42,7 +45,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new User(request.getEmail(), passwordEncoder.encode(request.getPassword()),
-                request.getFirstName(), request.getLastName(), UserRole.valueOf(request.getRole()), false);
+                request.getFirstName(), request.getLastName(), UserRole.fromString(request.getRole()), false);
         return userRepository.save(user);
     }
 
@@ -55,6 +58,35 @@ public class UserServiceImpl implements UserService {
     public void createActivationToken(User user, String token) {
         final ActivationToken userToken = ActivationToken.of(token, user);
         tokenRepository.save(userToken);
+    }
+
+    /**
+     * Activates a user by its activation token
+     * @param token Sent by the user, from the activation email
+     * @return True if the token is valid and the user is activated successfully,
+     * false otherwise.
+     */
+    @Override
+    public boolean activateUser(String token) {
+        final ActivationToken activationToken = tokenRepository.findByToken(token);
+        if (activationToken == null) {
+            return false;
+        }
+
+        final User user = activationToken.getUser();
+        final Calendar cal = Calendar.getInstance();
+        if ((activationToken.getExpiryDate()
+                .getTime()
+                - cal.getTime()
+                .getTime()) <= 0) {
+            tokenRepository.delete(activationToken);
+            return false;
+        }
+
+        user.setEnabled(true);
+        tokenRepository.delete(activationToken);
+        userRepository.save(user);
+        return true;
     }
 
     /**

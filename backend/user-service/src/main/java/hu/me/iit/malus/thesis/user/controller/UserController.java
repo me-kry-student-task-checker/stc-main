@@ -3,15 +3,16 @@ package hu.me.iit.malus.thesis.user.controller;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationResponse;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
+import hu.me.iit.malus.thesis.user.model.ActivationToken;
 import hu.me.iit.malus.thesis.user.model.exception.UserAlreadyExistException;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -31,7 +32,9 @@ public class UserController {
 
     @PostMapping("/registration")
     public RegistrationResponse registerUserAccount(
-            @Valid RegistrationRequest registrationRequest, HttpServletRequest httpRequest) {
+            @RequestBody @Valid RegistrationRequest registrationRequest, HttpServletRequest httpRequest) {
+        log.info("Registering user account by request: {}", registrationRequest);
+
         User registeredUser = service.registerNewUserAccount(registrationRequest);
         if (registeredUser == null) {
             throw new UserAlreadyExistException();
@@ -42,5 +45,19 @@ public class UserController {
                 new RegistrationCompletedEvent(registeredUser, httpRequest.getLocale(), appUrl));
 
         return new RegistrationResponse("!!");
+    }
+
+    @GetMapping("/confirmation")
+    public ResponseEntity<String> confirmRegistration(@RequestParam("token") String token) {
+
+        boolean valid = service.activateUser(token);
+        if (!valid) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_ACCEPTABLE)
+                    .body("Account cannot be activated, invalid, expired or used token!");
+        }
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Account activated");
     }
 }

@@ -41,17 +41,28 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // These flags are not defined in our system, but should be used for userdetails.User
+        final boolean accountNonExpired = true;
+        final boolean credentialsNonExpired = true;
+        final boolean accountNonLocked = true;
+
         Optional<User> userToLoad = repository.findById(email);
 
         if(!userToLoad.isPresent()) {
-            throw new UsernameNotFoundException("Username: " + email + " not found");
+            throw new UsernameNotFoundException("User with email: " + email + " not found");
         }
         User user = userToLoad.get();
 
         List<GrantedAuthority> grantedAuthorities =
                 AuthorityUtils.createAuthorityList(user.getRole().getRoleString());
 
-        return new org.springframework.security.core.userdetails.User
-                (user.getEmail(), user.getPassword(), grantedAuthorities);
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                user.isEnabled(),
+                accountNonExpired,
+                credentialsNonExpired,
+                accountNonLocked,
+                grantedAuthorities);
     }
 }

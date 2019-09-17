@@ -13,4 +13,6 @@ public interface UserService {
             throws EmailExistsException;
 
     void createActivationToken(User user, String token);
+
+    boolean activateUser(String token);
 }

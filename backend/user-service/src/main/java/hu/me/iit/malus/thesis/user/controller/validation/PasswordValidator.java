@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.user.controller.validation;
 
 import com.google.common.base.Joiner;
+import lombok.extern.slf4j.Slf4j;
 import org.passay.*;
 
 import javax.validation.ConstraintValidator;
@@ -18,7 +19,7 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword, Str
     }
 
     @Override
-    public boolean isValid(String password, ConstraintValidatorContext context) {
+    public boolean isValid(final String password, ConstraintValidatorContext context) {
         final org.passay.PasswordValidator validator = new org.passay.PasswordValidator(Arrays.asList(
                 // More possible rules can be found in org.passay
                 new LengthRule(8, 30),

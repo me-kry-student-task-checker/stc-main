@@ -8,7 +8,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
 @Entity
-@Getter @Setter @AllArgsConstructor
+@Getter @Setter
+@AllArgsConstructor
 @ToString @EqualsAndHashCode
 /**
  * Aggregator class for all possible User objects.
@@ -21,12 +22,18 @@ public class User
 {
     @Id
     private final String email;
-    private final String password;
-    private final String firstName, lastName;
+    private String password;
+    private String firstName, lastName;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private boolean enabled;
+
+    public User() {
+        super();
+        this.email = null;
+        enabled = false;
+    }
 
     User withEmail(String email) {
         return new User(email, this.password, this.firstName, this.lastName, this.role, false);

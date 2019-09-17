@@ -6,17 +6,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-import java.sql.Date;
-import java.util.stream.Stream;
+import java.util.Date;
 
 public interface ActivationTokenRepository extends CrudRepository<ActivationToken, String> {
     ActivationToken findByToken(String token);
 
     ActivationToken findByUser(User user);
-
-    Stream<ActivationToken> findAllByExpiryDateLessThan(Date now);
-
-    void deleteByExpiryDateLessThan(Date now);
 
     @Modifying
     @Query("DELETE FROM ActivationToken t WHERE t.expiryDate <= ?1")

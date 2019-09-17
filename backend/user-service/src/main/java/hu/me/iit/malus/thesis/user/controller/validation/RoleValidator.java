@@ -29,7 +29,7 @@ public class RoleValidator implements ConstraintValidator<ValidRole, Object> {
             final String string = (String) object;
 
             try {
-                UserRole.valueOf(string);
+                UserRole.fromString(string);
                 return true;
             } catch (IllegalArgumentException illegalArgE) {
                 return false;

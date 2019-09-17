@@ -28,7 +28,10 @@ public class MatchingPasswordsValidator implements ConstraintValidator<MatchingP
     public boolean isValid(final Object object, ConstraintValidatorContext constraintValidatorContext) {
         if (object instanceof RegistrationRequest) {
             final RegistrationRequest request = (RegistrationRequest) object;
-            return request.getPassword().equals(request.getPasswordConfirm());
+            if (request.getPassword() != null && request.getPasswordConfirm() != null) {
+                return request.getPassword().equals(request.getPasswordConfirm());
+            }
+            return false;
         }
         throw new IllegalStateException("Invalid target for " + this.getClass().getName());
     }

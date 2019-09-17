@@ -3,7 +3,6 @@ package hu.me.iit.malus.thesis.user.event.listener;
 import hu.me.iit.malus.thesis.user.client.EmailClient;
 import hu.me.iit.malus.thesis.user.client.dto.Mail;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
-import hu.me.iit.malus.thesis.user.event.listener.config.ActivationConfig;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +18,11 @@ public class RegistrationCompletedListener implements
 
     private UserService service;
     private EmailClient emailClient;
-    private ActivationConfig activationConfig;
 
     @Autowired
-    public RegistrationCompletedListener(UserService service, EmailClient emailClient, ActivationConfig activationConfig) {
+    public RegistrationCompletedListener(UserService service, EmailClient emailClient) {
         this.service = service;
         this.emailClient = emailClient;
-        this.activationConfig = activationConfig;
     }
 
     @Override
@@ -39,7 +36,7 @@ public class RegistrationCompletedListener implements
         service.createActivationToken(user, token);
 
         String recipientAddress = user.getEmail();
-        String subject = "Registration Confirmation - " + activationConfig.getApplicationName();
+        String subject = "Registration Confirmation - Student Task Checker";
         String confirmationUrl
                 = event.getAppUrl() + "/?token=" + token;
 

@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.user.security;
+package hu.me.iit.malus.thesis.user.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
