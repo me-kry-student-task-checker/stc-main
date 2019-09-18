@@ -15,8 +15,8 @@ public class Student extends User {
 
     private List<Long> assignedCourseIds;
 
-    public Student(String id, String firstName, String lastName, List<Long> assignedCourseIds) {
-        super(id, firstName, lastName);
+    public Student(String email, String firstName, String lastName, List<Long> assignedCourseIds, boolean enabled) {
+        super(email, null, firstName, lastName, UserRole.STUDENT, enabled);
         this.assignedCourseIds = assignedCourseIds;
     }
 }

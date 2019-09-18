@@ -47,7 +47,7 @@ public class CredentialsConfigSetup extends WebSecurityConfigurerAdapter {
                 // Authorization requests configuration
                 .authorizeRequests()
 
-                // Allow all requests going for authorization
+                // Allow all requests going for authorization, registration, and confirmation
                 .antMatchers(HttpMethod.POST, jwtAuthConfig.getUri()).permitAll()
                 .antMatchers(HttpMethod.POST, "/api/user/registration").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/user/confirmation").permitAll()

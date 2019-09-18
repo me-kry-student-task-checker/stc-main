@@ -3,6 +3,7 @@ package hu.me.iit.malus.thesis.user.event.listener;
 import hu.me.iit.malus.thesis.user.client.EmailClient;
 import hu.me.iit.malus.thesis.user.client.dto.Mail;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
+import hu.me.iit.malus.thesis.user.event.listener.config.ActivationConfig;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +19,13 @@ public class RegistrationCompletedListener implements
 
     private UserService service;
     private EmailClient emailClient;
+    private ActivationConfig activationConfig;
 
     @Autowired
-    public RegistrationCompletedListener(UserService service, EmailClient emailClient) {
+    public RegistrationCompletedListener(UserService service, EmailClient emailClient, ActivationConfig activationConfig) {
         this.service = service;
         this.emailClient = emailClient;
+        this.activationConfig = activationConfig;
     }
 
     @Override
@@ -36,19 +39,19 @@ public class RegistrationCompletedListener implements
         service.createActivationToken(user, token);
 
         String recipientAddress = user.getEmail();
-        String subject = "Registration Confirmation - Student Task Checker";
+        String subject = "Registration Confirmation - " + activationConfig.getApplicationName();
         String confirmationUrl
-                = event.getAppUrl() + "/?token=" + token;
+                = activationConfig.getApplicationURL() + "/api/user/confirmation" + "?token=" + token;
 
         // This can be externalized via MessageSource, and get messages for different locales
-        String message = "You can activate your account on the following ";
+        String message = "You can activate your account on the following link: ";
 
         Mail email = new Mail();
         email.setTo(Arrays.asList(recipientAddress));
         email.setSubject(subject);
 
         // Application URL (config) can be used here, if necessary
-        email.setText(message + " rn" + confirmationUrl);
+        email.setText(message + confirmationUrl);
 
         emailClient.sendMail(email);
     }

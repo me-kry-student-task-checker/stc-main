@@ -2,15 +2,9 @@ package hu.me.iit.malus.thesis.user.model;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
+import javax.persistence.*;
 
-@Entity
-@Getter @Setter
-@AllArgsConstructor
-@ToString @EqualsAndHashCode
+
 /**
  * Aggregator class for all possible User objects.
  * It is not a real DTO, so it should not be used in inter-service communication,
@@ -18,6 +12,11 @@ import javax.persistence.Id;
  *
  * @author Javorek Dénes
  */
+@Entity
+@Inheritance
+@Getter @Setter
+@AllArgsConstructor
+@ToString @EqualsAndHashCode
 public class User
 {
     @Id
@@ -32,7 +31,7 @@ public class User
     public User() {
         super();
         this.email = null;
-        enabled = false;
+        this.enabled = false;
     }
 
     User withEmail(String email) {

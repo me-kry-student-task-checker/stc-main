@@ -53,10 +53,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course create(Course course) {
         course.setCreationDate(new Date());
-        Teacher teacher = UserClient.getTeacherById(course.getCreator().getEmail());
+        Teacher teacher = UserClient.getTeacherByEmail(course.getCreator().getEmail());
         Course newCourse = courseRepository.save(course);
         teacher.getCreatedCourseIds().add(newCourse.getId());
-        UserClient.save(teacher);
+        UserClient.saveTeacher(teacher);
         log.info("Created course: {}", course);
         return newCourse;
     }
@@ -144,22 +144,22 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public void invite(Long courseId, String studentId) {
+    public void invite(Long courseId, String studentEmail) {
         String invitationUuid = UUID.randomUUID().toString(); // for the email
-        invitationRepository.save(new Invitation(invitationUuid, studentId, courseId));
+        invitationRepository.save(new Invitation(invitationUuid, studentEmail, courseId));
         //TODO send email with email service
         //TODO remove this from the database after 24 hours - FOR DENIS
-        log.info("Invitation saved to database and e-mail sent - courseId: {}, studentId{}", courseId, studentId);
+        log.info("Invitation saved to database and e-mail sent - courseId: {}, studentId{}", courseId, studentEmail);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void invite(Long courseId, List<String> studentIds) {
+    public void invite(Long courseId, List<String> studentEmails) {
         List<String> invitationUuids = new ArrayList<>(); //for the emails
         List<Invitation> invitations = new ArrayList<>();
-        for (String studentId : studentIds) {
+        for (String studentId : studentEmails) {
             String uuid = UUID.randomUUID().toString();
             invitationUuids.add(uuid);
             invitations.add(new Invitation(uuid, studentId, courseId));
@@ -167,7 +167,7 @@ public class CourseServiceImpl implements CourseService {
         invitationRepository.saveAll(invitations);
         //TODO send emails with email service
         //TODO remove these from the database after 24 hours - FOR DENIS
-        log.info("Invitations saved to database and e-mails sent - courseId: {}, studentId{}", courseId, studentIds);
+        log.info("Invitations saved to database and e-mails sent - courseId: {}, studentId{}", courseId, studentEmails);
     }
 
     /**
@@ -178,9 +178,9 @@ public class CourseServiceImpl implements CourseService {
         Optional<Invitation> opt = invitationRepository.findById(inviteUUID);
         if (opt.isPresent()) {
             Invitation invitation = opt.get();
-            Student student = UserClient.getStudentById(invitation.getStudentId());
+            Student student = UserClient.getStudentByEmail(invitation.getStudentId());
             student.getAssignedCourseIds().add(invitation.getCourseId());
-            UserClient.save(student);
+            UserClient.saveStudent(student);
             log.info("Invitation accepted: {}", invitation);
             invitationRepository.delete(invitation);
         } else {

@@ -1,12 +1,12 @@
 package hu.me.iit.malus.thesis.user.service.impl;
 
-import hu.me.iit.malus.thesis.user.model.Student;
-import hu.me.iit.malus.thesis.user.model.Teacher;
 import hu.me.iit.malus.thesis.user.model.User;
-import hu.me.iit.malus.thesis.user.repository.UserRepository;
+import hu.me.iit.malus.thesis.user.repository.AdminRepository;
+import hu.me.iit.malus.thesis.user.repository.StudentRepository;
+import hu.me.iit.malus.thesis.user.repository.TeacherRepository;
+import hu.me.iit.malus.thesis.user.repository.UserBaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Implementation of a common Spring interface, used to load user data by its identifier during authentication.
@@ -25,11 +26,16 @@ import java.util.Optional;
 @Qualifier("customUserDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private UserRepository repository;
+    private AdminRepository adminRepository;
+    private TeacherRepository teacherRepository;
+    private StudentRepository studentRepository;
 
     @Autowired
-    public UserDetailsServiceImpl(UserRepository repository) {
-        this.repository = repository;
+    public UserDetailsServiceImpl(AdminRepository adminRepository, TeacherRepository teacherRepository,
+                                  StudentRepository studentRepository) {
+        this.adminRepository = adminRepository;
+        this.teacherRepository = teacherRepository;
+        this.studentRepository = studentRepository;
     }
 
     /**
@@ -46,7 +52,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         final boolean credentialsNonExpired = true;
         final boolean accountNonLocked = true;
 
-        Optional<User> userToLoad = repository.findById(email);
+        // Looks ugly, there are better options for Optional chaining, maybe try those later
+        Optional<User> userToLoad = Optional.ofNullable(studentRepository.findByEmail(email));
+        if(!userToLoad.isPresent()) {
+            userToLoad = Optional.ofNullable(teacherRepository.findByEmail(email));
+        }
+        if(!userToLoad.isPresent()) {
+            userToLoad = Optional.ofNullable(adminRepository.findByEmail(email));
+        }
 
         if(!userToLoad.isPresent()) {
             throw new UsernameNotFoundException("User with email: " + email + " not found");

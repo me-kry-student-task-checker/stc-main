@@ -12,16 +12,11 @@ import java.util.Locale;
  */
 @Getter
 public class RegistrationCompletedEvent extends ApplicationEvent {
-    private final String appUrl;
 
-    // It can be used later to send emails in different languages
-    private final Locale locale;
     private final User user;
 
-    public RegistrationCompletedEvent(final User user, final Locale locale, final String appUrl) {
+    public RegistrationCompletedEvent(final User user) {
         super(user);
         this.user = user;
-        this.locale = locale;
-        this.appUrl = appUrl;
     }
 }

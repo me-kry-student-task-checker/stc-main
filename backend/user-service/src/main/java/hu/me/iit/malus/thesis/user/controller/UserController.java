@@ -3,7 +3,6 @@ package hu.me.iit.malus.thesis.user.controller;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationResponse;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
-import hu.me.iit.malus.thesis.user.model.ActivationToken;
 import hu.me.iit.malus.thesis.user.model.exception.UserAlreadyExistException;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.service.UserService;
@@ -14,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
@@ -32,24 +30,20 @@ public class UserController {
 
     @PostMapping("/registration")
     public RegistrationResponse registerUserAccount(
-            @RequestBody @Valid RegistrationRequest registrationRequest, HttpServletRequest httpRequest) {
+            @RequestBody @Valid RegistrationRequest registrationRequest) {
         log.info("Registering user account by request: {}", registrationRequest);
 
         User registeredUser = service.registerNewUserAccount(registrationRequest);
         if (registeredUser == null) {
             throw new UserAlreadyExistException();
         }
-        String appUrl = "http://" + httpRequest.getServerName() + ":" + httpRequest.getServerPort();
 
-        eventPublisher.publishEvent(
-                new RegistrationCompletedEvent(registeredUser, httpRequest.getLocale(), appUrl));
-
-        return new RegistrationResponse("!!");
+        eventPublisher.publishEvent(new RegistrationCompletedEvent(registeredUser));
+        return new RegistrationResponse("Success");
     }
 
     @GetMapping("/confirmation")
     public ResponseEntity<String> confirmRegistration(@RequestParam("token") String token) {
-
         boolean valid = service.activateUser(token);
         if (!valid) {
             return ResponseEntity

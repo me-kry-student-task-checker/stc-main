@@ -1,18 +1,15 @@
 package hu.me.iit.malus.thesis.user.service.impl;
 
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
-import hu.me.iit.malus.thesis.user.model.ActivationToken;
+import hu.me.iit.malus.thesis.user.model.*;
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
-import hu.me.iit.malus.thesis.user.model.User;
-import hu.me.iit.malus.thesis.user.model.UserRole;
-import hu.me.iit.malus.thesis.user.repository.ActivationTokenRepository;
-import hu.me.iit.malus.thesis.user.repository.UserRepository;
+import hu.me.iit.malus.thesis.user.repository.*;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
+import java.util.*;
 
 /**
  * Default implementation of UserService
@@ -20,39 +17,57 @@ import java.util.Calendar;
  */
 @Service
 public class UserServiceImpl implements UserService {
-    UserRepository userRepository;
-    ActivationTokenRepository tokenRepository;
-    BCryptPasswordEncoder passwordEncoder;
+    private StudentRepository studentRepository;
+    private TeacherRepository teacherRepository;
+    private AdminRepository adminRepository;
+    private ActivationTokenRepository tokenRepository;
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, ActivationTokenRepository tokenRepository, BCryptPasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    public UserServiceImpl(StudentRepository studentRepository, TeacherRepository teacherRepository,
+                           AdminRepository adminRepository, ActivationTokenRepository tokenRepository,
+                           BCryptPasswordEncoder passwordEncoder) {
+        this.studentRepository = studentRepository;
+        this.teacherRepository = teacherRepository;
+        this.adminRepository = adminRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     /**
-     * Registers a new user into the database, throws exception if its email already registered
-     * @param request Contains all the required information for registration.
-     * @return The registered User
-     * @throws EmailExistsException
+     * {@inheritDoc}
      */
     @Override
-    public User registerNewUserAccount(RegistrationRequest request) throws EmailExistsException {
-        if (emailExists(request.getEmail())) {
+    public User registerNewUserAccount(RegistrationRequest registrationRequest) throws EmailExistsException {
+        if (emailExists(registrationRequest.getEmail())) {
             throw new EmailExistsException(
-                    "There is already an account with that email address: " + request.getEmail());
+                    "There is already an account with that email address: " + registrationRequest.getEmail());
         }
 
-        User user = new User(request.getEmail(), passwordEncoder.encode(request.getPassword()),
-                request.getFirstName(), request.getLastName(), UserRole.fromString(request.getRole()), false);
-        return userRepository.save(user);
+        UserRole userRole = UserRole.fromString(registrationRequest.getRole());
+        switch (userRole) {
+            case ADMIN: {
+                Admin newAdmin = new Admin(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
+                        registrationRequest.getFirstName(), registrationRequest.getLastName());
+                return adminRepository.save(newAdmin);
+            }
+            case TEACHER: {
+                Teacher newTeacher = new Teacher(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
+                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.EMPTY_LIST);
+                return teacherRepository.save(newTeacher);
+            }
+            case STUDENT: {
+                Student newStudent = new Student(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
+                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.EMPTY_LIST);
+                return studentRepository.save(newStudent);
+            }
+            default:
+                throw new IllegalStateException("User type cannot be recognized");
+        }
     }
 
     /**
-     * Creates and saves a new activation token for a user
-     * @param user Owner of the token
-     * @param token
+     * {@inheritDoc}
      */
     @Override
     public void createActivationToken(User user, String token) {
@@ -61,10 +76,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Activates a user by its activation token
-     * @param token Sent by the user, from the activation email
-     * @return True if the token is valid and the user is activated successfully,
-     * false otherwise.
+     * {@inheritDoc}
      */
     @Override
     public boolean activateUser(String token) {
@@ -83,10 +95,63 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
-        user.setEnabled(true);
+        switch (user.getRole()) {
+            case STUDENT: {
+                Student studentToActivate = studentRepository.findByEmail(user.getEmail());
+                studentToActivate.setEnabled(true);
+                studentRepository.save(studentToActivate);
+                break;
+            }
+            case TEACHER: {
+                Teacher teacherToActivate = teacherRepository.findByEmail(user.getEmail());
+                teacherToActivate.setEnabled(true);
+                teacherRepository.save(teacherToActivate);
+                break;
+            }
+            case ADMIN: {
+                Admin adminToActivate = adminRepository.findByEmail(user.getEmail());
+                adminToActivate.setEnabled(true);
+                adminRepository.save(adminToActivate);
+                break;
+            }
+        }
         tokenRepository.delete(activationToken);
-        userRepository.save(user);
         return true;
+    }
+
+    @Override
+    public void saveStudent(Student student) {
+        studentRepository.save(student);
+    }
+
+    @Override
+    public void saveStudents(Set<Student> studentsToSave) {
+        studentRepository.saveAll(studentsToSave);
+    }
+
+    @Override
+    public void saveTeacher(Teacher teacher) {
+        teacherRepository.save(teacher);
+    }
+
+    @Override
+    public Set<Student> getAllStudents() {
+        return new HashSet<>(studentRepository.findAllBy());
+    }
+
+    @Override
+    public Set<Teacher> getAllTeachers() {
+        return new HashSet<>(teacherRepository.findAllBy());
+    }
+
+    @Override
+    public Student getStudentByEmail(String studentEmail) {
+        return studentRepository.findByEmail(studentEmail);
+    }
+
+    @Override
+    public Teacher getTeacherByEmail(String teacherEmail) {
+        return teacherRepository.findByEmail(teacherEmail);
     }
 
     /**
@@ -95,10 +160,11 @@ public class UserServiceImpl implements UserService {
      * @return True if email already exists, false otherwise
      */
     private boolean emailExists(String email) {
-        User user = userRepository.findByEmail(email);
-        if (user != null) {
+        if (studentRepository.findByEmail(email) != null || teacherRepository.findByEmail(email) != null ||
+                adminRepository.findByEmail(email) != null) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 }

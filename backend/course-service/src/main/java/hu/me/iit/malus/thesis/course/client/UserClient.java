@@ -20,32 +20,18 @@ public class UserClient {
     private static Set<Teacher> teachers = new HashSet<>();
 
     private static void init() {
-        teachers.add(new Teacher("lala@lali.com", RandomStringUtils.randomAlphabetic(5),
-                RandomStringUtils.randomAlphabetic(5), new ArrayList<>(Arrays.asList(9L, 1L))));
-        teachers.add(new Teacher("a@b.com", RandomStringUtils.randomAlphabetic(5),
-                RandomStringUtils.randomAlphabetic(5), new ArrayList<>(Arrays.asList(3L))));
-        students.add(new Student(
-                "adsdasda@mail.com",
-                RandomStringUtils.randomAlphabetic(5),
-                RandomStringUtils.randomAlphabetic(5),
-                new ArrayList<>(Arrays.asList(9L, 1L, 3L))));
-        students.add(new Student(
-                "putty@mail.com",
-                RandomStringUtils.randomAlphabetic(5),
-                RandomStringUtils.randomAlphabetic(5),
-                new ArrayList<>()));
 
     }
 
-    public static void save(Student student) {
+    public static void saveStudent(Student student) {
         students.add(student);
     }
 
-    public static void save(Set<Student> studentsToAdd) {
+    public static void saveStudents(Set<Student> studentsToAdd) {
         students.addAll(studentsToAdd);
     }
 
-    public static void save(Teacher teacher) {
+    public static void saveTeacher(Teacher teacher) {
         teachers.add(teacher);
     }
 
@@ -59,20 +45,20 @@ public class UserClient {
         return teachers;
     }
 
-    public static Student getStudentById(String studentId) {
+    public static Student getStudentByEmail(String studentEmail) {
         init();
         for (Student student : students) {
-            if (student.getEmail().equals(studentId)) {
+            if (student.getEmail().equals(studentEmail)) {
                 return student;
             }
         }
         return new Student();
     }
 
-    public static Teacher getTeacherById(String teacherId) {
+    public static Teacher getTeacherByEmail(String teacherEmail) {
         init();
         for (Teacher teacher : teachers) {
-            if (teacher.getEmail().equals(teacherId)) {
+            if (teacher.getEmail().equals(teacherEmail)) {
                 return teacher;
             }
         }
