@@ -9,6 +9,7 @@ It accepts 4 arguments: <br>
              doesn't affect running containers, fast <br>
     - stop: stops and removes all containers, removes the network <br>
     - recreate ${container_name}: recreates a container completely from scratch <br>
+    - restart ${container_name}: restarts a container <br>
 
 ### Other infos
 Services reach each other by their container names, thanks to the Docker built-in DNS service.
