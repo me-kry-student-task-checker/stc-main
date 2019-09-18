@@ -1,13 +1,10 @@
 package hu.me.iit.malus.thesis.filemanagement.model;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -24,10 +21,10 @@ public class FileDescription {
     @GeneratedValue
     @Id
     Long id;
+    @Column(length = 2000)
     String name;
     String downloadLink;
     long size;
-    BlobId blobId;
     Date uploadDate;
     String uploadedBy;
     String contentType;

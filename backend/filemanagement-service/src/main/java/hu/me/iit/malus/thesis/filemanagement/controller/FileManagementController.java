@@ -5,7 +5,6 @@ import hu.me.iit.malus.thesis.filemanagement.controller.converters.Converter;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.File;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
-import hu.me.iit.malus.thesis.filemanagement.model.exceptions.FileCouldNotBeUploaded;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +31,9 @@ public class FileManagementController {
     }
 
     @PostMapping("/upload")
-    public File uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service) throws FileCouldNotBeUploaded, IOException {
-        FileDescription fd = fileManagementService.uploadFile(file, service);
+    public File uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service) throws IOException {
+        //TODO: Replace with users got from header
+        FileDescription fd = fileManagementService.uploadFile(file, service, "krsztn@alma.hu");
         if (fd == null) return null;
         return Converter.FileDescriptionToFile(fd);
     }
@@ -55,11 +55,18 @@ public class FileManagementController {
     @GetMapping("/download/getByFilename/{filename}")
     public Set<File> getFileByFileName(@PathVariable String filename){
         Set<File> files = new HashSet<>();
-
         fileManagementService.getAllByFileName(filename).forEach(fd -> {
             files.add(Converter.FileDescriptionToFile(fd));
         });
+        return files;
+    }
 
+    @GetMapping("/download/getByUser/{user}")
+    public Set<File> getFileByFileUser(@PathVariable String user){
+        Set<File> files = new HashSet<>();
+        fileManagementService.getAllFilesByUsers(user).forEach(fd -> {
+            files.add(Converter.FileDescriptionToFile(fd));
+        });
         return files;
     }
 

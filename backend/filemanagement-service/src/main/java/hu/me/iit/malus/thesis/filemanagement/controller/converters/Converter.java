@@ -1,12 +1,10 @@
 package hu.me.iit.malus.thesis.filemanagement.controller.converters;
 
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.File;
-import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Converter {
 
@@ -18,6 +16,7 @@ public class Converter {
         //TODO: As user authentication up it should be evaluated
         file.setCanBeDeleted(true);
         file.setUploadDate(fileDescription.getUploadDate());
+        file.setUploadedBy(fileDescription.getUploadedBy());
         file.setContentType(fileDescription.getContentType());
         file.setServices(fileDescription.getServices());
         return file;
