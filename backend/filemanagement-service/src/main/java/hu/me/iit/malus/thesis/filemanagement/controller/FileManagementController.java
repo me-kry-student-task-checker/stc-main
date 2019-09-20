@@ -6,10 +6,12 @@ import hu.me.iit.malus.thesis.filemanagement.controller.dto.File;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
+import org.apache.http.HttpStatus;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.ws.rs.FormParam;
 import java.io.IOException;
@@ -38,15 +40,16 @@ public class FileManagementController {
         return Converter.FileDescriptionToFile(fd);
     }
 
-    @DeleteMapping("/delete/{id},{service}")
+    @DeleteMapping("/delete/{id}/{service}")
     public void deleteFile(@PathVariable Long id, @PathVariable Service service) {
         fileManagementService.deleteFile(id, service);
     }
 
     @GetMapping("/download/getById/{id}")
-    public File getFileById(@PathVariable Long id){
+    public File getFileById(@PathVariable Long id, HttpServletResponse response){
         FileDescription fd = fileManagementService.getById(id);
         if(fd == null) {
+            response.setStatus( HttpStatus.SC_NO_CONTENT);
             return null;
         }
         return Converter.FileDescriptionToFile(fd);

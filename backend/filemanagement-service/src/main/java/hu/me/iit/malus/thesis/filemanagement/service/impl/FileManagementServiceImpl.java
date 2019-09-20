@@ -53,7 +53,7 @@ public class FileManagementServiceImpl implements FileManagementService {
         fileDescription.setSize(file.getSize());
         fileDescription.setContentType(file.getContentType());
         fileDescription.setUploadedBy(user);
-        if (fileDescription.getServices() == null) fileDescription.setServices(new HashSet<>());
+        fileDescription.setServices(new HashSet<>());
         fileDescription.getServices().add(service);
 
         for (FileDescription fd : fileDescriptionRepository.findAll()) {
