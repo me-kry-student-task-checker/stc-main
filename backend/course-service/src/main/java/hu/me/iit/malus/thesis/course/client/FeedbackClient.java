@@ -1,41 +1,21 @@
 package hu.me.iit.malus.thesis.course.client;
 
 import hu.me.iit.malus.thesis.course.client.dto.CourseComment;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
- * Mocked Feign client class for Feedback service
+ * Feign client class for Feedback service
+ *
  * @author Attila Szőke
  */
-public class FeedbackClient {
+@FeignClient(name = "feedback-service")
+public interface FeedbackClient {
 
-    //FIXME when feedback service is ready, replace this with a Feign interface
-    private static List<CourseComment> comments = new ArrayList<>();
-
-    {
-        comments.add(new CourseComment(1L, new Date(), "lala@lali.com", "minden jó"));
-        comments.add(new CourseComment(3L, new Date(), "a@b.com", "minden jó, nem"));
-    }
-
-    public static void save(List<CourseComment> courseComment) {
-        comments.addAll(courseComment);
-    }
-
-    public static List<CourseComment> getAll() {
-        return comments;
-    }
-
-    public static List<CourseComment> getByCourseId(Long courseId) {
-        List<CourseComment> filteredComments = new ArrayList<>();
-        for (CourseComment comment: comments) {
-            if (comment.getCourseId().equals(courseId)) {
-                filteredComments.add(comment);
-            }
-        }
-        return filteredComments;
-    }
+    @GetMapping("/api/feedback/getAllCourseComments/{courseId}")
+    List<CourseComment> getAllCourseComments(@PathVariable Long courseId);
 
 }

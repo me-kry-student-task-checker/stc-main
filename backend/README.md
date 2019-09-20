@@ -1,17 +1,22 @@
-# How to run backend
+### How to run backend
+Linux or MacOS is preferred, Windows works too but Docker shows unpredictable behaviour there sometimes.
+Install Docker and Docker-compose and configure it, so it doesn't need sudo (mainly for convenience's sake).
+After a fresh pull or if you change something, you have to 'mvn clean install' the respective modules.
+To run the services use docker-script.sh. <br>
+It accepts 4 arguments: <br>
+    - init: forcibly recreates containers, picks up on changes, slow <br>
+    - start: starts every container, if something needs building it uses cached resources so doesn't pick up on changes,
+             doesn't affect running containers, fast <br>
+    - stop: stops and removes all containers, removes the network <br>
+    - recreate ${container_name}: recreates a container completely from scratch <br>
+    - restart ${container_name}: restarts a container <br>
 
-You must use Linux (some Ubuntu is preferred) for now, and have Docker and Docker-Compose installed (please configure so they doesnt need sudo)
-and **cd into the 'backend' directory**. After that **run 'mvn clean install' and just run 'bash docker_script.sh $arg'**, in which ** *$arg is either 'start' or 'stop'* **.
-Start creates a network, images of the services, and containers from the images on said network. Services can reach each other by container name, so IP is
-dynamically set. Docker-compose should always rebuilds images, so if there are changes in the source code be sure to run 'mvn clean install'.
-Windows docker had a strange behaviour when I tried so it's not advised as of yet. When the containers are running you can 'docker inspect container_name',
-and search for its IP address, so you can reach it from a browser. It may take some time (and luck :D) and you can use 'docker inspect backend_studentTaskChecker'
-command to see the container IP's on the network. Based on the IPs you can reach the containers from a browser. (${IP}:${PORT})
-More services will be getting Docker files after they are more or less done. Until then you run in-dev services from intellij in conjunction with the ones
-running on docker. If you dont want to use Docker there is a way, it involves some property changes but that is it.
-**The easiest way to read logs is the 'docker logs ${service-name} -f' command.**
-Use 'docker exec -it name of container bash' to check filesystem thingies in a container. Volumes are hard to figure out y'know.
-If you want to read logs while in a container use 'cat' or install nano if you want.
+### Other infos
+Services reach each other by their container names, thanks to the Docker built-in DNS service.
+Their IP is dynamically set, the script shows them but you can 'docker inspect ${container_name}' to see them for yourself.
+From browser, you can reach the containers by their IPs and Ports.
+To read logs use Kitematic or 'docker logs ${container_name} -f' command.
+To check out a container's file system use 'docker exec -it ${container_name} bash' command.
 
-# Windows solutions
-In Windows there are heavy docker problems. To reach containers you must run 'route add 172.18.0.0 mask 255.255.0.0 10.0.75.2 -p', but that can cause internet outage somehow.
+### Windows solutions
+To reach containers you must run 'route add 172.18.0.0 mask 255.255.0.0 10.0.75.2 -p'.

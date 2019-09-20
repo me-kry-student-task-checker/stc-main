@@ -1,0 +1,4 @@
+/**
+ * This package contains classes, that are required for communication between this service and other microservices.
+ */
+package hu.me.iit.malus.thesis.course.client;

@@ -9,23 +9,23 @@ networks:
           gateway: 172.18.0.1
 
 services:
-  zipkin-storage:
-    image: openzipkin/zipkin-mysql
-    container_name: zipkin-storage
-    networks:
-      - studentTaskChecker
-  zipkin:
-    image: openzipkin/zipkin
-    container_name: zipkin
-    networks:
-      - studentTaskChecker
-    environment:
-      - STORAGE_TYPE=mysql
-      - MYSQL_HOST=zipkin-storage
-    ports:
-      - "9411"
-    depends_on:
-      - zipkin-storage
+  #  zipkin-storage:
+  #    image: openzipkin/zipkin-mysql
+  #    container_name: zipkin-storage
+  #    networks:
+  #      - studentTaskChecker
+  #  zipkin:
+  #    image: openzipkin/zipkin
+  #    container_name: zipkin
+  #    networks:
+  #      - studentTaskChecker
+  #    environment:
+  #      - STORAGE_TYPE=mysql
+  #      - MYSQL_HOST=zipkin-storage
+  #    ports:
+  #      - "9411"
+  #    depends_on:
+  #      - zipkin-storage
 
   #  cloud-sql-proxy:
   #    image: gcr.io/cloudsql-docker/gce-proxy:1.12
@@ -49,7 +49,8 @@ services:
     networks:
       - studentTaskChecker
     ports:
-      - "3306"
+      - "3666:3306" # Mind the difference
+
 
   config-service:
     container_name: config-service
@@ -88,6 +89,21 @@ services:
     depends_on:
       - config-service
 
+  gateway-service:
+    container_name: gateway-service
+    build:
+      context: ./gateway-service
+      dockerfile: dockerfile
+    image: gateway-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8060:8060"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+
   email-service:
     container_name: email-service
     build:
@@ -103,12 +119,82 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
 
+  task-service:
+    container_name: task-service
+    build:
+      context: ./task-service
+      dockerfile: dockerfile
+    image: task-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
+
   course-service:
     container_name: course-service
     build:
       context: ./course-service
       dockerfile: dockerfile
     image: course-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
+
+
+  filemanagement-service:
+    container_name: filemanagement-service
+    volumes:
+      - ./docker/provision/gcp/credential:/credential
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/credential/cred.json
+    build:
+      context: ./filemanagement-service
+      dockerfile: dockerfile
+    image: filemanagement-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
+
+
+  feedback-service:
+    container_name: feedback-service
+    build:
+      context: ./feedback-service
+      dockerfile: dockerfile
+    image: feedback-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
+
+  user-service:
+    container_name: user-service
+    build:
+      context: ./user-service
+      dockerfile: dockerfile
+    image: user-service:latest
     networks:
       - studentTaskChecker
     ports:
