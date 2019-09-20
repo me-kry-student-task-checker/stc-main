@@ -4,8 +4,6 @@ import hu.me.iit.malus.thesis.user.model.User;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
-import java.util.Locale;
-
 /**
  * Application event, which is published after registration to indicate for post-registration tasks
  * @author Javorek Dénes

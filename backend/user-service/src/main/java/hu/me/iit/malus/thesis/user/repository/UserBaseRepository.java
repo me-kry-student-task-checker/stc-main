@@ -13,4 +13,5 @@ import org.springframework.data.repository.NoRepositoryBean;
 @NoRepositoryBean
 public interface UserBaseRepository<T extends User> extends JpaRepository<User, String> {
     T findByEmail(String email);
+    boolean existsByEmail(String email);
 }

@@ -1,10 +1,8 @@
 package hu.me.iit.malus.thesis.user.service.impl;
 
 import hu.me.iit.malus.thesis.user.model.User;
-import hu.me.iit.malus.thesis.user.repository.AdminRepository;
-import hu.me.iit.malus.thesis.user.repository.StudentRepository;
-import hu.me.iit.malus.thesis.user.repository.TeacherRepository;
-import hu.me.iit.malus.thesis.user.repository.UserBaseRepository;
+import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
+import hu.me.iit.malus.thesis.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,8 +13,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Implementation of a common Spring interface, used to load user data by its identifier during authentication.
@@ -26,16 +22,11 @@ import java.util.stream.Stream;
 @Qualifier("customUserDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private AdminRepository adminRepository;
-    private TeacherRepository teacherRepository;
-    private StudentRepository studentRepository;
+    private UserService userService;
 
     @Autowired
-    public UserDetailsServiceImpl(AdminRepository adminRepository, TeacherRepository teacherRepository,
-                                  StudentRepository studentRepository) {
-        this.adminRepository = adminRepository;
-        this.teacherRepository = teacherRepository;
-        this.studentRepository = studentRepository;
+    public UserDetailsServiceImpl(UserService userService) {
+        this.userService = userService;
     }
 
     /**
@@ -43,7 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      * In our case the email equals to the user's email, because we dont use separate email field.
      * @param email
      * @return The corresponding UserDetails object, which holds the data of the give user
-     * @throws UsernameNotFoundException
+     * @throws UsernameNotFoundException If the user cannot be found
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -52,19 +43,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         final boolean credentialsNonExpired = true;
         final boolean accountNonLocked = true;
 
-        // Looks ugly, there are better options for Optional chaining, maybe try those later
-        Optional<User> userToLoad = Optional.ofNullable(studentRepository.findByEmail(email));
-        if(!userToLoad.isPresent()) {
-            userToLoad = Optional.ofNullable(teacherRepository.findByEmail(email));
-        }
-        if(!userToLoad.isPresent()) {
-            userToLoad = Optional.ofNullable(adminRepository.findByEmail(email));
-        }
+        final User user;
 
-        if(!userToLoad.isPresent()) {
-            throw new UsernameNotFoundException("User with email: " + email + " not found");
+        try {
+            user = userService.getAnyUserByEmail(email);
+        } catch (UserNotFoundException notFoundExc) {
+            throw new UsernameNotFoundException("User with this email: " + notFoundExc.getEmail() + ", cannot be found");
         }
-        User user = userToLoad.get();
 
         List<GrantedAuthority> grantedAuthorities =
                 AuthorityUtils.createAuthorityList(user.getRole().getRoleString());

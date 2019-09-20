@@ -15,14 +15,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import javax.servlet.http.HttpServletResponse;
 
 @EnableWebSecurity
-public class CredentialsConfigSetup extends WebSecurityConfigurerAdapter {
+public class AuthenticationConfigSetup extends WebSecurityConfigurerAdapter {
 
     private UserDetailsService userDetailsService;
     private JwtAuthConfig jwtAuthConfig;
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public CredentialsConfigSetup(@Qualifier("customUserDetailsService") UserDetailsService userDetailsService, JwtAuthConfig jwtAuthConfig, BCryptPasswordEncoder passwordEncoder) {
+    public AuthenticationConfigSetup(@Qualifier("customUserDetailsService") UserDetailsService userDetailsService, JwtAuthConfig jwtAuthConfig, BCryptPasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthConfig = jwtAuthConfig;
         this.passwordEncoder = passwordEncoder;
@@ -50,10 +50,13 @@ public class CredentialsConfigSetup extends WebSecurityConfigurerAdapter {
                 // Allow all requests going for authorization, registration, and confirmation
                 .antMatchers(HttpMethod.POST, jwtAuthConfig.getUri()).permitAll()
                 .antMatchers(HttpMethod.POST, "/api/user/registration").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/user/confirmation").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/user/confirmation*").permitAll()
 
                 // Any other request must be authenticated
-                .anyRequest().authenticated();
+                // TODO: Disable this
+                .anyRequest().permitAll();
+                // TODO: Enable this when Authorization filter is ready
+                //.anyRequest().authenticated();
     }
 
     // Spring has UserDetailsService interface, which can be overrode to provide our implementation for fetching user data from any source.

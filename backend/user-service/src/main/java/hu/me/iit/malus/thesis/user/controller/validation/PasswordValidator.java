@@ -1,7 +1,6 @@
 package hu.me.iit.malus.thesis.user.controller.validation;
 
 import com.google.common.base.Joiner;
-import lombok.extern.slf4j.Slf4j;
 import org.passay.*;
 
 import javax.validation.ConstraintValidator;

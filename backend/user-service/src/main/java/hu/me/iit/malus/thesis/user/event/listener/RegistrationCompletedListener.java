@@ -10,9 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
+/**
+ * Does all the action, that is needed after registration was completed.
+ * Currently used for sending confirmation email for the user.
+ * @author Javorek Dénes
+ */
 @Component
 public class RegistrationCompletedListener implements
         ApplicationListener<RegistrationCompletedEvent> {
@@ -47,7 +52,7 @@ public class RegistrationCompletedListener implements
         String message = "You can activate your account on the following link: ";
 
         Mail email = new Mail();
-        email.setTo(Arrays.asList(recipientAddress));
+        email.setTo(Collections.singletonList(recipientAddress));
         email.setSubject(subject);
 
         // Application URL (config) can be used here, if necessary

@@ -11,7 +11,7 @@ import javax.persistence.Entity;
  */
 @Entity
 @Getter @Setter
-@ToString @EqualsAndHashCode
+@ToString
 @NoArgsConstructor
 public class Admin extends User {
     public Admin(String email, String password, String firstName, String lastName) {

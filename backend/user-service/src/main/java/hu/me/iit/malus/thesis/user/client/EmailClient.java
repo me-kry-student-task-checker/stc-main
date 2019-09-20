@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * Feign client class for the Emai-service
+ * Feign client class for the Email-service
  * @author Javorek Dénes
  */
 @FeignClient(name = "email-service")

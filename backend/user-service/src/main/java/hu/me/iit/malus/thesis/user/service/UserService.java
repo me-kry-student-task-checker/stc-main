@@ -14,13 +14,11 @@ import java.util.Set;
  */
 public interface UserService {
 
-    //Registration
-
     /**
      * Registers a new user into the database, throws exception if its email already registered
      * @param registrationRequest Contains all the required information for registration.
      * @return The registered User
-     * @throws EmailExistsException
+     * @throws EmailExistsException If a user already exists with this email
      */
     User registerNewUserAccount(RegistrationRequest registrationRequest)
             throws EmailExistsException;
@@ -40,23 +38,60 @@ public interface UserService {
      */
     boolean activateUser(String token);
 
-    //API
-
     /**
-     * Saves a single
+     * Saves a single Student
      * @param student
      */
-    void saveStudent(Student student) throws IllegalArgumentException;
+    void saveStudent(Student student);
 
-    void saveStudents(Set<Student> studentsToAdd) throws IllegalArgumentException;
+    /**
+     * Saves a set of Students
+     * @param studentsToAdd
+     */
+    void saveStudents(Set<Student> studentsToAdd);
 
-    void saveTeacher(Teacher teacher) throws IllegalArgumentException;
+    /**
+     * Saves a single Teacher
+     * @param teacher
+     */
+    void saveTeacher(Teacher teacher);
 
+    /**
+     * Saves a set of Teachers
+     * @param teachersToAdd
+     */
+    void saveTeachers(Set<Teacher> teachersToAdd);
+
+    /**
+     * Returns all the saved Students
+     * @return the students
+     */
     Set<Student> getAllStudents();
 
+    /**
+     * Returns all the saved Teachers
+     * @return the teachers
+     */
     Set<Teacher> getAllTeachers();
 
+    /**
+     * Returns a single Student by its email (identifier)
+     * @param studentEmail Student's email
+     * @return The corresponding Student
+     */
     Student getStudentByEmail(String studentEmail);
 
+    /**
+     * Returns a single Teacher by its email (identifier)
+     * @param teacherEmail Teacher's email
+     * @return The corresponding Teacher
+     */
     Teacher getTeacherByEmail(String teacherEmail);
+
+    /**
+     * Return a complete User object, queried by its email (identifier)
+     * @param email of the User
+     * @return User
+     */
+    User getAnyUserByEmail(String email);
 }

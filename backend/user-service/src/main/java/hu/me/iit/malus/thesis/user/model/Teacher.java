@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Entity
 @Getter @Setter
-@ToString @EqualsAndHashCode
+@ToString
 @NoArgsConstructor
 public class Teacher extends User {
 

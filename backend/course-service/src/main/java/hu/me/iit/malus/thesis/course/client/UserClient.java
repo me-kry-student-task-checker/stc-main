@@ -2,66 +2,46 @@ package hu.me.iit.malus.thesis.course.client;
 
 import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
-import org.apache.commons.lang.RandomStringUtils;
+import hu.me.iit.malus.thesis.course.client.dto.User;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Mocked Feign client class for User service
- * @author Attila Szőke
+ * Feign client class for the User service
+ * @author Javorek Dénes
  */
-public class UserClient {
+@FeignClient(name = "user-service")
+public interface UserClient {
 
-    //FIXME when user service is ready, replace this with a Feign interface
-    private static Set<Student> students = new HashSet<>();
-    private static Set<Teacher> teachers = new HashSet<>();
+    @PostMapping("/saveStudent")
+    void saveStudent(@RequestBody Student student);
 
-    private static void init() {
+    @PostMapping("/saveStudents")
+    void saveStudents(@RequestBody Set<Student> studentsToSave);
 
-    }
+    @PostMapping("/saveTeacher")
+    void saveTeacher(@RequestBody Teacher teacher);
 
-    public static void saveStudent(Student student) {
-        students.add(student);
-    }
+    @PostMapping("/saveTeacher")
+    void saveTeachers(@RequestBody Set<Teacher> teachersToSave);
 
-    public static void saveStudents(Set<Student> studentsToAdd) {
-        students.addAll(studentsToAdd);
-    }
+    @GetMapping("/students")
+    Set<Student> getAllStudents();
 
-    public static void saveTeacher(Teacher teacher) {
-        teachers.add(teacher);
-    }
+    @GetMapping("/teachers")
+    Set<Teacher> getAllTeachers();
 
-    public static Set<Student> getAllStudents() {
-        init();
-        return students;
-    }
+    @GetMapping("/student/{email:.+}")
+    Student getStudentByEmail(@PathVariable("email") String studentEmail);
 
-    public static Set<Teacher> getAllTeachers() {
-        init();
-        return teachers;
-    }
+    @GetMapping("/teacher/{email:.+}")
+    Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail);
 
-    public static Student getStudentByEmail(String studentEmail) {
-        init();
-        for (Student student : students) {
-            if (student.getEmail().equals(studentEmail)) {
-                return student;
-            }
-        }
-        return new Student();
-    }
-
-    public static Teacher getTeacherByEmail(String teacherEmail) {
-        init();
-        for (Teacher teacher : teachers) {
-            if (teacher.getEmail().equals(teacherEmail)) {
-                return teacher;
-            }
-        }
-        return new Teacher();
-    }
+    @GetMapping("/{email:.+}")
+    User getUserByEmail(@PathVariable("email") String userEmail);
 }

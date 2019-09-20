@@ -2,8 +2,6 @@ package hu.me.iit.malus.thesis.user.controller.error;
 
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationResponse;
 import hu.me.iit.malus.thesis.user.model.exception.UserAlreadyExistException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +17,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  */
 public class RegistrationResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private MessageSource messages;
-
-    @Autowired
-    public RegistrationResponseEntityExceptionHandler(MessageSource messages) {
-        this.messages = messages;
-    }
-
     /**
-     * Handles invalid RegistrationRequest, returnd 400 (Bad Request)
+     * Handles invalid RegistrationRequest, returnedd 400 (Bad Request)
      * @param ex
      * @param headers
      * @param status
@@ -51,7 +42,7 @@ public class RegistrationResponseEntityExceptionHandler extends ResponseEntityEx
     @ExceptionHandler({ UserAlreadyExistException.class })
     public ResponseEntity<Object> handleUserAlreadyExist(final RuntimeException ex, final WebRequest request) {
         logger.error("409 Status Code", ex);
-        final RegistrationResponse bodyOfResponse = new RegistrationResponse(messages.getMessage("message.regError", null, request.getLocale()), "UserAlreadyExist");
+        final RegistrationResponse bodyOfResponse = new RegistrationResponse("User Already Exist");
         return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 }

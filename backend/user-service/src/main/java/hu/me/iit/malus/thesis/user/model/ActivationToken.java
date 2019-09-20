@@ -38,14 +38,14 @@ public class ActivationToken {
      * @return new instance of ActivationToken with correctly set fields
      */
     public static ActivationToken of(String token, User user) {
-        Date expiryDate = calculateExpiryDate(EXPIRATION);
+        Date expiryDate = calculateExpiryDate();
         return new ActivationToken(token, user, expiryDate);
     }
 
-    private static Date calculateExpiryDate(int expiryTimeInMinutes) {
+    private static Date calculateExpiryDate() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Timestamp(cal.getTime().getTime()));
-        cal.add(Calendar.MINUTE, expiryTimeInMinutes);
+        cal.add(Calendar.MINUTE, EXPIRATION);
         return new Date(cal.getTime().getTime());
     }
 }

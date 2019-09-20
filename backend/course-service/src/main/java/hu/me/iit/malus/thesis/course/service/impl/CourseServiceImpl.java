@@ -31,6 +31,7 @@ public class CourseServiceImpl implements CourseService {
     private InvitationRepository invitationRepository;
     private TaskClient taskClient;
     private FeedbackClient feedbackClient;
+    private UserClient userClient;
 
     /**
      * Instantiates a new Course service.
@@ -40,11 +41,13 @@ public class CourseServiceImpl implements CourseService {
      * @param feedbackClient the feedback client
      */
     @Autowired
-    public CourseServiceImpl(CourseRepository courseRepository, InvitationRepository invitationRepository, TaskClient taskClient, FeedbackClient feedbackClient) {
+    public CourseServiceImpl(CourseRepository courseRepository, InvitationRepository invitationRepository,
+                             TaskClient taskClient, FeedbackClient feedbackClient, UserClient userClient) {
         this.courseRepository = courseRepository;
         this.invitationRepository = invitationRepository;
         this.taskClient = taskClient;
         this.feedbackClient = feedbackClient;
+        this.userClient = userClient;
     }
 
     /**
@@ -53,10 +56,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course create(Course course) {
         course.setCreationDate(new Date());
-        Teacher teacher = UserClient.getTeacherByEmail(course.getCreator().getEmail());
+        Teacher teacher = userClient.getTeacherByEmail(course.getCreator().getEmail());
         Course newCourse = courseRepository.save(course);
         teacher.getCreatedCourseIds().add(newCourse.getId());
-        UserClient.saveTeacher(teacher);
+        userClient.saveTeacher(teacher);
         log.info("Created course: {}", course);
         return newCourse;
     }
@@ -77,7 +80,7 @@ public class CourseServiceImpl implements CourseService {
     public Course get(Long courseId) throws CourseNotFoundException {
         Teacher creator = null;
         Set<Student> students = new HashSet<>();
-        Set<Teacher> teachers = UserClient.getAllTeachers();
+        Set<Teacher> teachers = userClient.getAllTeachers();
         Optional<Course> opt = courseRepository.findById(courseId);
         if (opt.isPresent()) {
             for (Teacher teacher : teachers) {
@@ -88,7 +91,7 @@ public class CourseServiceImpl implements CourseService {
                     }
                 }
             }
-            for (Student student : UserClient.getAllStudents()) {
+            for (Student student : userClient.getAllStudents()) {
                 for (Long assignedCourseId : student.getAssignedCourseIds()) {
                     if (assignedCourseId.equals(courseId)) {
                         students.add(student);
@@ -117,7 +120,7 @@ public class CourseServiceImpl implements CourseService {
         Set<Student> students;
         Iterable<Course> courses = courseRepository.findAll();
         for (Course course : courses) {
-            for (Teacher teacher : UserClient.getAllTeachers()) {
+            for (Teacher teacher : userClient.getAllTeachers()) {
                 for (Long createdCourseId : teacher.getCreatedCourseIds()) {
                     if (createdCourseId.equals(course.getId())) {
                         course.setCreator(teacher);
@@ -125,7 +128,7 @@ public class CourseServiceImpl implements CourseService {
                 }
             }
             students = new HashSet<>();
-            for (Student student : UserClient.getAllStudents()) {
+            for (Student student : userClient.getAllStudents()) {
                 for (Long assignedCourseId : student.getAssignedCourseIds()) {
                     if (assignedCourseId.equals(course.getId())) {
                         students.add(student);
@@ -178,9 +181,9 @@ public class CourseServiceImpl implements CourseService {
         Optional<Invitation> opt = invitationRepository.findById(inviteUUID);
         if (opt.isPresent()) {
             Invitation invitation = opt.get();
-            Student student = UserClient.getStudentByEmail(invitation.getStudentId());
+            Student student = userClient.getStudentByEmail(invitation.getStudentId());
             student.getAssignedCourseIds().add(invitation.getCourseId());
-            UserClient.saveStudent(student);
+            userClient.saveStudent(student);
             log.info("Invitation accepted: {}", invitation);
             invitationRepository.delete(invitation);
         } else {

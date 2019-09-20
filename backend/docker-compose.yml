@@ -49,7 +49,7 @@ services:
     networks:
       - studentTaskChecker
     ports:
-      - "3306"
+      - "3666:3306" # Mind the difference
 
 
   config-service:

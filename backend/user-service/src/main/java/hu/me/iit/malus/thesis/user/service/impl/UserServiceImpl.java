@@ -2,13 +2,18 @@ package hu.me.iit.malus.thesis.user.service.impl;
 
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
 import hu.me.iit.malus.thesis.user.model.*;
+import hu.me.iit.malus.thesis.user.model.exception.DatabaseOperationFailedException;
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
+import hu.me.iit.malus.thesis.user.model.exception.IllegalUserInsertionException;
+import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
 import hu.me.iit.malus.thesis.user.repository.*;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.*;
 
 /**
@@ -119,39 +124,144 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void saveStudent(Student student) {
-        studentRepository.save(student);
+        if (studentRepository.existsByEmail(student.getEmail())) {
+            try {
+                studentRepository.save(student);
+            } catch (DataAccessException e) {
+                throw new DatabaseOperationFailedException(e);
+            }
+        } else {
+            throw new IllegalUserInsertionException();
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void saveStudents(Set<Student> studentsToSave) {
-        studentRepository.saveAll(studentsToSave);
+        for (Student student : studentsToSave) {
+            if (!studentRepository.existsByEmail(student.getEmail())) {
+                throw new IllegalUserInsertionException();
+            }
+        }
+
+        try {
+            studentRepository.saveAll(studentsToSave);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationFailedException(e);
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void saveTeacher(Teacher teacher) {
-        teacherRepository.save(teacher);
+        if (teacherRepository.existsByEmail(teacher.getEmail())) {
+            try {
+                teacherRepository.save(teacher);
+            } catch (DataAccessException e) {
+                throw new DatabaseOperationFailedException(e);
+            }
+        } else {
+            throw new IllegalUserInsertionException();
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void saveTeachers(Set<Teacher> teachersToSave) {
+        for (Teacher teacher : teachersToSave) {
+            if (!teacherRepository.existsByEmail(teacher.getEmail())) {
+                throw new IllegalUserInsertionException();
+            }
+        }
+
+        try {
+            teacherRepository.saveAll(teachersToSave);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationFailedException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<Student> getAllStudents() {
-        return new HashSet<>(studentRepository.findAllBy());
+        try {
+            return new HashSet<>(studentRepository.findAllBy());
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationFailedException(e);
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<Teacher> getAllTeachers() {
-        return new HashSet<>(teacherRepository.findAllBy());
+        try {
+            return new HashSet<>(teacherRepository.findAllBy());
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationFailedException(e);
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Student getStudentByEmail(String studentEmail) {
-        return studentRepository.findByEmail(studentEmail);
+        try {
+            return  studentRepository.findByEmail(studentEmail);
+        } catch (EntityNotFoundException notFoundExc) {
+            throw new UserNotFoundException(studentEmail);
+        } catch (DataAccessException dataExc) {
+            throw new DatabaseOperationFailedException(dataExc);
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Teacher getTeacherByEmail(String teacherEmail) {
-        return teacherRepository.findByEmail(teacherEmail);
+        try {
+            return  teacherRepository.findByEmail(teacherEmail);
+        } catch (EntityNotFoundException notFoundExc) {
+            throw new UserNotFoundException(teacherEmail);
+        }  catch (DataAccessException e) {
+            throw new DatabaseOperationFailedException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public User getAnyUserByEmail(String email) {
+        // TODO: Looks ugly, there are better options for Optional chaining, maybe try those later
+        Optional<User> userToLoad = Optional.ofNullable(studentRepository.findByEmail(email));
+        if(!userToLoad.isPresent()) {
+            userToLoad = Optional.ofNullable(teacherRepository.findByEmail(email));
+        }
+        if(!userToLoad.isPresent()) {
+            userToLoad = Optional.ofNullable(adminRepository.findByEmail(email));
+        }
+
+        if(!userToLoad.isPresent()) {
+            throw new UserNotFoundException(email);
+        }
+        return userToLoad.get();
     }
 
     /**
@@ -160,11 +270,7 @@ public class UserServiceImpl implements UserService {
      * @return True if email already exists, false otherwise
      */
     private boolean emailExists(String email) {
-        if (studentRepository.findByEmail(email) != null || teacherRepository.findByEmail(email) != null ||
-                adminRepository.findByEmail(email) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return studentRepository.findByEmail(email) != null || teacherRepository.findByEmail(email) != null ||
+                adminRepository.findByEmail(email) != null;
     }
 }

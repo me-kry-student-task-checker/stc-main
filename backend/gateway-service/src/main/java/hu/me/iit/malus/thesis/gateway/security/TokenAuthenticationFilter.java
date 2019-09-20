@@ -106,7 +106,7 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
     }
 
     /**
-     * Simple error message formatter. The error message gets extended with the JWT standard page
+     * Simple error message formatter. The error message gets extended with the page of JWT Standard
      * @param msg
      * @return Formatted string
      */
