@@ -151,6 +151,28 @@ services:
       - discovery-service-peer2
       - mysql-database
 
+
+  filemanagement-service:
+    container_name: filemanagement-service
+    volumes:
+      - ./docker/provision/gcp/credential:/credential
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/credential/cred.json
+    build:
+      context: ./filemanagement-service
+      dockerfile: dockerfile
+    image: filemanagement-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
+
+
   feedback-service:
     container_name: feedback-service
     build:

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<packaging>pom</packaging>
 
+  <modelVersion>4.0.0</modelVersion>
+	<packaging>pom</packaging>
+  
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -25,6 +26,7 @@
 		<module>course-service</module>
 		<module>task-service</module>
 		<module>feedback-service</module>
+    <module>filemanagement-service</module>
 		<module>user-service</module>
 	</modules>
 
@@ -127,6 +129,16 @@
 				<artifactId>passay</artifactId>
 				<version>${passay.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>google-cloud-storage</artifactId>
+				<version>1.90.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-multipart</artifactId>
+				<version>2.27</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -173,6 +185,16 @@
 				</configuration>
 			</plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.google.appengine</groupId>
+					<artifactId>appengine-maven-plugin</artifactId>
+					<version>1.9.76</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 </project>
