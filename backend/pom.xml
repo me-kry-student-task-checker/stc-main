@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
 	<packaging>pom</packaging>
+  
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.1.5.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<groupId>hu.me.iit.malus.thesis</groupId>
+	<artifactId>studentTaskChecker</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>studentTaskChecker</name>
+	<description>Thesis project for students of the University of Miskolc</description>
 
 	<modules>
 		<module>config-service</module>
@@ -10,27 +24,18 @@
 		<module>gateway-service</module>
 		<module>email-service</module>
 		<module>course-service</module>
-        <module>task-service</module>
+		<module>task-service</module>
 		<module>feedback-service</module>
-		<module>filemanagement-service</module>
+    <module>filemanagement-service</module>
+		<module>user-service</module>
 	</modules>
-
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.5.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>hu.me.iit.malus.thesis</groupId>
-	<artifactId>studentTaskChecker</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>studentTaskChecker</name>
-	<description>Thesis project for students of the University of Miskolc</description>
 
 	<properties>
 		<java.version>1.8</java.version>
-		<spring.boot.version>2.1.5.RELEASE</spring.boot.version>
-		<spring.cloud.version>2.1.1.RELEASE</spring.cloud.version>
+		<spring.cloud.version>2.1.2.RELEASE</spring.cloud.version>
+		<jjwt.version>0.9.0</jjwt.version>
+		<javax.servlet.version>2.5</javax.servlet.version>
+		<passay.version>1.0</passay.version>
 	</properties>
 
 	<!--Basic dependencies for everybody-->
@@ -62,70 +67,31 @@
 	<!--Dependencies for child modules to choose from-->
 	<dependencyManagement>
 		<dependencies>
+			<!--Before changing these versions, check Spring compatibility matrix-->
 			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-web</artifactId>
-				<version>${spring.boot.version}</version>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>Greenwich.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-actuator</artifactId>
-				<version>${spring.boot.version}</version>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>2.1.6.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
+
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
 				<version>2.9.9</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-config-server</artifactId>
-				<version>${spring.cloud.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-starter-config</artifactId>
-				<version>${spring.cloud.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.springframework.retry</groupId>
 				<artifactId>spring-retry</artifactId>
 				<version>1.2.4.RELEASE</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-aop</artifactId>
-				<version>${spring.boot.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
-				<version>${spring.cloud.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-				<version>${spring.cloud.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-data-jpa</artifactId>
-				<version>${spring.boot.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-mail</artifactId>
-				<version>${spring.boot.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-starter-sleuth</artifactId>
-				<version>${spring.cloud.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-starter-zipkin</artifactId>
-				<version>${spring.cloud.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.springfox</groupId>
@@ -154,14 +120,14 @@
 				<version>3.9</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-starter-gateway</artifactId>
-				<version>2.1.2.RELEASE</version>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt</artifactId>
+				<version>${jjwt.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-starter-openfeign</artifactId>
-				<version>2.1.2.RELEASE</version>
+				<groupId>org.passay</groupId>
+				<artifactId>passay</artifactId>
+				<version>${passay.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.cloud</groupId>

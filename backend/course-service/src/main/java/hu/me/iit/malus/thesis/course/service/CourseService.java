@@ -53,20 +53,20 @@ public interface CourseService {
     /**
      * Sends an invitation email to a student, which if accepted assigns a student to a course
      *
-     * @param studentId the assignees id
+     * @param studentEmail the assignees email
      * @param courseId  the courses id
      * @return the UUID of the invitation
      */
-    void invite(Long courseId, String studentId);
+    void invite(Long courseId, String studentEmail);
 
     /**
      * Sends multiple invitation e-mails to multiple students
      *
-     * @param studentIds the assignees id
+     * @param studentEmails the assignees email
      * @param courseId  the courses id
      * @return the UUID of the invitation
      */
-    void invite(Long courseId, List<String> studentIds);
+    void invite(Long courseId, List<String> studentEmails);
 
     /**
      * Based on the UUID assigns a student to a course
