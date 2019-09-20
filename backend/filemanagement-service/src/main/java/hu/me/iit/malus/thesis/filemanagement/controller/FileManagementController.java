@@ -9,6 +9,7 @@ import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import org.apache.http.HttpStatus;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -33,11 +34,15 @@ public class FileManagementController {
     }
 
     @PostMapping("/upload")
-    public File uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service) throws IOException {
+    public ResponseEntity<File> uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service) throws IOException {
         //TODO: Replace with users got from header
         FileDescription fd = fileManagementService.uploadFile(file, service, "krsztn@alma.hu");
-        if (fd == null) return null;
-        return Converter.FileDescriptionToFile(fd);
+        if (fd == null) return ResponseEntity
+                .status(204)
+                .body(null);
+        return ResponseEntity
+                .status(200)
+                .body(Converter.FileDescriptionToFile(fd));
     }
 
     @DeleteMapping("/delete/{id}/{service}")
@@ -46,45 +51,56 @@ public class FileManagementController {
     }
 
     @GetMapping("/download/getById/{id}")
-    public File getFileById(@PathVariable Long id, HttpServletResponse response){
+    public ResponseEntity<File> getFileById(@PathVariable Long id){
         FileDescription fd = fileManagementService.getById(id);
         if(fd == null) {
-            response.setStatus( HttpStatus.SC_NO_CONTENT);
-            return null;
+            return ResponseEntity
+                    .status(204)
+                    .body(null);
         }
-        return Converter.FileDescriptionToFile(fd);
+        return ResponseEntity
+                .status(200)
+                .body(Converter.FileDescriptionToFile(fd));
     }
 
     @GetMapping("/download/getByFilename/{filename}")
-    public Set<File> getFileByFileName(@PathVariable String filename){
+    public ResponseEntity<Set<File>> getFileByFileName(@PathVariable String filename){
         Set<File> files = new HashSet<>();
         fileManagementService.getAllByFileName(filename).forEach(fd -> {
             files.add(Converter.FileDescriptionToFile(fd));
         });
-        return files;
+        return ResponseEntity
+                .status(200)
+                .body(files);
     }
 
     @GetMapping("/download/getByUser/{user}")
-    public Set<File> getFileByFileUser(@PathVariable String user){
+    public ResponseEntity<Set<File>> getFileByFileUser(@PathVariable String user){
         Set<File> files = new HashSet<>();
         fileManagementService.getAllFilesByUsers(user).forEach(fd -> {
             files.add(Converter.FileDescriptionToFile(fd));
         });
-        return files;
+        return ResponseEntity
+                .status(200)
+                .body(files);
     }
 
     @GetMapping("/download/getByService/{service}")
-    public Set<File> getAllFilesByService(@PathVariable Service service) {
+    public ResponseEntity<Set<File>> getAllFilesByService(@PathVariable Service service) {
         Set<FileDescription> files = new HashSet<>(fileManagementService.getAllFilesByServices(service));
-        return new HashSet<>(Converter.FileDescriptionsToFiles(files));
+        return ResponseEntity
+                .status(200)
+                .body(new HashSet<>(Converter.FileDescriptionsToFiles(files)));
     }
 
     @GetMapping("/download/getAll")
-    public Set<File> getAllFiles() {
+    public ResponseEntity<Set<File>> getAllFiles() {
         Set<File> files = new HashSet<>();
         fileManagementService.getAllFiles().forEach(fileDescription -> {
            files.add(Converter.FileDescriptionToFile(fileDescription));
         });
-        return files;
+        return ResponseEntity
+                .status(200)
+                .body(files);
     }
 }
