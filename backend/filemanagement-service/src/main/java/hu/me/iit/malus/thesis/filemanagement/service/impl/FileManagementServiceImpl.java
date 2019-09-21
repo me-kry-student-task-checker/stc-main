@@ -184,7 +184,7 @@ public class FileManagementServiceImpl implements FileManagementService {
         String hashedUser = hashIt(userEmail);
         if (hashedUser != null) {
             fileName = fileName.replace(hashedUser, "");
-            return fileName.substring(0, fileName.length() -1 );
+            return fileName.substring(0, fileName.length() - 1 );
         }
 
         return fileName;
