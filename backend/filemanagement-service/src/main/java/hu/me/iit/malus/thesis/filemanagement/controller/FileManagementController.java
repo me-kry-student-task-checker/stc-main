@@ -6,13 +6,11 @@ import hu.me.iit.malus.thesis.filemanagement.controller.dto.File;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
-import org.apache.http.HttpStatus;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.ws.rs.FormParam;
 import java.io.IOException;
@@ -45,6 +43,21 @@ public class FileManagementController {
                 .body(Converter.FileDescriptionToFile(fd));
     }
 
+    @PostMapping("/uploadFiles")
+    public ResponseEntity<Set<File>> uploadFileMultipleFiles(@FormDataParam("file") ArrayList<Part> file, @FormParam("service") Service service) throws IOException {
+        //TODO: Replace with users got from header
+        Set<File> result = new HashSet<>();
+        for (Part f : file) {
+            FileDescription fd = fileManagementService.uploadFile(f, service, "krsztn@alma.hu");
+            result.add(Converter.FileDescriptionToFile(fd));
+        }
+
+        return ResponseEntity
+                .status(200)
+                .body(result);
+    }
+
+
     @DeleteMapping("/delete/{id}/{service}")
     public void deleteFile(@PathVariable Long id, @PathVariable Service service) {
         fileManagementService.deleteFile(id, service);
@@ -66,9 +79,7 @@ public class FileManagementController {
     @GetMapping("/download/getByFilename/{filename}")
     public ResponseEntity<Set<File>> getFileByFileName(@PathVariable String filename){
         Set<File> files = new HashSet<>();
-        fileManagementService.getAllByFileName(filename).forEach(fd -> {
-            files.add(Converter.FileDescriptionToFile(fd));
-        });
+        fileManagementService.getAllByFileName(filename).forEach(fd -> files.add(Converter.FileDescriptionToFile(fd)));
         return ResponseEntity
                 .status(200)
                 .body(files);
@@ -77,9 +88,7 @@ public class FileManagementController {
     @GetMapping("/download/getByUser/{user}")
     public ResponseEntity<Set<File>> getFileByFileUser(@PathVariable String user){
         Set<File> files = new HashSet<>();
-        fileManagementService.getAllFilesByUsers(user).forEach(fd -> {
-            files.add(Converter.FileDescriptionToFile(fd));
-        });
+        fileManagementService.getAllFilesByUsers(user).forEach(fd -> files.add(Converter.FileDescriptionToFile(fd)));
         return ResponseEntity
                 .status(200)
                 .body(files);
@@ -96,9 +105,7 @@ public class FileManagementController {
     @GetMapping("/download/getAll")
     public ResponseEntity<Set<File>> getAllFiles() {
         Set<File> files = new HashSet<>();
-        fileManagementService.getAllFiles().forEach(fileDescription -> {
-           files.add(Converter.FileDescriptionToFile(fileDescription));
-        });
+        fileManagementService.getAllFiles().forEach(fileDescription -> files.add(Converter.FileDescriptionToFile(fileDescription)));
         return ResponseEntity
                 .status(200)
                 .body(files);
