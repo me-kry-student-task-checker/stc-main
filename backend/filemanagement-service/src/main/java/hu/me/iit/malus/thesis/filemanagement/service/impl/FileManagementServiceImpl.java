@@ -41,7 +41,7 @@ public class FileManagementServiceImpl implements FileManagementService {
      * {@inheritDoc}
      */
     @Override
-    public FileDescription uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service, String user) throws IOException {
+    public FileDescription uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service, String user, Long tagId) throws IOException {
         String userHash = hashIt(user);
         String fileName = file.getSubmittedFileName() + "_" + userHash;
         Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).build(), file.getInputStream());
@@ -55,6 +55,7 @@ public class FileManagementServiceImpl implements FileManagementService {
         fileDescription.setUploadedBy(user);
         fileDescription.setServices(new HashSet<>());
         fileDescription.getServices().add(service);
+        fileDescription.setTagId(tagId);
 
         for (FileDescription fd : fileDescriptionRepository.findAll()) {
             if (fd.getName().equalsIgnoreCase(fileDescription.getName())) {
@@ -171,6 +172,20 @@ public class FileManagementServiceImpl implements FileManagementService {
             results.add(fd);
         }
         log.info("Files found by file name: {}", userEmail);
+        return results;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Set<FileDescription> getAllFilesByTagId(Long tagId, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service) {
+        Iterable<FileDescription> fileDescriptions = fileDescriptionRepository.findAll();
+        Set<FileDescription> results = new HashSet<>();
+        for (FileDescription fd : fileDescriptions) {
+            if (fd.getTagId().equals(tagId) && fd.getServices().contains(service)) {
+                results.add(fd);
+            }
+        }
         return results;
     }
 
