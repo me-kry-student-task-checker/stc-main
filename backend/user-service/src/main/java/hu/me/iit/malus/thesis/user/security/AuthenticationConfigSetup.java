@@ -42,8 +42,8 @@ public class AuthenticationConfigSetup extends WebSecurityConfigurerAdapter {
                 .and()
 
                 // New filter to validate user credentials and generate token
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtAuthConfig))
-
+                .addFilter(new UsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtAuthConfig))
+                .addFilterAfter(new JwtAuthorizationFilter(jwtAuthConfig), UsernameAndPasswordAuthenticationFilter.class)
                 // Authorization requests configuration
                 .authorizeRequests()
 
@@ -53,10 +53,7 @@ public class AuthenticationConfigSetup extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/user/confirmation*").permitAll()
 
                 // Any other request must be authenticated
-                // TODO: Disable this
-                .anyRequest().permitAll();
-                // TODO: Enable this when Authorization filter is ready
-                //.anyRequest().authenticated();
+                .anyRequest().authenticated();
     }
 
     // Spring has UserDetailsService interface, which can be overrode to provide our implementation for fetching user data from any source.

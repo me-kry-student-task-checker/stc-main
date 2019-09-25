@@ -28,6 +28,8 @@ import java.util.List;
 public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<TokenAuthenticationFilterConfig> {
     private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
     private static final String X_AUTH_TOKEN = "X-Auth-Token";
+    private static final String BEARER = "Bearer";
+
     private TokenAuthenticationFilterConfig config;
 
     @Autowired
@@ -50,7 +52,7 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
     public GatewayFilter apply(TokenAuthenticationFilterConfig config) {
         return (exchange, chain) -> {
             try {
-                String token = this.extractJWTToken(exchange.getRequest(), config);
+                String token = this.extractJWTToken(exchange.getRequest());
 
                 Jwts.parser()
                         .setSigningKey(config.getSecret().getBytes())
@@ -60,9 +62,10 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
                         header(X_AUTH_TOKEN, token).
                         build();
 
+                log.info("Request forwarded to inner service: {}", request.getPath());
                 return chain.filter(exchange.mutate().request(request).build());
             } catch (JwtException e) {
-                log.error(e.toString());
+                log.error("Request blocked, error occurred: " + e.toString());
                 return this.onError(exchange, e.getMessage());
             }
         };
@@ -84,7 +87,7 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
         return response.setComplete();
     }
 
-    private String extractJWTToken(ServerHttpRequest request, TokenAuthenticationFilterConfig config)
+    private String extractJWTToken(ServerHttpRequest request)
     {
         if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
             throw new JwtException("Token header is missing");
@@ -98,11 +101,11 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
 
         String tokenHeader = headers.get(0);
 
-        if (!tokenHeader.startsWith(config.getPrefix())) {
+        if (!tokenHeader.startsWith(BEARER)) {
             throw new JwtException("Token header is invalid");
         }
 
-        return tokenHeader.replace(config.getPrefix(), "");
+        return tokenHeader.substring((BEARER + " ").length());
     }
 
     /**
