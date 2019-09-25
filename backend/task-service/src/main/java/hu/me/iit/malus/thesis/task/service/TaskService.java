@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.task.service;
 
+import hu.me.iit.malus.thesis.task.client.dto.File;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
@@ -76,5 +77,12 @@ public interface TaskService {
      * @param studentId id of the student
      */
     void resolveHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException;
+
+    /**
+     * Queries files based on the taskId
+     * @param taskId The task id
+     * @return Set of files by task id
+     */
+    Set<File> getFilesByTaskId(Long taskId);
 
 }

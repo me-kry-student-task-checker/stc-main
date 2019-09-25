@@ -1,5 +1,7 @@
 package hu.me.iit.malus.thesis.feedback.service.impl;
 
+import hu.me.iit.malus.thesis.feedback.client.FileManagementClient;
+import hu.me.iit.malus.thesis.feedback.client.dto.File;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.repository.CourseCommentRepository;
@@ -9,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Default implementation of Feedback Service interface.
@@ -25,14 +24,17 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     private CourseCommentRepository courseCommentRepository;
     private TaskCommentRepository taskCommentRepository;
+    private FileManagementClient fileManagementClient;
 
     /**
      * Instantiates a new FeedbackServiceImpl
      */
     @Autowired
-    public FeedbackServiceImpl(CourseCommentRepository courseCommentRepository, TaskCommentRepository taskCommentRepository) {
+    public FeedbackServiceImpl(CourseCommentRepository courseCommentRepository, TaskCommentRepository taskCommentRepository,
+                               FileManagementClient fileManagementClient) {
         this.courseCommentRepository = courseCommentRepository;
         this.taskCommentRepository = taskCommentRepository;
+        this.fileManagementClient = fileManagementClient;
     }
 
     /**
@@ -73,5 +75,13 @@ public class FeedbackServiceImpl implements FeedbackService {
         log.info("Listing comments for task id: {}", taskId);
         Optional<List<TaskComment>> opt = taskCommentRepository.findAllByTaskId(taskId);
         return opt.orElseGet(ArrayList::new);
+    }
+
+    /**
+     *  {@inheritDoc}
+     */
+    @Override
+    public Set<File> getAllFilesByTagId(Long tagId) {
+        return fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK, tagId).getBody();
     }
 }

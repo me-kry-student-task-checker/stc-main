@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.task.controller;
 
+import hu.me.iit.malus.thesis.task.client.dto.File;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.service.TaskService;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
@@ -63,5 +64,10 @@ public class TaskController {
     @PostMapping("/resolveHelp/{taskId}/{studentId}")
     public void resolveHelpOnTask(@PathVariable Long taskId, @PathVariable String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
         service.resolveHelp(taskId, studentId);
+    }
+
+    @GetMapping("/getFiles/{taskId}")
+    public Set<File> getFilesByTaskId(@PathVariable Long taskId) {
+        return service.getFilesByTaskId(taskId);
     }
 }

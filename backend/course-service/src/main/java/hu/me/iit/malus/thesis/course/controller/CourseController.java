@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 
+import hu.me.iit.malus.thesis.course.client.dto.File;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Controller endpoint of this service
@@ -40,6 +42,11 @@ public class CourseController {
     //TODO exception handling with controller advice?
     public Course get(@PathVariable Long courseId) throws CourseNotFoundException {
         return service.get(courseId);
+    }
+
+    @GetMapping("/getFiles/{courseId}")
+    public Set<File> getFiles(@PathVariable Long courseId) {
+        return service.getFiles(courseId);
     }
 
     @GetMapping("/getAll")

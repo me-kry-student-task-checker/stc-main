@@ -1,9 +1,11 @@
 package hu.me.iit.malus.thesis.feedback.service;
 
+import hu.me.iit.malus.thesis.feedback.client.dto.File;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Interface of the Feedback Service
@@ -40,4 +42,6 @@ public interface FeedbackService {
      * @return list of task comments
      */
     List<TaskComment> getAllTaskComments(Long taskId);
+
+    Set<File> getAllFilesByTagId(Long tagId);
 }
