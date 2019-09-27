@@ -29,13 +29,13 @@ import java.util.stream.Collectors;
  * Custom filter, which purpose is to handle login event.
  * Gets the credentials from the login request,
  * Checks them with the help of our implementation of UserDetailsService,
- * If all good, provides a JWT token and returns it in the Authorization header.
+ * If all good, provides a JWT and returns it in the Authorization header.
  * Otherwise returns 401 - Unauthorized status
  */
 public class UsernameAndPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authManager;
-    private final JwtAuthConfig jwtConfig;
+    private JwtAuthConfig jwtConfig;
 
     @Autowired
     public UsernameAndPasswordAuthenticationFilter(AuthenticationManager authManager, JwtAuthConfig jwtAuthConfig) {

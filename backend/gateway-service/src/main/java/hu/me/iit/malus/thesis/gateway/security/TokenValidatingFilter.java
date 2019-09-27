@@ -17,23 +17,22 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 /**
- * Custom filter, that finds and validates the JWT token (by Authorization header) in the incoming request.
+ * Custom filter, that finds and validates the JWT (by Authorization header) in the incoming request.
  * If the token is valid, the request will be forwarded to the destination service,
- * with the same included JWT token (by X-Auth-Token header).
+ * with the same included JWT  (by X-Auth-Token header).
  * If the token is missing from the request or invalid, the request will be blocked with Unauthorized error
  * @author Javorek Dénes
  */
 @Slf4j
 @Component
-public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<TokenAuthenticationFilterConfig> {
+public class TokenValidatingFilter extends AbstractGatewayFilterFactory<TokenAuthenticationFilterConfig> {
     private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
-    private static final String X_AUTH_TOKEN = "X-Auth-Token";
     private static final String BEARER = "Bearer";
 
     private TokenAuthenticationFilterConfig config;
 
     @Autowired
-    public TokenAuthenticationFilter(TokenAuthenticationFilterConfig config) {
+    public TokenValidatingFilter(TokenAuthenticationFilterConfig config) {
         super(TokenAuthenticationFilterConfig.class);
         this.config = config;
     }
@@ -44,7 +43,7 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
     }
 
     /**
-     * @see TokenAuthenticationFilter javaDoc
+     * @see TokenValidatingFilter javaDoc
      * @param config
      * @return The filter
      */
@@ -59,7 +58,7 @@ public class TokenAuthenticationFilter extends AbstractGatewayFilterFactory<Toke
                         .parseClaimsJws(token);
 
                 ServerHttpRequest request = exchange.getRequest().mutate().
-                        header(X_AUTH_TOKEN, token).
+                        header(config.getInnerTokenHeader(), token).
                         build();
 
                 log.info("Request forwarded to inner service: {}", request.getPath());

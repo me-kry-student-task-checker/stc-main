@@ -12,4 +12,7 @@ public class TokenAuthenticationFilterConfig {
 
     @Value("${security.jwt.secret}")
     private String secret;
+
+    @Value("${security.jwt.inner.header}")
+    private String innerTokenHeader;
 }

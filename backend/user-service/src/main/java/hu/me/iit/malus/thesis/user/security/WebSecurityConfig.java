@@ -15,14 +15,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import javax.servlet.http.HttpServletResponse;
 
 @EnableWebSecurity
-public class AuthenticationConfigSetup extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private UserDetailsService userDetailsService;
     private JwtAuthConfig jwtAuthConfig;
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthenticationConfigSetup(@Qualifier("customUserDetailsService") UserDetailsService userDetailsService, JwtAuthConfig jwtAuthConfig, BCryptPasswordEncoder passwordEncoder) {
+    public WebSecurityConfig(@Qualifier("customUserDetailsService") UserDetailsService userDetailsService, JwtAuthConfig jwtAuthConfig, BCryptPasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthConfig = jwtAuthConfig;
         this.passwordEncoder = passwordEncoder;

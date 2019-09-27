@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.security.Principal;
 import java.util.Set;
 
 /**
@@ -44,4 +45,7 @@ public interface UserClient {
 
     @GetMapping("/{email:.+}")
     User getUserByEmail(@PathVariable("email") String userEmail);
+
+    @GetMapping("/me")
+    public User getMe();
 }

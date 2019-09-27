@@ -1,6 +1,6 @@
-package hu.me.iit.malus.thesis.user.security;
+package hu.me.iit.malus.thesis.task.security;
 
-import hu.me.iit.malus.thesis.user.security.config.JwtAuthConfig;
+import hu.me.iit.malus.thesis.task.security.config.JwtAuthConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
