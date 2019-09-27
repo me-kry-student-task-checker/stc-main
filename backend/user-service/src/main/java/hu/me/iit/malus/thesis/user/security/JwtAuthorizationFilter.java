@@ -68,7 +68,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     {
         String token = request.getHeader(config.getTokenHeader());
 
-        if (token == null && token.length() == 0) {
+        if (token == null || token.length() == 0) {
             throw new JwtException("Token header is empty");
         }
         return token;

@@ -35,7 +35,7 @@ public class JwtForwardingInterceptor implements RequestInterceptor {
             return;
         }
         String token = originalRequest.getHeader(jwtConfig.getTokenHeader());
-        if (token == null && token.length() == 0) {
+        if (token == null || token.length() == 0) {
             return;
         }
         forwardedRequestTemplate.header(jwtConfig.getTokenHeader(), token);

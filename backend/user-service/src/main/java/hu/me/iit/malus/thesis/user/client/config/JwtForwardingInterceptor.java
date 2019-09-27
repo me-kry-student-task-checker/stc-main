@@ -3,6 +3,7 @@ package hu.me.iit.malus.thesis.user.client.config;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import hu.me.iit.malus.thesis.user.security.config.JwtAuthConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author Javorek Dénes
  */
 @Component
+@Slf4j
 public class JwtForwardingInterceptor implements RequestInterceptor {
     private JwtAuthConfig jwtConfig;
 
@@ -35,7 +37,8 @@ public class JwtForwardingInterceptor implements RequestInterceptor {
             return;
         }
         String token = originalRequest.getHeader(jwtConfig.getTokenHeader());
-        if (token == null && token.length() == 0) {
+
+        if (token == null || token.length() == 0) {
             return;
         }
         forwardedRequestTemplate.header(jwtConfig.getTokenHeader(), token);
