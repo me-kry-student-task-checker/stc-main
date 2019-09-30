@@ -15,12 +15,12 @@ public class JwtAuthConfig {
     @Value("${security.jwt.uri}")
     private String Uri;
 
-    @Value("${security.jwt.prefix}")
-    private String prefix;
-
     @Value("${security.jwt.expiration}")
     private int expiration;
 
     @Value("${security.jwt.secret}")
     private String secret;
+
+    @Value("${security.jwt.inner.header}")
+    private String tokenHeader;
 }

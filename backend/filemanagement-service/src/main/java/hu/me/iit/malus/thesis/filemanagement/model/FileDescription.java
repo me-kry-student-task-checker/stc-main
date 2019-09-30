@@ -23,6 +23,7 @@ public class FileDescription {
     Long id;
     @Column(length = 2000)
     String name;
+    @Column(length = 5000)
     String downloadLink;
     long size;
     Date uploadDate;
@@ -31,7 +32,7 @@ public class FileDescription {
     @Enumerated(EnumType.STRING)
     @ElementCollection
     Set<Service> services;
-
+    Long tagId;
 
 
 }

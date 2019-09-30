@@ -1,9 +1,11 @@
 package hu.me.iit.malus.thesis.feedback.model;
 
+import hu.me.iit.malus.thesis.feedback.client.dto.File;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Data model for comment object, foundation of this service.
@@ -27,5 +29,5 @@ public class Comment {
     private String authorId;
     private String text;
     private Date createDate;
-
+    @Transient private Set<File> files;
 }

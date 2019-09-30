@@ -3,7 +3,6 @@ package hu.me.iit.malus.thesis.filemanagement.controller.dto;
 import lombok.*;
 
 import java.util.Date;
-import java.util.Set;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -11,13 +10,10 @@ import java.util.Set;
 @EqualsAndHashCode
 public class File {
 
+    Long id;
     String name;
     String downloadLink;
-    long size;
-    boolean canBeDeleted;
     Date uploadDate;
     String uploadedBy;
-    String contentType;
-    Set<Service> services;
+    Long tagId;
 }
-

@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.Set;
 
 @RestController
@@ -101,5 +102,10 @@ public class UserController {
     @GetMapping("/{email:.+}")
     public User getUserByEmail(@PathVariable("email") String userEmail) {
         return service.getAnyUserByEmail(userEmail);
+    }
+
+    @GetMapping("/me")
+    public User getMe(Principal principal) {
+        return service.getAnyUserByEmail(principal.getName());
     }
 }

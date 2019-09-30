@@ -24,7 +24,7 @@ public interface FileManagementService {
      * @return The object that represents the file which was uploaded and saved to database.
      * @throws IOException
      */
-    FileDescription uploadFile(Part file, Service service, String user) throws IOException;
+    FileDescription uploadFile(Part file, Service service, String user, Long tagId) throws IOException;
 
     /**
      * Queries the files by their IDs
@@ -67,4 +67,12 @@ public interface FileManagementService {
      * @return If it founds by the parameter than returns the value, else return empty Set
      */
     Set<FileDescription> getAllFilesByUsers(String userEmail);
+
+    /**
+     * Queries all files based on the id set and given outside of fileservice filtered by service
+     * @param tagId - The id, given when a file is sent in
+     * @param service - The service which sent the file in
+     * @return Filtered Set of files based on the given parameters
+     */
+    Set<FileDescription> getAllFilesByTagId(Long tagId, Service service);
 }
