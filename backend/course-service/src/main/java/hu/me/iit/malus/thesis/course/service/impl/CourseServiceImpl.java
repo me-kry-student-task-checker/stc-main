@@ -4,7 +4,6 @@ import hu.me.iit.malus.thesis.course.client.FeedbackClient;
 import hu.me.iit.malus.thesis.course.client.FileManagementClient;
 import hu.me.iit.malus.thesis.course.client.TaskClient;
 import hu.me.iit.malus.thesis.course.client.UserClient;
-import hu.me.iit.malus.thesis.course.client.dto.File;
 import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import hu.me.iit.malus.thesis.course.model.Course;
@@ -108,6 +107,7 @@ public class CourseServiceImpl implements CourseService {
             course.setCreator(creator);
             course.setStudents(students);
             course.setTasks(taskClient.getAllTasks(courseId));
+            course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, courseId).getBody());
             course.setComments(feedbackClient.getAllCourseComments(courseId));
             log.info("Course found: {}", courseId);
             return course;
@@ -143,6 +143,7 @@ public class CourseServiceImpl implements CourseService {
             course.setStudents(students);
             course.setTasks(taskClient.getAllTasks(course.getId()));
             course.setComments(feedbackClient.getAllCourseComments(course.getId()));
+            course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, course.getId()).getBody());
         }
         log.info("Courses found: {}", courses);
         return courses;
@@ -197,13 +198,4 @@ public class CourseServiceImpl implements CourseService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * @param courseId the course id
-     * @return
-     */
-    @Override
-    public Set<File> getFiles(Long courseId) {
-        return fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, courseId).getBody();
-    }
 }

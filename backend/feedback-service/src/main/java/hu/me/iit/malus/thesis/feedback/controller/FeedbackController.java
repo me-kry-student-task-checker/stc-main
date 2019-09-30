@@ -1,6 +1,5 @@
 package hu.me.iit.malus.thesis.feedback.controller;
 
-import hu.me.iit.malus.thesis.feedback.client.dto.File;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
@@ -8,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Controller endpoint of this service
@@ -45,11 +43,4 @@ public class FeedbackController {
     public List<TaskComment> getAllTaskComments(@PathVariable Long taskId) {
         return feedbackService.getAllTaskComments(taskId);
     }
-
-    @GetMapping("/getFilesById/{tagId}")
-    public Set<File> getAllFilesById(@PathVariable Long tagId) {
-        return feedbackService.getAllFilesByTagId(tagId);
-    }
-
-
 }

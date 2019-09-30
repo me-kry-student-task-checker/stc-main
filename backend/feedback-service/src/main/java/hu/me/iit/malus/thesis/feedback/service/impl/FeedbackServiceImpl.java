@@ -1,7 +1,6 @@
 package hu.me.iit.malus.thesis.feedback.service.impl;
 
 import hu.me.iit.malus.thesis.feedback.client.FileManagementClient;
-import hu.me.iit.malus.thesis.feedback.client.dto.File;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.repository.CourseCommentRepository;
@@ -64,7 +63,10 @@ public class FeedbackServiceImpl implements FeedbackService {
     public List<CourseComment> getAllCourseComments(Long courseId) {
         log.info("Listing comments for course id: {}", courseId);
         Optional<List<CourseComment>> opt = courseCommentRepository.findAllByCourseId(courseId);
-        return opt.orElseGet(ArrayList::new);
+        List<CourseComment> results = opt.orElseGet(ArrayList::new);
+        results.forEach(courseComment -> fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK, courseComment.getId()));
+
+        return results;
     }
 
     /**
@@ -74,14 +76,9 @@ public class FeedbackServiceImpl implements FeedbackService {
     public List<TaskComment> getAllTaskComments(Long taskId) {
         log.info("Listing comments for task id: {}", taskId);
         Optional<List<TaskComment>> opt = taskCommentRepository.findAllByTaskId(taskId);
-        return opt.orElseGet(ArrayList::new);
-    }
+        List<TaskComment> results = opt.orElseGet(ArrayList::new);
+        results.forEach(taskComment -> taskComment.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK, taskComment.getId()).getBody()));
 
-    /**
-     *  {@inheritDoc}
-     */
-    @Override
-    public Set<File> getAllFilesByTagId(Long tagId) {
-        return fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK, tagId).getBody();
+        return results;
     }
 }

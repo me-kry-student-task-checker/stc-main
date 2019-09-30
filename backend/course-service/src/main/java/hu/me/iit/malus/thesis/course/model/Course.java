@@ -1,9 +1,6 @@
 package hu.me.iit.malus.thesis.course.model;
 
-import hu.me.iit.malus.thesis.course.client.dto.CourseComment;
-import hu.me.iit.malus.thesis.course.client.dto.Student;
-import hu.me.iit.malus.thesis.course.client.dto.Task;
-import hu.me.iit.malus.thesis.course.client.dto.Teacher;
+import hu.me.iit.malus.thesis.course.client.dto.*;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -34,6 +31,7 @@ public class Course {
     @Transient private Set<Student> students = new HashSet<>();
     @Transient private Set<Task> tasks = new HashSet<>();
     @Transient private List<CourseComment> comments = new ArrayList<>();
+    @Transient private Set<File> files = new HashSet<>();
 
     public Course(String name, String description, Teacher creator) {
         this.name = name;

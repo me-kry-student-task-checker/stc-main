@@ -1,12 +1,10 @@
 package hu.me.iit.malus.thesis.course.service;
 
-import hu.me.iit.malus.thesis.course.client.dto.File;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Interface of the Course Service
@@ -76,11 +74,4 @@ public interface CourseService {
      * @param inviteUUID the UUID by which the student is assigned
      */
     void acceptInvite(String inviteUUID) throws InvitationNotFoundException;
-
-    /**
-     * Gets the files based on a courseId
-     * @param courseId the course id
-     * @return list of files
-     */
-    Set<File> getFiles(Long courseId);
 }
