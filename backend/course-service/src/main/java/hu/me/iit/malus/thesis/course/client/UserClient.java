@@ -44,4 +44,7 @@ public interface UserClient {
 
     @GetMapping("/{email:.+}")
     User getUserByEmail(@PathVariable("email") String userEmail);
+
+    @GetMapping("/me")
+    public User getMe();
 }
