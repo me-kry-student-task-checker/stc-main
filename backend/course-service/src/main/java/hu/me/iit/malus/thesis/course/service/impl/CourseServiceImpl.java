@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.course.service.impl;
 
 import hu.me.iit.malus.thesis.course.client.FeedbackClient;
+import hu.me.iit.malus.thesis.course.client.FileManagementClient;
 import hu.me.iit.malus.thesis.course.client.TaskClient;
 import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.client.dto.Student;
@@ -32,6 +33,7 @@ public class CourseServiceImpl implements CourseService {
     private TaskClient taskClient;
     private FeedbackClient feedbackClient;
     private UserClient userClient;
+    private FileManagementClient fileManagementClient;
 
     /**
      * Instantiates a new Course service.
@@ -42,12 +44,14 @@ public class CourseServiceImpl implements CourseService {
      */
     @Autowired
     public CourseServiceImpl(CourseRepository courseRepository, InvitationRepository invitationRepository,
-                             TaskClient taskClient, FeedbackClient feedbackClient, UserClient userClient) {
+                             TaskClient taskClient, FeedbackClient feedbackClient, UserClient userClient,
+                             FileManagementClient fileManagementClient) {
         this.courseRepository = courseRepository;
         this.invitationRepository = invitationRepository;
         this.taskClient = taskClient;
         this.feedbackClient = feedbackClient;
         this.userClient = userClient;
+        this.fileManagementClient = fileManagementClient;
     }
 
     /**
@@ -103,6 +107,7 @@ public class CourseServiceImpl implements CourseService {
             course.setCreator(creator);
             course.setStudents(students);
             course.setTasks(taskClient.getAllTasks(courseId));
+            course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, courseId).getBody());
             course.setComments(feedbackClient.getAllCourseComments(courseId));
             log.info("Course found: {}", courseId);
             return course;
@@ -138,6 +143,7 @@ public class CourseServiceImpl implements CourseService {
             course.setStudents(students);
             course.setTasks(taskClient.getAllTasks(course.getId()));
             course.setComments(feedbackClient.getAllCourseComments(course.getId()));
+            course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, course.getId()).getBody());
         }
         log.info("Courses found: {}", courses);
         return courses;
@@ -191,4 +197,5 @@ public class CourseServiceImpl implements CourseService {
             throw new InvitationNotFoundException();
         }
     }
+
 }

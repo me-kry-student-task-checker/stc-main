@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.filemanagement.controller.dto;
+package hu.me.iit.malus.thesis.task.client.dto;
 
 import lombok.*;
 

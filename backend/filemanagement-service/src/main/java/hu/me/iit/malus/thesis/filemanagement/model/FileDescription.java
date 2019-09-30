@@ -32,7 +32,7 @@ public class FileDescription {
     @Enumerated(EnumType.STRING)
     @ElementCollection
     Set<Service> services;
-
+    Long tagId;
 
 
 }

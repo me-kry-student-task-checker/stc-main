@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.task.model;
 
+import hu.me.iit.malus.thesis.task.client.dto.File;
 import hu.me.iit.malus.thesis.task.client.dto.TaskComment;
 import lombok.*;
 
@@ -29,6 +30,7 @@ public class Task {
     private Date creationDate;
     private boolean isDone;
     private Long courseId;
+    @Transient Set<File> files;
     @ElementCollection
     private Set<String> helpNeededStudentIds;
     @ElementCollection

@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.task.service.impl;
 
 import hu.me.iit.malus.thesis.task.client.FeedbackClient;
+import hu.me.iit.malus.thesis.task.client.FileManagementClient;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.repository.TaskRepository;
 import hu.me.iit.malus.thesis.task.service.TaskService;
@@ -26,14 +27,16 @@ public class TaskServiceImpl implements TaskService {
 
     private TaskRepository repository;
     private FeedbackClient feedbackClient;
+    private FileManagementClient fileManagementClient;
 
     /**
      * Instantiates a new TaskServiceImpl class
      */
     @Autowired
-    public TaskServiceImpl(TaskRepository repository, FeedbackClient feedbackClient) {
+    public TaskServiceImpl(TaskRepository repository, FeedbackClient feedbackClient, FileManagementClient fileManagementClient) {
         this.repository = repository;
         this.feedbackClient = feedbackClient;
+        this.fileManagementClient = fileManagementClient;
     }
 
     /**
@@ -66,6 +69,7 @@ public class TaskServiceImpl implements TaskService {
             Set<Task> tasks = opt.get();
             for (Task task : tasks) {
                 task.setComments(feedbackClient.getAllTaskComments(task.getId()));
+                task.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.task.client.dto.Service.TASK, task.getId()).getBody());
             }
             log.info("Task queried: {}", tasks);
             return tasks;

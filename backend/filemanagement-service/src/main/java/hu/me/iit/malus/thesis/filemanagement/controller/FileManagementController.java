@@ -32,23 +32,24 @@ public class FileManagementController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<File> uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service) throws IOException {
+    public ResponseEntity<File> uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service, @FormParam("tagId") Long tagId) throws IOException {
         //TODO: Replace with users got from header
-        FileDescription fd = fileManagementService.uploadFile(file, service, "krsztn@alma.hu");
+        FileDescription fd = fileManagementService.uploadFile(file, service, "krsztn@alma.hu", tagId);
         if (fd == null) return ResponseEntity
                 .status(204)
                 .body(null);
+
         return ResponseEntity
                 .status(200)
                 .body(Converter.FileDescriptionToFile(fd));
     }
 
     @PostMapping("/uploadFiles")
-    public ResponseEntity<Set<File>> uploadFileMultipleFiles(@FormDataParam("file") ArrayList<Part> file, @FormParam("service") Service service) throws IOException {
+    public ResponseEntity<Set<File>> uploadFileMultipleFiles(@FormDataParam("file") ArrayList<Part> file, @FormParam("service") Service service, @FormParam("tagId") Long tagId) throws IOException {
         //TODO: Replace with users got from header
         Set<File> result = new HashSet<>();
         for (Part f : file) {
-            FileDescription fd = fileManagementService.uploadFile(f, service, "krsztn@alma.hu");
+            FileDescription fd = fileManagementService.uploadFile(f, service, "krsztn@alma.hu", tagId);
             result.add(Converter.FileDescriptionToFile(fd));
         }
 
@@ -109,5 +110,14 @@ public class FileManagementController {
         return ResponseEntity
                 .status(200)
                 .body(files);
+    }
+
+    @GetMapping("/download/getByTagId/{service}/{tagId}")
+    public ResponseEntity<Set<File>> getAllFilesByTagId(@PathVariable Service service, @PathVariable Long tagId) {
+        Set<File> results = new HashSet<>();
+        fileManagementService.getAllFilesByTagId(tagId, service).forEach(fileDescription -> results.add(Converter.FileDescriptionToFile(fileDescription)));
+        return ResponseEntity
+                .status(200)
+                .body(results);
     }
 }

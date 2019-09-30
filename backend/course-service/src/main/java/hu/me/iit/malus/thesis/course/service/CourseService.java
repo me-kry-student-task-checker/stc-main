@@ -74,5 +74,4 @@ public interface CourseService {
      * @param inviteUUID the UUID by which the student is assigned
      */
     void acceptInvite(String inviteUUID) throws InvitationNotFoundException;
-
 }
