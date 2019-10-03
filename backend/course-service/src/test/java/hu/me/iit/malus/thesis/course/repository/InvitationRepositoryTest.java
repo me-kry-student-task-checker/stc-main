@@ -23,7 +23,6 @@ public class InvitationRepositoryTest {
     @Autowired
     private InvitationRepository repository;
 
-
     @Test
     public void whenFindById_invitationFound_wrappedInOptional() {
         // Given
@@ -43,7 +42,7 @@ public class InvitationRepositoryTest {
     }
 
     @Test
-    public void whenSave_invitationExist() {
+    public void whenSave_invitationExists() {
         // Given
         String invitationId = UUID.randomUUID().toString();
 
