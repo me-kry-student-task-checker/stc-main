@@ -1,5 +1,7 @@
 package hu.me.iit.malus.thesis.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
@@ -21,6 +23,7 @@ public class User
 {
     @Id
     private final String email;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String firstName, lastName;
 
