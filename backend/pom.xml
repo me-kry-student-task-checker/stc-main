@@ -146,11 +146,6 @@
 				<artifactId>h2</artifactId>
 				<version>${h2.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>com.github.tomakehurst</groupId>
-				<artifactId>wiremock</artifactId>
-				<version>${wiremock.version}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -170,9 +165,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<artifactId>maven-install-plugin</artifactId>

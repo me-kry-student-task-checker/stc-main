@@ -1,6 +1,6 @@
 package hu.me.iit.malus.thesis.course.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import hu.me.iit.malus.thesis.course.controller.helper.JwtTestHelper;
 import hu.me.iit.malus.thesis.course.model.Course;
@@ -26,6 +26,9 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * @author Javorek Dénes
+ */
 @RunWith(SpringRunner.class)
 @WebMvcTest(CourseController.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -45,14 +48,9 @@ public class CourseControllerTest {
         }
     }
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MockMvc mvc;
-
-    @Autowired
-    private JwtTestHelper jwtHelper;
+    @Autowired private MockMvc mvc;
+    @Autowired private Gson gson;
+    @Autowired private JwtTestHelper jwtHelper;
 
     @MockBean
     private CourseService courseService;
@@ -70,11 +68,11 @@ public class CourseControllerTest {
         // When
         MvcResult response = mvc.perform(post("/api/course/create")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(course))
+                .content(gson.toJson(course))
                 .header(jwtHelper.getJwtHeader(), jwtHelper.createValidJWT("teacher", "TEACHER")))
                 .andExpect(status().isOk())
                 .andReturn();
-        Course responseCourse = objectMapper.readValue(response.getResponse().getContentAsString(), Course.class);
+        Course responseCourse = gson.fromJson(response.getResponse().getContentAsString(), Course.class);
 
         // Then
         Assertions.assertThat(course).isEqualTo(responseCourse);
@@ -93,7 +91,7 @@ public class CourseControllerTest {
         // When
         mvc.perform(post("/api/course/create")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(course)))
+                .content(gson.toJson(course)))
                 .andExpect(status().isUnauthorized()); //Then
     }
 }

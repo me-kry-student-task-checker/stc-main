@@ -23,6 +23,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 
+/**
+ * @author Javorek Dénes
+ */
 @RunWith(SpringRunner.class)
 public class CourseServiceImplTest {
     @TestConfiguration

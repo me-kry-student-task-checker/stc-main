@@ -14,6 +14,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 
+/**
+ * @author Javorek Dénes
+ */
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @TestPropertySource(locations = "classpath:application-test.properties")
