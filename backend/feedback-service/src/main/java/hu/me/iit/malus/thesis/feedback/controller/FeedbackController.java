@@ -1,5 +1,8 @@
 package hu.me.iit.malus.thesis.feedback.controller;
 
+import hu.me.iit.malus.thesis.feedback.controller.converters.Converter;
+import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentDto;
+import hu.me.iit.malus.thesis.feedback.controller.dto.TaskCommentDto;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
@@ -25,13 +28,13 @@ public class FeedbackController {
     }
 
     @PostMapping("/createCourseComment")
-    public CourseComment create(@RequestBody CourseComment courseComment) {
-        return feedbackService.createCourseComment(courseComment);
+    public CourseComment create(@RequestBody CourseCommentDto courseComment) {
+        return feedbackService.createCourseComment(Converter.CourseCommentDtoToCourseComment(courseComment));
     }
 
     @PostMapping("/createTaskComment")
-    public TaskComment create(@RequestBody TaskComment taskComment) {
-        return feedbackService.createTaskComment(taskComment);
+    public TaskComment create(@RequestBody TaskCommentDto taskComment) {
+        return feedbackService.createTaskComment(Converter.TaskCommentDtoToTaskComment(taskComment));
     }
 
     @GetMapping("/getAllCourseComments/{courseId}")
