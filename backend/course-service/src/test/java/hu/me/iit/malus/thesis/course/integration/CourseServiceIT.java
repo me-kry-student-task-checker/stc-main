@@ -1,18 +1,20 @@
-package hu.me.iit.malus.thesis.course.controller;
+package hu.me.iit.malus.thesis.course.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.loadbalancer.Server;
+import com.netflix.loadbalancer.ServerList;
+import hu.me.iit.malus.thesis.course.CourseServiceApplication;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import hu.me.iit.malus.thesis.course.controller.helper.JwtTestHelper;
 import hu.me.iit.malus.thesis.course.model.Course;
-import hu.me.iit.malus.thesis.course.security.config.JwtAuthConfig;
-import hu.me.iit.malus.thesis.course.service.CourseService;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.netflix.ribbon.StaticServerList;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -22,27 +24,18 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 
-import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(CourseController.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
-public class CourseControllerTest {
+@SpringBootTest(classes = CourseServiceApplication.class)
+@AutoConfigureMockMvc
+@TestPropertySource(
+        locations = "classpath:application-test.properties")
+public class CourseServiceIT {
     @TestConfiguration
-    static class CourseControllerTestContextConfiguration {
-        // Default config cannot be instantiated as properties (from config-service) are missing.
-        // We defined those properties as test properties, so this bean can be created now.
-        @Bean
-        public JwtAuthConfig jwtAuthConfig() {
-            return new JwtAuthConfig();
-        }
+    public static class LocalRibbonClientConfiguration {
 
-        @Bean
-        public JwtTestHelper jwtTestHelper() {
-            return new JwtTestHelper();
-        }
     }
 
     @Autowired
@@ -54,8 +47,6 @@ public class CourseControllerTest {
     @Autowired
     private JwtTestHelper jwtHelper;
 
-    @MockBean
-    private CourseService courseService;
 
     @Test
     public void whenCreateCourse_WithValidToken_returnOkAndTheSameCourse()
@@ -65,7 +56,6 @@ public class CourseControllerTest {
                 "teacher@test.test", "Teacher", "Test", new ArrayList<>(), true);
         Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
 
-        given(courseService.create(course)).willReturn(course);
 
         // When
         MvcResult response = mvc.perform(post("/api/course/create")
@@ -78,22 +68,5 @@ public class CourseControllerTest {
 
         // Then
         Assertions.assertThat(course).isEqualTo(responseCourse);
-    }
-
-    @Test
-    public void whenCreateCourse_WithoutToken_returnUnauthorized()
-            throws Exception {
-        // Given
-        Teacher courseOwner = new Teacher(
-                "teacher@test.test", "Teacher", "Test", new ArrayList<>(), true);
-        Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
-
-        given(courseService.create(course)).willReturn(course);
-
-        // When
-        mvc.perform(post("/api/course/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(course)))
-                .andExpect(status().isUnauthorized()); //Then
     }
 }

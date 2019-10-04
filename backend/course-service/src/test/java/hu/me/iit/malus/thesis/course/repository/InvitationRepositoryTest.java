@@ -30,8 +30,7 @@ public class InvitationRepositoryTest {
 
         Invitation invitation = new Invitation(
                 invitationId, "invited@user.com", 1L);
-        entityManager.persist(invitation);
-        entityManager.flush();
+        entityManager.persistAndFlush(invitation);
 
         // When
         Optional<Invitation> foundById = repository.findById(invitationId);
