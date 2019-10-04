@@ -37,7 +37,6 @@
 		<javax.servlet.version>2.5</javax.servlet.version>
 		<passay.version>1.0</passay.version>
 		<h2.version>1.4.199</h2.version>
-		<wiremock.version>1.58</wiremock.version>
 	</properties>
 
 	<!--Basic dependencies for everybody-->
