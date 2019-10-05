@@ -72,7 +72,7 @@ services:
     networks:
       - studentTaskChecker
     ports:
-      - "8761"
+      - "8761:8761"
     depends_on:
       - config-service
 

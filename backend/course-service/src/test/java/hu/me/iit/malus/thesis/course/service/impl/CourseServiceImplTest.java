@@ -5,6 +5,7 @@ import hu.me.iit.malus.thesis.course.client.FileManagementClient;
 import hu.me.iit.malus.thesis.course.client.TaskClient;
 import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
+import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.repository.InvitationRepository;
@@ -67,12 +68,13 @@ public class CourseServiceImplTest {
         Teacher courseOwner = new Teacher(
                 courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
         Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
+        CourseDto courseDto = new CourseDto(course.getName(), course.getDescription());
 
         Mockito.when(courseRepository.save(course)).thenReturn(course);
         Mockito.when(userClient.getTeacherByEmail(courseOwnersEmail)).thenReturn(courseOwner);
 
         // When
-        Course createdCourse = courseService.create(course);
+        Course createdCourse = courseService.create(courseDto);
 
         // Then
         Mockito.verify(courseRepository, Mockito.times(1)).save(course);

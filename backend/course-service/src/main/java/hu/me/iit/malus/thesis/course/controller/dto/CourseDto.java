@@ -1,6 +1,8 @@
 package hu.me.iit.malus.thesis.course.controller.dto;
 
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class CourseDto {
 
     private Long id;

@@ -12,4 +12,4 @@ spring:
       fail-fast: true #if it cannot get its config files it retries (spring retry default values apply) and then fails
       retry:
         max-attempts: 15 #If your pc is slow to start the config service and something fails because of it, up this number a bit
-      profile: docker-mysql
+      profile: docker

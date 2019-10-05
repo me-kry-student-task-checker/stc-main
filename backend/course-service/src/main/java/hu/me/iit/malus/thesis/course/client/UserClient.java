@@ -18,33 +18,33 @@ import java.util.Set;
 @FeignClient(name = "user-service")
 public interface UserClient {
 
-    @PostMapping("/saveStudent")
+    @PostMapping("/api/user/saveStudent")
     void saveStudent(@RequestBody Student student);
 
-    @PostMapping("/saveStudents")
+    @PostMapping("/api/user/saveStudents")
     void saveStudents(@RequestBody Set<Student> studentsToSave);
 
-    @PostMapping("/saveTeacher")
+    @PostMapping("/api/user/saveTeacher")
     void saveTeacher(@RequestBody Teacher teacher);
 
-    @PostMapping("/saveTeacher")
+    @PostMapping("/api/user/saveTeacher")
     void saveTeachers(@RequestBody Set<Teacher> teachersToSave);
 
-    @GetMapping("/students")
+    @GetMapping("/api/user/students")
     Set<Student> getAllStudents();
 
-    @GetMapping("/teachers")
+    @GetMapping("/api/user/teachers")
     Set<Teacher> getAllTeachers();
 
-    @GetMapping("/student/{email:.+}")
+    @GetMapping("/api/user/student/{email}/")
     Student getStudentByEmail(@PathVariable("email") String studentEmail);
 
-    @GetMapping("/teacher/{email:.+}")
+    @GetMapping("/api/user/teacher/{email}/")
     Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail);
 
-    @GetMapping("/{email:.+}")
+    @GetMapping("/api/user/{email}/")
     User getUserByEmail(@PathVariable("email") String userEmail);
 
-    @GetMapping("/me")
+    @GetMapping("/api/user/me")
     public User getMe();
 }
