@@ -6,6 +6,7 @@ import hu.me.iit.malus.thesis.course.client.TaskClient;
 import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
+import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.model.Invitation;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
@@ -58,13 +59,16 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Course create(Course course) {
-        course.setCreationDate(new Date());
-        Teacher teacher = userClient.getTeacherByEmail(course.getCreator().getEmail());
-        Course newCourse = courseRepository.save(course);
+    public Course create(CourseDto course) {
+        Course courseToSave = new Course();
+        courseToSave.setName(course.getName());
+        courseToSave.setCreationDate(new Date());
+        courseToSave.setDescription(course.getDescription());
+        Teacher teacher = userClient.getTeacherByEmail(course.getCreator());
+        Course newCourse = courseRepository.save(courseToSave);
         teacher.getCreatedCourseIds().add(newCourse.getId());
         userClient.saveTeacher(teacher);
-        log.info("Created course: {}", course);
+        log.info("Created course: {}", newCourse);
         return newCourse;
     }
 
@@ -72,9 +76,13 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Course edit(Course course) {
+    public Course edit(CourseDto course) {
+        Course courseToSave = courseRepository.getOne(course.getId());
+        courseToSave.setName(course.getName());
+        courseToSave.setDescription(course.getDescription());
+        courseToSave.setCreator(userClient.getTeacherByEmail(course.getCreator()));
         log.info("Modified course: {}", course);
-        return courseRepository.save(course);
+        return courseRepository.save(courseToSave);
     }
 
     /**

@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 
+import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
@@ -8,6 +9,7 @@ import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundExcepti
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -27,12 +29,14 @@ public class CourseController {
     }
 
     @PostMapping("/create")
-    public Course createCourse(@RequestBody Course course) {
+    public Course createCourse(@RequestBody CourseDto course, Principal principal) {
+        course.setCreator(principal.getName());
         return service.create(course);
     }
 
     @PostMapping("/edit")
-    public Course editCourse(@RequestBody Course course) {
+    public Course editCourse(@RequestBody CourseDto course, Principal principal) {
+        course.setCreator(principal.getName());
         return service.edit(course);
     }
 
