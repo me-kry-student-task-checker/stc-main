@@ -13,7 +13,6 @@ public class Converter {
         CourseComment courseComment = new CourseComment();
         courseComment.setFiles(new HashSet<>());
         courseComment.setCourseId(courseCommentDto.getCourseId());
-        courseComment.setAuthorId(courseCommentDto.getAuthorId());
         courseComment.setText(courseCommentDto.getText());
         return courseComment;
     }
@@ -22,7 +21,6 @@ public class Converter {
         TaskComment taskComment = new TaskComment();
         taskComment.setFiles(new HashSet<>());
         taskComment.setTaskId(taskCommentDto.getTaskId());
-        taskComment.setAuthorId(taskCommentDto.getAuthorId());
         taskComment.setText(taskCommentDto.getText());
         return taskComment;
     }

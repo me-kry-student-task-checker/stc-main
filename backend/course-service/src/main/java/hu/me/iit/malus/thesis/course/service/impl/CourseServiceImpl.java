@@ -61,12 +61,14 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course create(CourseDto course) {
         Course courseToSave = new Course();
+        courseToSave.setName(course.getName());
         courseToSave.setCreationDate(new Date());
+        courseToSave.setDescription(course.getDescription());
         Teacher teacher = userClient.getTeacherByEmail(course.getCreator());
         Course newCourse = courseRepository.save(courseToSave);
         teacher.getCreatedCourseIds().add(newCourse.getId());
         userClient.saveTeacher(teacher);
-        log.info("Created course: {}", courseToSave);
+        log.info("Created course: {}", newCourse);
         return newCourse;
     }
 

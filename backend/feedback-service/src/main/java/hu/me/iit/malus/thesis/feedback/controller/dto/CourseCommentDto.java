@@ -1,28 +1,17 @@
 package hu.me.iit.malus.thesis.feedback.controller.dto;
 
-import java.util.Date;
 
 public class CourseCommentDto {
 
-    private String authorId;
     private String text;
     private Long courseId;
 
-    public CourseCommentDto(String authorId, String text, Long courseId) {
-        this.authorId = authorId;
+    public CourseCommentDto(String text, Long courseId) {
         this.text = text;
         this.courseId = courseId;
     }
 
     public CourseCommentDto() {
-    }
-
-    public String getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(String authorId) {
-        this.authorId = authorId;
     }
 
     public String getText() {

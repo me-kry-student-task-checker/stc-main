@@ -22,7 +22,6 @@ import java.util.List;
 public class CourseController {
 
     private CourseService service;
-    private Principal principal;
 
     @Autowired
     public CourseController(CourseService service) {
@@ -30,13 +29,13 @@ public class CourseController {
     }
 
     @PostMapping("/create")
-    public Course createCourse(@RequestBody CourseDto course) {
+    public Course createCourse(@RequestBody CourseDto course, Principal principal) {
         course.setCreator(principal.getName());
         return service.create(course);
     }
 
     @PostMapping("/edit")
-    public Course editCourse(@RequestBody CourseDto course) {
+    public Course editCourse(@RequestBody CourseDto course, Principal principal) {
         course.setCreator(principal.getName());
         return service.edit(course);
     }

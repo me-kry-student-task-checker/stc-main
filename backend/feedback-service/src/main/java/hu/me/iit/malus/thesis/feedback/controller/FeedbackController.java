@@ -9,6 +9,7 @@ import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -28,13 +29,17 @@ public class FeedbackController {
     }
 
     @PostMapping("/createCourseComment")
-    public CourseComment create(@RequestBody CourseCommentDto courseComment) {
-        return feedbackService.createCourseComment(Converter.CourseCommentDtoToCourseComment(courseComment));
+    public CourseComment create(@RequestBody CourseCommentDto courseComment, Principal principal) {
+        CourseComment cc = Converter.CourseCommentDtoToCourseComment(courseComment);
+        cc.setAuthorId(principal.getName());
+        return feedbackService.createCourseComment(cc);
     }
 
     @PostMapping("/createTaskComment")
-    public TaskComment create(@RequestBody TaskCommentDto taskComment) {
-        return feedbackService.createTaskComment(Converter.TaskCommentDtoToTaskComment(taskComment));
+    public TaskComment create(@RequestBody TaskCommentDto taskComment, Principal principal) {
+        TaskComment tc = Converter.TaskCommentDtoToTaskComment(taskComment);
+        tc.setAuthorId(principal.getName());
+        return feedbackService.createTaskComment(tc);
     }
 
     @GetMapping("/getAllCourseComments/{courseId}")

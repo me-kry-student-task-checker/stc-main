@@ -3,25 +3,15 @@ package hu.me.iit.malus.thesis.feedback.controller.dto;
 
 public class TaskCommentDto {
 
-    private String authorId;
     private String text;
     private Long taskId;
 
-    public TaskCommentDto(String authorId, String text, Long taskId) {
-        this.authorId = authorId;
+    public TaskCommentDto(String text, Long taskId) {
         this.text = text;
         this.taskId = taskId;
     }
 
     public TaskCommentDto() {
-    }
-
-    public String getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(String authorId) {
-        this.authorId = authorId;
     }
 
     public String getText() {
