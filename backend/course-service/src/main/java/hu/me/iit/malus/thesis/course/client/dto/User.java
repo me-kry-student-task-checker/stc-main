@@ -2,9 +2,6 @@ package hu.me.iit.malus.thesis.course.client.dto;
 
 import lombok.*;
 
-@Getter @Setter
-@AllArgsConstructor
-@ToString @EqualsAndHashCode
 /**
  * Aggregator class for Student and Teacher objects.
  * It is not a real DTO, so it should not be used in inter-service communication,
@@ -12,6 +9,9 @@ import lombok.*;
  *
  * @author Javorek Dénes
  */
+@Getter @Setter
+@AllArgsConstructor
+@ToString @EqualsAndHashCode
 public class User
 {
     private final String email;

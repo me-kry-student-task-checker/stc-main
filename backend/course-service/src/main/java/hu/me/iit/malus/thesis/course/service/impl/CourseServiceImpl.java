@@ -6,7 +6,6 @@ import hu.me.iit.malus.thesis.course.client.TaskClient;
 import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
-import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.model.Invitation;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;

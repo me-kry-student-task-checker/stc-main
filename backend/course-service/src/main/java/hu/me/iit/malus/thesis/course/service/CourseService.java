@@ -1,6 +1,5 @@
 package hu.me.iit.malus.thesis.course.service;
 
-import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;

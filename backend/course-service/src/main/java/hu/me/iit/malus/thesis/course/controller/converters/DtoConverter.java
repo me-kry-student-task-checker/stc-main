@@ -3,7 +3,6 @@ package hu.me.iit.malus.thesis.course.controller.converters;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.model.Course;
-import org.springframework.beans.BeanUtils;
 
 /**
  * Collection of static Dto converter methods.
