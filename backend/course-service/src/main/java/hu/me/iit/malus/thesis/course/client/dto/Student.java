@@ -19,4 +19,8 @@ public class Student extends User {
         super(email, null, firstName, lastName, UserRole.STUDENT, enabled);
         this.assignedCourseIds = assignedCourseIds;
     }
+
+    public Student withEmail(String email) {
+        return new Student(email, this.getFirstName(), this.getLastName(), this.getAssignedCourseIds(), this.isEnabled());
+    }
 }

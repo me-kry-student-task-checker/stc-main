@@ -19,4 +19,8 @@ public class Teacher extends User {
         super(email, null, firstName, lastName, UserRole.TEACHER, enabled);
         this.createdCourseIds = createdCourseIds;
     }
+
+    public Teacher withEmail(String email) {
+        return new Teacher(email, this.getFirstName(), this.getLastName(), this.getCreatedCourseIds(), this.isEnabled());
+    }
 }

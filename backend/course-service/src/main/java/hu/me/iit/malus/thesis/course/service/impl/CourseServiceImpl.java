@@ -59,13 +59,9 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Course create(CourseDto course) {
-        Course courseToSave = new Course();
-        courseToSave.setName(course.getName());
-        courseToSave.setCreationDate(new Date());
-        courseToSave.setDescription(course.getDescription());
-        Teacher teacher = userClient.getTeacherByEmail(course.getCreator());
-        Course newCourse = courseRepository.save(courseToSave);
+    public Course create(Course course) {
+        Teacher teacher = userClient.getTeacherByEmail(course.getCreator().getEmail());
+        Course newCourse = courseRepository.save(course);
         teacher.getCreatedCourseIds().add(newCourse.getId());
         userClient.saveTeacher(teacher);
         log.info("Created course: {}", newCourse);
@@ -76,13 +72,9 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Course edit(CourseDto course) {
-        Course courseToSave = courseRepository.getOne(course.getId());
-        courseToSave.setName(course.getName());
-        courseToSave.setDescription(course.getDescription());
-        courseToSave.setCreator(userClient.getTeacherByEmail(course.getCreator()));
+    public Course edit(Course course) {
         log.info("Modified course: {}", course);
-        return courseRepository.save(courseToSave);
+        return courseRepository.save(course);
     }
 
     /**

@@ -22,7 +22,7 @@ public interface CourseService {
      * @param course the new course
      * @return the saved course
      */
-    Course create(CourseDto course);
+    Course create(Course course);
 
     /**
      * Saves an existing course with new parameters
@@ -30,7 +30,7 @@ public interface CourseService {
      * @param course the modified course which will be saved
      * @return the saved course
      */
-    Course edit(CourseDto course);
+    Course edit(Course course);
 
     /**
      * Gets a course by it's id

@@ -15,14 +15,12 @@ public class CourseDto {
         id = null;
         this.name = name;
         this.description = description;
-        this.creator = creator;
     }
 
     public CourseDto(Long id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.creator = creator;
     }
 
     public Long getId() {

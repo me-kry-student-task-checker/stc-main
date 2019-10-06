@@ -27,7 +27,7 @@ public class User
         this.enabled = false;
     }
 
-    User withEmail(String email) {
+    public User withEmail(String email) {
         return new User(email, this.password, this.firstName, this.lastName, this.role, false);
     }
 }
