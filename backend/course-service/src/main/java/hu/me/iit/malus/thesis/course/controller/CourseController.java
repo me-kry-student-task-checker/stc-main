@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 
+import hu.me.iit.malus.thesis.course.controller.converters.DtoConverter;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
@@ -29,15 +30,15 @@ public class CourseController {
     }
 
     @PostMapping("/create")
-    public Course createCourse(@RequestBody CourseDto course, Principal principal) {
-        course.setCreator(principal.getName());
-        return service.create(course);
+    public Course createCourse(@RequestBody CourseDto courseDto, Principal principal) {
+        courseDto.setCreator(principal.getName());
+        return service.create(DtoConverter.CourseDtoToCourse(courseDto));
     }
 
     @PostMapping("/edit")
-    public Course editCourse(@RequestBody CourseDto course, Principal principal) {
-        course.setCreator(principal.getName());
-        return service.edit(course);
+    public Course editCourse(@RequestBody CourseDto courseDto, Principal principal) {
+        courseDto.setCreator(principal.getName());
+        return service.edit(DtoConverter.CourseDtoToCourse(courseDto));
     }
 
     @GetMapping("/get/{courseId}")

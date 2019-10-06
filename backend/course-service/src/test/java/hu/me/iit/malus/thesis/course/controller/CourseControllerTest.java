@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.course.controller;
 
 import com.google.gson.Gson;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
+import hu.me.iit.malus.thesis.course.controller.converters.DtoConverter;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.controller.helper.JwtTestHelper;
 import hu.me.iit.malus.thesis.course.model.Course;
@@ -16,7 +17,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -54,25 +54,25 @@ public class CourseControllerTest {
     @Autowired private Gson gson;
     @Autowired private JwtTestHelper jwtHelper;
 
-    @MockBean
-    private CourseService courseService;
+    @MockBean private CourseService courseService;
 
     @Test
-    @WithMockUser(username="teacher@test.test",roles={"Teacher"})
     public void whenCreateCourse_WithValidToken_returnOkAndTheSameCourse()
             throws Exception {
         // Given
+
         Teacher courseOwner = new Teacher(
                 "teacher@test.test", "Teacher", "Test", new ArrayList<>(), true);
         Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
 
-        CourseDto courseDto = new CourseDto(course.getName(), course.getDescription());
-        given(courseService.create(courseDto)).willReturn(course);
+        CourseDto courseDto = new CourseDto("Meant To Be Created", "Creation tester");
+
+        given(courseService.create(DtoConverter.CourseDtoToCourse(courseDto))).willReturn(course);
 
         // When
         MvcResult response = mvc.perform(post("/api/course/create")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(course))
+                .content(gson.toJson(courseDto))
                 .header(jwtHelper.getJwtHeader(), jwtHelper.createValidJWT("teacher", "TEACHER")))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -90,8 +90,7 @@ public class CourseControllerTest {
                 "teacher@test.test", "Teacher", "Test", new ArrayList<>(), true);
         Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
 
-        CourseDto courseDto = new CourseDto(course.getName(), course.getDescription());
-        given(courseService.create(courseDto)).willReturn(course);
+        given(courseService.create(course)).willReturn(course);
 
         // When
         mvc.perform(post("/api/course/create")

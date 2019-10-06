@@ -46,5 +46,5 @@ public interface UserClient {
     User getUserByEmail(@PathVariable("email") String userEmail);
 
     @GetMapping("/api/user/me")
-    public User getMe();
+    User getMe();
 }

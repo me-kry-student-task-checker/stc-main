@@ -1,6 +1,5 @@
 package hu.me.iit.malus.thesis.course.service;
 
-import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
@@ -22,7 +21,7 @@ public interface CourseService {
      * @param course the new course
      * @return the saved course
      */
-    Course create(CourseDto course);
+    Course create(Course course);
 
     /**
      * Saves an existing course with new parameters
@@ -30,7 +29,7 @@ public interface CourseService {
      * @param course the modified course which will be saved
      * @return the saved course
      */
-    Course edit(CourseDto course);
+    Course edit(Course course);
 
     /**
      * Gets a course by it's id

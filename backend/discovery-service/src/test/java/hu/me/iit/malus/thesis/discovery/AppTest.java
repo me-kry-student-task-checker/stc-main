@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.gateway;
+package hu.me.iit.malus.thesis.discovery;
 
 import static org.junit.Assert.assertTrue;
 
