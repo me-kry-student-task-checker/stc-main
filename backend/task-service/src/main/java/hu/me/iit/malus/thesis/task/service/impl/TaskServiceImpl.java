@@ -55,6 +55,9 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public Task edit(Task task) {
+        Task taskToChange = repository.getOne(task.getId());
+        taskToChange.setName(task.getName());
+        taskToChange.setDescription(task.getDescription());
         log.info("Task edited: {}", task);
         return repository.save(task);
     }

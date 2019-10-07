@@ -59,12 +59,11 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public Course create(Course course) {
-        course.setCreationDate(new Date());
         Teacher teacher = userClient.getTeacherByEmail(course.getCreator().getEmail());
         Course newCourse = courseRepository.save(course);
         teacher.getCreatedCourseIds().add(newCourse.getId());
         userClient.saveTeacher(teacher);
-        log.info("Created course: {}", course);
+        log.info("Created course: {}", newCourse);
         return newCourse;
     }
 

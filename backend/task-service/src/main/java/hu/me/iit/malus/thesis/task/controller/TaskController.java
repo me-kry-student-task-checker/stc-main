@@ -1,5 +1,7 @@
 package hu.me.iit.malus.thesis.task.controller;
 
+import hu.me.iit.malus.thesis.task.controller.converters.Converter;
+import hu.me.iit.malus.thesis.task.controller.dto.TaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.service.TaskService;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
@@ -26,13 +28,13 @@ public class TaskController {
     }
 
     @PostMapping("/create")
-    public Task createTask(@RequestBody Task task) {
-        return service.create(task);
+    public Task createTask(@RequestBody TaskDto task) {
+        return service.create(Converter.taskDtoToTask(task));
     }
 
     @PostMapping("/edit")
-    public Task editTask(@RequestBody Task task) {
-        return service.edit(task);
+    public Task editTask(@RequestBody TaskDto task) {
+        return service.edit(Converter.taskDtoToTask(task));
     }
 
     @GetMapping("/getAll/{courseId}")
