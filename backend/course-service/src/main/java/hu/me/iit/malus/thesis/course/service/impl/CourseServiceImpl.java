@@ -6,8 +6,11 @@ import hu.me.iit.malus.thesis.course.client.TaskClient;
 import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
+import hu.me.iit.malus.thesis.course.client.dto.User;
+import hu.me.iit.malus.thesis.course.client.dto.UserRole;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.model.Invitation;
+import hu.me.iit.malus.thesis.course.model.exception.ForbiddenCourseEdit;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.repository.InvitationRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
@@ -15,8 +18,11 @@ import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.*;
 
 /**
@@ -58,8 +64,10 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Course create(Course course) {
-        Teacher teacher = userClient.getTeacherByEmail(course.getCreator().getEmail());
+    public Course create(Course course, String creatorsEmail) {
+        Teacher teacher = userClient.getTeacherByEmail(creatorsEmail);
+        course.setCreator(teacher);
+
         Course newCourse = courseRepository.save(course);
         teacher.getCreatedCourseIds().add(newCourse.getId());
         userClient.saveTeacher(teacher);
@@ -71,7 +79,13 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Course edit(Course course) {
+    public Course edit(Course course, String editorsEmail) {
+        Course oldCourse = courseRepository.getOne(course.getId());
+
+        if (!oldCourse.getCreator().getEmail().equals(editorsEmail)) {
+            throw new ForbiddenCourseEdit();
+        }
+
         log.info("Modified course: {}", course);
         return courseRepository.save(course);
     }
@@ -80,38 +94,23 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Course get(Long courseId) throws CourseNotFoundException {
-        Teacher creator = null;
-        Set<Student> students = new HashSet<>();
-        Set<Teacher> teachers = userClient.getAllTeachers();
-        Optional<Course> opt = courseRepository.findById(courseId);
-        if (opt.isPresent()) {
-            for (Teacher teacher : teachers) {
-                for (Long createdCourseId : teacher.getCreatedCourseIds()) {
-                    if (createdCourseId.equals(courseId)) {
-                        creator = teacher;
-                        break;
-                    }
-                }
+    public Course get(Long courseId, String userEmail) throws CourseNotFoundException {
+        Optional<Course> optCourse = courseRepository.findById(courseId);
+
+        if (optCourse.isPresent()) {
+            Course course = optCourse.get();
+            if (!findRelatedCourseIds(userEmail).contains(course.getId())) {
+                throw new CourseNotFoundException();
             }
-            for (Student student : userClient.getAllStudents()) {
-                for (Long assignedCourseId : student.getAssignedCourseIds()) {
-                    if (assignedCourseId.equals(courseId)) {
-                        students.add(student);
-                        break;
-                    }
-                }
-            }
-            Course course = opt.get();
-            course.setCreator(creator);
-            course.setStudents(students);
+            course.setCreator(userClient.getTeacherByCreatedCourseId(courseId));
+            course.setStudents(userClient.getStudentsByAssignedCourseId(courseId));
             course.setTasks(taskClient.getAllTasks(courseId));
             course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, courseId).getBody());
             course.setComments(feedbackClient.getAllCourseComments(courseId));
             log.info("Course found: {}", courseId);
             return course;
         } else {
-            log.error("No course found with this email: {}", courseId);
+            log.warn("No course found with this id: {}", courseId);
             throw new CourseNotFoundException();
         }
     }
@@ -120,31 +119,19 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Iterable<Course> getAll() {
-        Set<Student> students;
-        Iterable<Course> courses = courseRepository.findAll();
+    public List<Course> getAll(String userEmail) {
+        List<Course> courses = courseRepository.findAll();
         for (Course course : courses) {
-            for (Teacher teacher : userClient.getAllTeachers()) {
-                for (Long createdCourseId : teacher.getCreatedCourseIds()) {
-                    if (createdCourseId.equals(course.getId())) {
-                        course.setCreator(teacher);
-                    }
-                }
+            if (!findRelatedCourseIds(userEmail).contains(course.getId())) {
+                continue;
             }
-            students = new HashSet<>();
-            for (Student student : userClient.getAllStudents()) {
-                for (Long assignedCourseId : student.getAssignedCourseIds()) {
-                    if (assignedCourseId.equals(course.getId())) {
-                        students.add(student);
-                    }
-                }
-            }
-            course.setStudents(students);
+            course.setCreator(userClient.getTeacherByCreatedCourseId(course.getId()));
+            course.setStudents(userClient.getStudentsByAssignedCourseId(course.getId()));
             course.setTasks(taskClient.getAllTasks(course.getId()));
             course.setComments(feedbackClient.getAllCourseComments(course.getId()));
             course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, course.getId()).getBody());
         }
-        log.info("Courses found: {}", courses);
+        log.info("Get all courses done, total number of courses is {}", courses.size());
         return courses;
     }
 
@@ -197,4 +184,16 @@ public class CourseServiceImpl implements CourseService {
         }
     }
 
+    private List<Long> findRelatedCourseIds(String userEmail) {
+        User user = userClient.getUserByEmail(userEmail);
+
+        if (user.getRole().equals(UserRole.TEACHER)) {
+            Teacher teacher = userClient.getTeacherByEmail(userEmail);
+            return teacher.getCreatedCourseIds();
+        } else if (user.getRole().equals(UserRole.STUDENT)) {
+            Student student = userClient.getStudentByEmail(userEmail);
+            return student.getAssignedCourseIds();
+        }
+        return Collections.emptyList();
+    }
 }

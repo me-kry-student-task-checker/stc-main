@@ -1,12 +1,15 @@
 package hu.me.iit.malus.thesis.course.service.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * Custom exception class, is thrown if a course can not be found in the database
  *
  * @author Attila Szőke
  */
-public class CourseNotFoundException extends Exception {
-
+@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Course not found")
+public class CourseNotFoundException extends RuntimeException {
     private static final String ERROR_MESSAGE = "Course can not be found!";
 
     public CourseNotFoundException() {

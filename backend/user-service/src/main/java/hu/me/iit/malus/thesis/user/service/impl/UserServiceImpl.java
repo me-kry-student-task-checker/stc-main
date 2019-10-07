@@ -6,7 +6,10 @@ import hu.me.iit.malus.thesis.user.model.exception.DatabaseOperationFailedExcept
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
 import hu.me.iit.malus.thesis.user.model.exception.IllegalUserInsertionException;
 import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
-import hu.me.iit.malus.thesis.user.repository.*;
+import hu.me.iit.malus.thesis.user.repository.ActivationTokenRepository;
+import hu.me.iit.malus.thesis.user.repository.AdminRepository;
+import hu.me.iit.malus.thesis.user.repository.StudentRepository;
+import hu.me.iit.malus.thesis.user.repository.TeacherRepository;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -234,12 +237,40 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
+    public Set<Student> getStudentsByAssignedCourseId(Long courseId) {
+        try {
+            return new HashSet<>(studentRepository.findAllByAssignedCourseId(courseId));
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationFailedException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Teacher getTeacherByEmail(String teacherEmail) {
         try {
             return  teacherRepository.findByEmail(teacherEmail);
         } catch (EntityNotFoundException notFoundExc) {
             throw new UserNotFoundException(teacherEmail);
         }  catch (DataAccessException e) {
+            throw new DatabaseOperationFailedException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Teacher getTeacherByCreatedCourseId(Long courseId) {
+        try {
+            Optional<Teacher> optTeacher = teacherRepository.findByCreatedCourseId(courseId);
+            if (!optTeacher.isPresent()) {
+                throw new UserNotFoundException();
+            }
+            return optTeacher.get();
+        } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
     }

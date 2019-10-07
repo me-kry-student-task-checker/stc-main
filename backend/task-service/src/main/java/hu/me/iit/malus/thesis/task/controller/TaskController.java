@@ -7,6 +7,7 @@ import hu.me.iit.malus.thesis.task.service.TaskService;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -28,11 +29,13 @@ public class TaskController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public Task createTask(@RequestBody TaskDto task) {
         return service.create(Converter.taskDtoToTask(task));
     }
 
     @PostMapping("/edit")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public Task editTask(@RequestBody TaskDto task) {
         return service.edit(Converter.taskDtoToTask(task));
     }
@@ -43,6 +46,7 @@ public class TaskController {
     }
 
     @PostMapping("/setDone/{taskId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public void changeTasksDoneStatus(@PathVariable Long taskId) throws TaskNotFoundException {
         service.changeDoneStatus(taskId);
     }

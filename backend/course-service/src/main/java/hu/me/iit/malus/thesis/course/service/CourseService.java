@@ -4,6 +4,7 @@ import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -19,34 +20,37 @@ public interface CourseService {
      * Saves a course to the database
      *
      * @param course the new course
+     * @param creatorsEmail the email address of the creator
      * @return the saved course
      */
-    Course create(Course course);
+    Course create(Course course, String creatorsEmail);
 
     /**
      * Saves an existing course with new parameters
      *
      * @param course the modified course which will be saved
+     * @param editorsEmail the email address of the editor
      * @return the saved course
      */
-    Course edit(Course course);
+    Course edit(Course course, String editorsEmail);
 
     /**
      * Gets a course by it's id
      *
      * @param courseId the id of the course
+     * @param userEmail currently authenticated user's email
      * @return the course
      */
-    Course get(Long courseId) throws CourseNotFoundException;
+    Course get(Long courseId, String userEmail) throws CourseNotFoundException;
 
     //TODO might need to use pagination
 
     /**
      * Lists all courses
-     *
+     * @param userEmail currently authenticated user's email
      * @return list of courses
      */
-    Iterable<Course> getAll();
+    List<Course> getAll(String userEmail);
 
     //TODO these will need a table which contains the uuid, a courseId and the studentId
 

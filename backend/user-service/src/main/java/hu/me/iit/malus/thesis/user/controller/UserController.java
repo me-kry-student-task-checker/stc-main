@@ -94,9 +94,19 @@ public class UserController {
         return service.getStudentByEmail(studentEmail);
     }
 
+    @GetMapping("/student/assigned/{courseId}")
+    public Set<Student> getStudentsByAssignedCourseId(@PathVariable("courseId") Long courseId) {
+        return service.getStudentsByAssignedCourseId(courseId);
+    }
+
     @GetMapping("/teacher/{email:.+}")
     public Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail) {
         return service.getTeacherByEmail(teacherEmail);
+    }
+
+    @GetMapping("/teacher/created/{courseId}")
+    public Teacher getTeacherByCreatedCourseId(@PathVariable("courseId") Long courseId) {
+        return service.getTeacherByCreatedCourseId(courseId);
     }
 
     @GetMapping("/{email:.+}")

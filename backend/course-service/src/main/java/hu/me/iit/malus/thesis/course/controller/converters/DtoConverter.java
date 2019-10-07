@@ -10,12 +10,11 @@ import hu.me.iit.malus.thesis.course.model.Course;
  */
 public class DtoConverter {
     public static Course CourseDtoToCourse(CourseDto courseDto) {
-        Teacher courseCreator = new Teacher();
-
         Course course = new Course();
-        course.setName(course.getName());
-        course.setDescription(course.getDescription());
-        course.setCreator(courseCreator.withEmail(courseDto.getCreator()));
+
+        course.setId(courseDto.getId());
+        course.setName(courseDto.getName());
+        course.setDescription(courseDto.getDescription());
 
         return course;
     }

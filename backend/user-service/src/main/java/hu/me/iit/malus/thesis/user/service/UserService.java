@@ -82,11 +82,25 @@ public interface UserService {
     Student getStudentByEmail(String studentEmail);
 
     /**
+     * Returns all the Students who has been assigned to a course
+     * @param courseId Id of a course, that the Students assigned to
+     * @return The corresponding Students
+     */
+    Set<Student> getStudentsByAssignedCourseId(Long courseId);
+
+    /**
      * Returns a single Teacher by its email (identifier)
      * @param teacherEmail Teacher's email
      * @return The corresponding Teacher
      */
     Teacher getTeacherByEmail(String teacherEmail);
+
+    /**
+     * Returns a single Teacher by a course id, that he owns
+     * @param courseId Id of a course, that the Teacher has created before
+     * @return The corresponding Teacher
+     */
+    Teacher getTeacherByCreatedCourseId(Long courseId);
 
     /**
      * Return a complete User object, queried by its email (identifier)

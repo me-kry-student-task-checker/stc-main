@@ -1,7 +1,9 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 import com.google.gson.Gson;
+import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
+import hu.me.iit.malus.thesis.course.client.dto.UserRole;
 import hu.me.iit.malus.thesis.course.controller.converters.DtoConverter;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.controller.helper.JwtTestHelper;
@@ -60,20 +62,22 @@ public class CourseControllerTest {
     public void whenCreateCourse_WithValidToken_returnOkAndTheSameCourse()
             throws Exception {
         // Given
-
+        String courseOwnersEmail = "teacher@test.test";
         Teacher courseOwner = new Teacher(
-                "teacher@test.test", "Teacher", "Test", new ArrayList<>(), true);
+                courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
         Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
 
-        CourseDto courseDto = new CourseDto("Meant To Be Created", "Creation tester");
+        CourseDto courseDto = new CourseDto();
+        courseDto.setName(course.getName());
+        courseDto.setDescription(course.getDescription());
 
-        given(courseService.create(DtoConverter.CourseDtoToCourse(courseDto))).willReturn(course);
+        given(courseService.create(DtoConverter.CourseDtoToCourse(courseDto), courseOwnersEmail)).willReturn(course);
 
         // When
         MvcResult response = mvc.perform(post("/api/course/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(gson.toJson(courseDto))
-                .header(jwtHelper.getJwtHeader(), jwtHelper.createValidJWT("teacher", "TEACHER")))
+                .header(jwtHelper.getJwtHeader(), jwtHelper.createValidJWT(courseOwnersEmail, UserRole.TEACHER.getRoleString())))
                 .andExpect(status().isOk())
                 .andReturn();
         Course responseCourse = gson.fromJson(response.getResponse().getContentAsString(), Course.class);
@@ -86,16 +90,33 @@ public class CourseControllerTest {
     public void whenCreateCourse_WithoutToken_returnUnauthorized()
             throws Exception {
         // Given
+        String courseOwnersEmail = "teacher@test.test";
         Teacher courseOwner = new Teacher(
-                "teacher@test.test", "Teacher", "Test", new ArrayList<>(), true);
+                courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
         Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
 
-        given(courseService.create(course)).willReturn(course);
+        given(courseService.create(course, courseOwnersEmail)).willReturn(course);
 
         // When
         mvc.perform(post("/api/course/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(gson.toJson(course)))
                 .andExpect(status().isUnauthorized()); //Then
+    }
+
+    @Test
+    public void whenStudentCreateCourse_WithValidToken_returnForbidden()
+            throws Exception {
+        // Given
+        CourseDto courseDto = new CourseDto();
+        courseDto.setName("Meant To Be Created");
+        courseDto.setDescription("Haha, can I create this one?");
+
+        // When
+        mvc.perform(post("/api/course/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(courseDto))
+                .header(jwtHelper.getJwtHeader(), jwtHelper.createValidJWT("bob", UserRole.STUDENT.getRoleString())))
+                .andExpect(status().isForbidden()); // Then
     }
 }

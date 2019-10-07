@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.course.repository;
 
 import hu.me.iit.malus.thesis.course.model.Invitation;
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,11 @@ public class InvitationRepositoryTest {
 
     @Autowired
     private InvitationRepository repository;
+
+    @Before
+    public void reset() {
+        entityManager.clear();
+    }
 
     @Test
     public void whenFindById_invitationFound_wrappedInOptional() {

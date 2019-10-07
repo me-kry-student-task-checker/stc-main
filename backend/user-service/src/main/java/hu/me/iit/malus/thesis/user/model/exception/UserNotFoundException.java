@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "User cannot be found.")
 @Getter
 public class UserNotFoundException extends RuntimeException {
-    private static final String MSG = "User with this email address, cannot be found!";
+    private static final String MSG = "User, cannot be found!";
     private String email;
+
+    public UserNotFoundException() {
+        super(MSG);
+    }
 
     public UserNotFoundException(String requestedEmail) {
         super(MSG + " Email: " + requestedEmail);
