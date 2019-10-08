@@ -67,7 +67,7 @@ services:
     container_name: discovery-service-peer1
     build:
       context: ./discovery-service
-      dockerfile: dockerfile-p1
+      dockerfile: dockerfile
     image: discovery-service-peer1:latest
     networks:
       - studentTaskChecker
@@ -80,7 +80,7 @@ services:
     container_name: discovery-service-peer2
     build:
       context: ./discovery-service
-      dockerfile: dockerfile-p2
+      dockerfile: dockerfile
     image: discovery-service-peer2:latest
     networks:
       - studentTaskChecker
