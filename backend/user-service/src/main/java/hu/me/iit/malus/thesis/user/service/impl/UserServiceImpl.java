@@ -134,6 +134,7 @@ public class UserServiceImpl implements UserService {
     public void saveStudent(Student student) {
         if (studentRepository.existsByEmail(student.getEmail())) {
             try {
+                student.setPassword(studentRepository.findByEmail(student.getEmail()).getPassword());
                 studentRepository.save(student);
             } catch (DataAccessException e) {
                 throw new DatabaseOperationFailedException(e);
@@ -152,6 +153,7 @@ public class UserServiceImpl implements UserService {
             if (!studentRepository.existsByEmail(student.getEmail())) {
                 throw new IllegalUserInsertionException();
             }
+            student.setPassword(studentRepository.findByEmail(student.getEmail()).getPassword());
         }
 
         try {
@@ -168,6 +170,7 @@ public class UserServiceImpl implements UserService {
     public void saveTeacher(Teacher teacher) {
         if (teacherRepository.existsByEmail(teacher.getEmail())) {
             try {
+                teacher.setPassword(teacherRepository.findByEmail(teacher.getEmail()).getPassword());
                 teacherRepository.save(teacher);
             } catch (DataAccessException e) {
                 throw new DatabaseOperationFailedException(e);
@@ -186,6 +189,7 @@ public class UserServiceImpl implements UserService {
             if (!teacherRepository.existsByEmail(teacher.getEmail())) {
                 throw new IllegalUserInsertionException();
             }
+            teacher.setPassword(teacherRepository.findByEmail(teacher.getEmail()).getPassword());
         }
 
         try {

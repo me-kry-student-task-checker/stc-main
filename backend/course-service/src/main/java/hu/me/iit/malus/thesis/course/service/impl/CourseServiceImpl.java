@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -64,6 +65,7 @@ public class CourseServiceImpl implements CourseService {
     public Course create(Course course, String creatorsEmail) {
         Teacher teacher = userClient.getTeacherByEmail(creatorsEmail);
         course.setCreator(teacher);
+        course.setCreationDate(Date.from(Instant.now()));
 
         Course newCourse = courseRepository.save(course);
         teacher.getCreatedCourseIds().add(newCourse.getId());
@@ -117,8 +119,9 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public List<Course> getAll(String userEmail) {
-        List<Course> courses = courseRepository.findAll();
-        for (Course course : courses) {
+        List<Course> allCourses = courseRepository.findAll();
+        List<Course> relatedCourses = new ArrayList<>();
+        for (Course course : allCourses) {
             if (!findRelatedCourseIds(userEmail).contains(course.getId())) {
                 continue;
             }
@@ -127,9 +130,11 @@ public class CourseServiceImpl implements CourseService {
             course.setTasks(taskClient.getAllTasks(course.getId()));
             course.setComments(feedbackClient.getAllCourseComments(course.getId()));
             course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, course.getId()).getBody());
+
+            relatedCourses.add(course);
         }
-        log.info("Get all courses done, total number of courses is {}", courses.size());
-        return courses;
+        log.info("Get all courses done, total number of courses is {}", relatedCourses.size());
+        return relatedCourses;
     }
 
     /**

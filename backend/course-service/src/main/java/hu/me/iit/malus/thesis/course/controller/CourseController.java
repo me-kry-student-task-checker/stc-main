@@ -69,6 +69,7 @@ public class CourseController {
     }
 
     @PostMapping("/acceptInvitation/{invitationUuid}")
+    @PreAuthorize("hasRole('ROLE_Student')")
     public void acceptInvite(@PathVariable String invitationUuid) throws InvitationNotFoundException {
         service.acceptInvite(invitationUuid);
     }
