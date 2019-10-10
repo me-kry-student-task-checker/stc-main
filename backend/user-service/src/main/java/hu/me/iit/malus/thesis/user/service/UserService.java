@@ -89,6 +89,13 @@ public interface UserService {
     Set<Student> getStudentsByAssignedCourseId(Long courseId);
 
     /**
+     * Returns all the Students who is not already assigned to the given course
+     * @param courseId Id of a course, that the Student NOT assigned to
+     * @return The corresponding Students
+     */
+    Set<Student> getStudentsByNotAssignedCourseId(Long courseId);
+
+    /**
      * Returns a single Teacher by its email (identifier)
      * @param teacherEmail Teacher's email
      * @return The corresponding Teacher

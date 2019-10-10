@@ -1,13 +1,7 @@
 package hu.me.iit.malus.thesis.course.service.impl;
 
-import hu.me.iit.malus.thesis.course.client.FeedbackClient;
-import hu.me.iit.malus.thesis.course.client.FileManagementClient;
-import hu.me.iit.malus.thesis.course.client.TaskClient;
-import hu.me.iit.malus.thesis.course.client.UserClient;
-import hu.me.iit.malus.thesis.course.client.dto.Student;
-import hu.me.iit.malus.thesis.course.client.dto.Teacher;
-import hu.me.iit.malus.thesis.course.client.dto.User;
-import hu.me.iit.malus.thesis.course.client.dto.UserRole;
+import hu.me.iit.malus.thesis.course.client.*;
+import hu.me.iit.malus.thesis.course.client.dto.*;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.model.Invitation;
 import hu.me.iit.malus.thesis.course.model.exception.ForbiddenCourseEdit;
@@ -16,6 +10,7 @@ import hu.me.iit.malus.thesis.course.repository.InvitationRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
+import hu.me.iit.malus.thesis.course.service.impl.config.InvitationConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +33,8 @@ public class CourseServiceImpl implements CourseService {
     private FeedbackClient feedbackClient;
     private UserClient userClient;
     private FileManagementClient fileManagementClient;
+    private EmailClient emailClient;
+    private InvitationConfig invitationConfig;
 
     /**
      * Instantiates a new Course service.
@@ -45,17 +42,24 @@ public class CourseServiceImpl implements CourseService {
      * @param invitationRepository the invitation repository
      * @param taskClient the task client
      * @param feedbackClient the feedback client
+     * @param userClient the user client
+     * @param fileManagementClient the fileManagement client
+     * @param emailClient the email client
+     * @param invitationConfig configuration for sending invitations
      */
     @Autowired
     public CourseServiceImpl(CourseRepository courseRepository, InvitationRepository invitationRepository,
                              TaskClient taskClient, FeedbackClient feedbackClient, UserClient userClient,
-                             FileManagementClient fileManagementClient) {
+                             FileManagementClient fileManagementClient, EmailClient emailClient,
+                             InvitationConfig invitationConfig) {
         this.courseRepository = courseRepository;
         this.invitationRepository = invitationRepository;
         this.taskClient = taskClient;
         this.feedbackClient = feedbackClient;
         this.userClient = userClient;
         this.fileManagementClient = fileManagementClient;
+        this.emailClient = emailClient;
+        this.invitationConfig = invitationConfig;
     }
 
     /**
@@ -142,11 +146,11 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public void invite(Long courseId, String studentEmail) {
-        String invitationUuid = UUID.randomUUID().toString(); // for the email
-        invitationRepository.save(new Invitation(invitationUuid, studentEmail, courseId));
-        //TODO send email with email service
-        //TODO remove this from the database after 24 hours - FOR DENIS
-        log.info("Invitation saved to database and e-mail sent - courseId: {}, studentId{}", courseId, studentEmail);
+        String invitationUuid = UUID.randomUUID().toString();
+        sendInvitationEmail(invitationUuid, studentEmail);
+        invitationRepository.save(Invitation.of(invitationUuid, studentEmail, courseId));
+
+        log.info("Invitation saved to database and e-mail sent - courseId: {}, studentEmail{}", courseId, studentEmail);
     }
 
     /**
@@ -154,16 +158,13 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public void invite(Long courseId, List<String> studentEmails) {
-        List<String> invitationUuids = new ArrayList<>(); //for the emails
         List<Invitation> invitations = new ArrayList<>();
         for (String studentId : studentEmails) {
             String uuid = UUID.randomUUID().toString();
-            invitationUuids.add(uuid);
-            invitations.add(new Invitation(uuid, studentId, courseId));
+            invitations.add(Invitation.of(uuid, studentId, courseId));
+            sendInvitationEmail(uuid, studentId);
         }
         invitationRepository.saveAll(invitations);
-        //TODO send emails with email service
-        //TODO remove these from the database after 24 hours - FOR DENIS
         log.info("Invitations saved to database and e-mails sent - courseId: {}, studentId{}", courseId, studentEmails);
     }
 
@@ -179,13 +180,22 @@ public class CourseServiceImpl implements CourseService {
             student.getAssignedCourseIds().add(invitation.getCourseId());
             userClient.saveStudent(student);
             log.info("Invitation accepted: {}", invitation);
-            invitationRepository.delete(invitation);
+
+            if (invitationRepository.existsById(invitation.getInvitationUuid())) {
+                invitationRepository.delete(invitation);
+            }
         } else {
             log.warn("Invitation not found: {}", inviteUUID);
             throw new InvitationNotFoundException();
         }
     }
 
+    /**
+     * Finds those courses (only ids), that somehow related to the given email,
+     * whether by creator or assignee.
+     * @param userEmail Email address (id) of a user.
+     * @return Ids of those course that the user is related to.
+     */
     private List<Long> findRelatedCourseIds(String userEmail) {
         User user = userClient.getUserByEmail(userEmail);
 
@@ -197,5 +207,25 @@ public class CourseServiceImpl implements CourseService {
             return student.getAssignedCourseIds();
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * Sends an invitation email to a student, which contains the correct link to accept the course invitation.
+     * @param invitationUuid Id of the invitation
+     * @param studentEmail Email address of the student
+     */
+    private void sendInvitationEmail(String invitationUuid, String studentEmail) {
+        String subject = "Registration Confirmation - " + invitationConfig.getApplicationName();
+        String confirmationUrl
+                = invitationConfig.getApplicationURL() + "/api/course/acceptInvitation/" + invitationUuid;
+
+        // This can be externalized via MessageSource, and get messages for different locales
+        String message = "You can accept your course invitation via the following link: ";
+
+        Mail email = new Mail();
+        email.setTo(Collections.singletonList(studentEmail));
+        email.setSubject(subject);
+        email.setText(message + confirmationUrl);
+        emailClient.sendMail(email);
     }
 }

@@ -1,7 +1,6 @@
 package hu.me.iit.malus.thesis.user.repository;
 
 import hu.me.iit.malus.thesis.user.model.Student;
-import hu.me.iit.malus.thesis.user.model.Teacher;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +49,7 @@ public class StudentRepositoryTest {
         entityManager.flush();
 
         // When
-        Set<Student> foundByAssignedCourseId = new HashSet<>(repository.findAllByAssignedCourseId(criteriaCourseId));
+        Set<Student> foundByAssignedCourseId = new HashSet<>(repository.findAllAssignedForCourseId(criteriaCourseId));
 
         // Then
         Assertions.assertThat(foundByAssignedCourseId.size()).isEqualTo(1);
@@ -71,9 +70,35 @@ public class StudentRepositoryTest {
         entityManager.flush();
 
         // When
-        Set<Student> foundByAssignedCourseId = new HashSet<>(repository.findAllByAssignedCourseId(criteriaCourseId_missing));
+        Set<Student> foundByAssignedCourseId = new HashSet<>(repository.findAllAssignedForCourseId(criteriaCourseId_missing));
 
         // Then
         Assertions.assertThat(foundByAssignedCourseId.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void whenFindAllByNotAssignedCourseId_withExistingId_returnNotAssigned() {
+        // Given
+        Long criteriaCourseId = 54L;
+        List<Long> someIdsOfAssignedCourses = Arrays.asList(1L, 2L, 6L, criteriaCourseId, 5L, 60L);
+
+        Student studentToFind = new Student(
+                "toFind@teacher.test", "$2aHash", "Target", "Student", new ArrayList<>());
+
+
+        Student studentNotToFind = new Student(
+                "nobody@student.test", "$2aHash", "Nobody", "Student", new ArrayList<>());
+        studentNotToFind.setAssignedCourseIds(someIdsOfAssignedCourses);
+
+        entityManager.persist(studentToFind);
+        entityManager.persist(studentNotToFind);
+        entityManager.flush();
+
+        // When
+        Set<Student> foundByAssignedCourseId = new HashSet<>(repository.findAllNotAssignedForCourseId(criteriaCourseId));
+
+        // Then
+        Assertions.assertThat(foundByAssignedCourseId.size()).isEqualTo(1);
+        Assertions.assertThat(foundByAssignedCourseId.contains(studentToFind)).isEqualTo(true);
     }
 }

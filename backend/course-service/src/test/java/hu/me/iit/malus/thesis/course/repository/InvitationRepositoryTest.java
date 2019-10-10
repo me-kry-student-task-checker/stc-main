@@ -37,7 +37,7 @@ public class InvitationRepositoryTest {
         // Given
         String invitationId = UUID.randomUUID().toString();
 
-        Invitation invitation = new Invitation(
+        Invitation invitation = Invitation.of(
                 invitationId, "invited@user.com", 1L);
         entityManager.persistAndFlush(invitation);
 
@@ -54,7 +54,7 @@ public class InvitationRepositoryTest {
         // Given
         String invitationId = UUID.randomUUID().toString();
 
-        Invitation invitation = new Invitation(
+        Invitation invitation = Invitation.of(
                 invitationId, "invited@student.com", 2L);
         repository.save(invitation);
 

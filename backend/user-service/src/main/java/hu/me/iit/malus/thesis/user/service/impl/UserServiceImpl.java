@@ -243,7 +243,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<Student> getStudentsByAssignedCourseId(Long courseId) {
         try {
-            return new HashSet<>(studentRepository.findAllByAssignedCourseId(courseId));
+            return new HashSet<>(studentRepository.findAllAssignedForCourseId(courseId));
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationFailedException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<Student> getStudentsByNotAssignedCourseId(Long courseId) {
+        try {
+            return new HashSet<>(studentRepository.findAllNotAssignedForCourseId(courseId));
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -308,4 +320,5 @@ public class UserServiceImpl implements UserService {
         return studentRepository.findByEmail(email) != null || teacherRepository.findByEmail(email) != null ||
                 adminRepository.findByEmail(email) != null;
     }
+
 }

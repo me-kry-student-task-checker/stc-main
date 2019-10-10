@@ -99,6 +99,11 @@ public class UserController {
         return service.getStudentsByAssignedCourseId(courseId);
     }
 
+    @GetMapping("/student/notassigned/{courseId}")
+    public Set<Student> getStudentsByNotAssignedCourseId(@PathVariable("courseId") Long courseId) {
+        return service.getStudentsByNotAssignedCourseId(courseId);
+    }
+
     @GetMapping("/teacher/{email:.+}")
     public Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail) {
         return service.getTeacherByEmail(teacherEmail);
