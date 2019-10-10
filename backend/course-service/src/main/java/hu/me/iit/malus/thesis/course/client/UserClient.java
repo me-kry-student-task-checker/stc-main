@@ -39,8 +39,17 @@ public interface UserClient {
     @GetMapping("/api/user/student/{email}/")
     Student getStudentByEmail(@PathVariable("email") String studentEmail);
 
+    @GetMapping("/api/user/student/assigned/{courseId}")
+    Set<Student> getStudentsByAssignedCourseId(@PathVariable("courseId") Long courseId);
+
+    @GetMapping("/api/user/student/notassigned/{courseId}")
+    Set<Student> getStudentsByNotAssignedCourseId(@PathVariable("courseId") Long courseId);
+
     @GetMapping("/api/user/teacher/{email}/")
     Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail);
+
+    @GetMapping("/api/user/teacher/created/{courseId}")
+    Teacher getTeacherByCreatedCourseId(@PathVariable("courseId") Long courseId);
 
     @GetMapping("/api/user/{email}/")
     User getUserByEmail(@PathVariable("email") String userEmail);

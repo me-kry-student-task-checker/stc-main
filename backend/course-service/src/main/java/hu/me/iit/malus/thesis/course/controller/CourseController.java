@@ -1,16 +1,23 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 
+import hu.me.iit.malus.thesis.course.client.dto.Teacher;
+import hu.me.iit.malus.thesis.course.client.dto.User;
 import hu.me.iit.malus.thesis.course.controller.converters.DtoConverter;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,26 +37,25 @@ public class CourseController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public Course createCourse(@RequestBody CourseDto courseDto, Principal principal) {
-        courseDto.setCreator(principal.getName());
-        return service.create(DtoConverter.CourseDtoToCourse(courseDto));
+        return service.create(DtoConverter.CourseDtoToCourse(courseDto), principal.getName());
     }
 
     @PostMapping("/edit")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public Course editCourse(@RequestBody CourseDto courseDto, Principal principal) {
-        courseDto.setCreator(principal.getName());
-        return service.edit(DtoConverter.CourseDtoToCourse(courseDto));
+        return service.edit(DtoConverter.CourseDtoToCourse(courseDto), principal.getName());
     }
 
     @GetMapping("/get/{courseId}")
-    //TODO exception handling with controller advice?
-    public Course get(@PathVariable Long courseId) throws CourseNotFoundException {
-        return service.get(courseId);
+    public Course get(@PathVariable Long courseId, Principal principal) {
+        return service.get(courseId, principal.getName());
     }
 
     @GetMapping("/getAll")
-    public Iterable<Course> getAll() {
-        return service.getAll();
+    public List<Course> getAll(Principal principal) {
+        return service.getAll(principal.getName());
     }
 
     @PostMapping("/invite/{courseId}/{studentId}")
@@ -63,7 +69,7 @@ public class CourseController {
     }
 
     @PostMapping("/acceptInvitation/{invitationUuid}")
-    //TODO exception handling with controller advice?
+    @PreAuthorize("hasRole('ROLE_Student')")
     public void acceptInvite(@PathVariable String invitationUuid) throws InvitationNotFoundException {
         service.acceptInvite(invitationUuid);
     }

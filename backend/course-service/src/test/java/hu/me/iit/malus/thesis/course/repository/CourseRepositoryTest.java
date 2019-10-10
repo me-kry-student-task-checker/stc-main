@@ -4,6 +4,7 @@ import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import hu.me.iit.malus.thesis.course.model.Course;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,11 @@ public class CourseRepositoryTest {
 
     @Autowired
     private CourseRepository repository;
+
+    @Before
+    public void reset() {
+        entityManager.clear();
+    }
 
     @Test
     public void whenFindById_courseFound_wrappedInOptional() {

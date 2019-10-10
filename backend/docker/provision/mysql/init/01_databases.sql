@@ -8,7 +8,6 @@ CREATE DATABASE IF NOT EXISTS `users`;
 # create root user and grant rights
 CREATE USER 'courseservice'@'%' IDENTIFIED BY 'course';
 GRANT ALL PRIVILEGES ON courses.* TO 'courseservice'@'%';
-
 CREATE USER 'fileservice'@'%' IDENTIFIED BY 'file';
 GRANT ALL PRIVILEGES ON files.* TO 'fileservice'@'%';
 CREATE USER 'taskservice'@'%' IDENTIFIED BY 'task';
