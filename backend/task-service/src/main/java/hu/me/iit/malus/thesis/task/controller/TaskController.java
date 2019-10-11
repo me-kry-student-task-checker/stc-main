@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.task.controller;
 
 import hu.me.iit.malus.thesis.task.controller.converters.Converter;
+import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.TaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.service.TaskService;
@@ -42,12 +43,12 @@ public class TaskController {
     }
 
     @GetMapping("/get/{taskId}")
-    public Task getTask(@PathVariable Long taskId) {
+    public DetailedTaskDto getTask(@PathVariable Long taskId) {
         return service.get(taskId);
     }
 
     @GetMapping("/getAll/{courseId}")
-    public Set<Task> getAllTasks(@PathVariable Long courseId) {
+    public Set<DetailedTaskDto> getAllTasks(@PathVariable Long courseId) {
         return service.getAll(courseId);
     }
 

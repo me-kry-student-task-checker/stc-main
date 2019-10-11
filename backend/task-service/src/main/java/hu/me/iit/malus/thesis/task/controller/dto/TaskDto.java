@@ -1,5 +1,9 @@
 package hu.me.iit.malus.thesis.task.controller.dto;
 
+/**
+ * A simple Task DTO, used as create and edit request
+ * @author Krisztián Ilku
+ */
 public class TaskDto {
 
     private Long id;

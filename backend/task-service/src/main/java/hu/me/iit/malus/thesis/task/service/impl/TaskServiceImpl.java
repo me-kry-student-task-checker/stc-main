@@ -2,6 +2,9 @@ package hu.me.iit.malus.thesis.task.service.impl;
 
 import hu.me.iit.malus.thesis.task.client.FeedbackClient;
 import hu.me.iit.malus.thesis.task.client.FileManagementClient;
+import hu.me.iit.malus.thesis.task.client.UserClient;
+import hu.me.iit.malus.thesis.task.client.dto.Student;
+import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.repository.TaskRepository;
 import hu.me.iit.malus.thesis.task.service.TaskService;
@@ -28,15 +31,18 @@ public class TaskServiceImpl implements TaskService {
     private TaskRepository repository;
     private FeedbackClient feedbackClient;
     private FileManagementClient fileManagementClient;
+    private UserClient userClient;
 
     /**
      * Instantiates a new TaskServiceImpl class
      */
     @Autowired
-    public TaskServiceImpl(TaskRepository repository, FeedbackClient feedbackClient, FileManagementClient fileManagementClient) {
+    public TaskServiceImpl(TaskRepository repository, FeedbackClient feedbackClient, FileManagementClient fileManagementClient,
+                           UserClient userClient) {
         this.repository = repository;
         this.feedbackClient = feedbackClient;
         this.fileManagementClient = fileManagementClient;
+        this.userClient = userClient;
     }
 
     /**
@@ -66,14 +72,12 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public Task get(Long taskId) {
+    public DetailedTaskDto get(Long taskId) {
         Optional<Task> optTask = repository.findById(taskId);
         if (optTask.isPresent()) {
-            Task task = optTask.get();
-            task.setComments(feedbackClient.getAllTaskComments(task.getId()));
-            task.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.task.client.dto.Service.TASK, task.getId()).getBody());
-            log.info("Task queried: {}", task);
-            return task;
+            DetailedTaskDto taskDto = getDetailedTask(optTask.get());
+            log.info("Task queried by id: {}, successfully", taskId);
+            return taskDto;
         } else {
             log.error("No task found with this id: {}", taskId);
             throw new TaskNotFoundException();
@@ -84,16 +88,16 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public Set<Task> getAll(Long courseId) {
-        Optional<Set<Task>> opt = repository.findAllByCourseId(courseId);
-        if (opt.isPresent()) {
-            Set<Task> tasks = opt.get();
+    public Set<DetailedTaskDto> getAll(Long courseId) {
+        Optional<Set<Task>> optTasks = repository.findAllByCourseId(courseId);
+        if (optTasks.isPresent()) {
+            Set<DetailedTaskDto> taskDtos = new HashSet<>();
+            Set<Task> tasks = optTasks.get();
             for (Task task : tasks) {
-                task.setComments(feedbackClient.getAllTaskComments(task.getId()));
-                task.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.task.client.dto.Service.TASK, task.getId()).getBody());
+                taskDtos.add(getDetailedTask(task));
             }
-            log.info("Tasks queried for course ({}): {}", courseId, tasks);
-            return tasks;
+            log.info("Tasks queried for course: {}, found {} tasks", courseId, taskDtos.size());
+            return taskDtos;
         } else {
             log.warn("No task found for this course id: {}", courseId);
             return new HashSet<>();
@@ -180,5 +184,25 @@ public class TaskServiceImpl implements TaskService {
             log.error("Could not toggle help request for {} - No task found with id: {}", studentId, taskId);
             throw new TaskNotFoundException();
         }
+    }
+
+    private DetailedTaskDto getDetailedTask(Task task) {
+        DetailedTaskDto taskDto = new DetailedTaskDto(task);
+
+        Set<Student> allStudentsInCourse = userClient.getStudentsByAssignedCourseId(task.getCourseId());
+        Set<Student> completed = new HashSet<>();
+        Set<Student> helpNeeded = new HashSet<>();
+        for (Student student : allStudentsInCourse) {
+            if (task.getCompletedStudentIds().contains(student.getEmail()))
+                completed.add(student);
+            if (task.getHelpNeededStudentIds().contains(student.getEmail()))
+                helpNeeded.add(student);
+        }
+        taskDto.setCompletedStudents(completed);
+        taskDto.setHelpNeededStudents(helpNeeded);
+        taskDto.setComments(feedbackClient.getAllTaskComments(task.getId()));
+        taskDto.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.task.client.dto.Service.TASK, task.getId()).getBody());
+
+        return taskDto;
     }
 }

@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.task.service;
 
+import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
@@ -35,7 +36,7 @@ public interface TaskService {
      * @param taskId id of the Task
      * @return the corresponding Task
      */
-    Task get(Long taskId);
+    DetailedTaskDto get(Long taskId);
 
     /**
      * Gets every task based on it's course id
@@ -43,7 +44,7 @@ public interface TaskService {
      * @param courseId the id of the course to get all tasks from
      * @return the list of tasks
      */
-    Set<Task> getAll(Long courseId);
+    Set<DetailedTaskDto> getAll(Long courseId);
 
     /**
      * Negates the done flag of a task

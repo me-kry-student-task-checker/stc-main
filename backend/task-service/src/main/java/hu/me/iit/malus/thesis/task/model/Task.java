@@ -30,12 +30,12 @@ public class Task {
     private Date creationDate;
     private boolean isDone;
     private Long courseId;
-    @Transient Set<File> files;
+    @Transient
+    private Set<File> files;
     @ElementCollection
     private Set<String> helpNeededStudentIds;
     @ElementCollection
     private Set<String> completedStudentIds;
-
     @Transient
     private List<TaskComment> comments;
 
