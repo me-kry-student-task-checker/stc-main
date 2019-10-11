@@ -31,6 +31,13 @@ public interface TaskService {
     Task edit(Task task);
 
     /**
+     * Returns a single Task by its id
+     * @param taskId id of the Task
+     * @return the corresponding Task
+     */
+    Task get(Long taskId);
+
+    /**
      * Gets every task based on it's course id
      *
      * @param courseId the id of the course to get all tasks from
@@ -62,19 +69,10 @@ public interface TaskService {
     Set<String> checkIfHelpNeeded(Long taskId) throws TaskNotFoundException;
 
     /**
-     * Adds a student id to a task's 'help needed' list
+     * Toggles (adds-removes) a student id from a task's 'help needed' list
      *
      * @param taskId    id of the task
      * @param studentId id of the student
      */
-    void requestHelp(Long taskId, String studentId) throws TaskNotFoundException;
-
-    /**
-     * Removes a student id from a task's 'help needed' list
-     *
-     * @param taskId    id of the task
-     * @param studentId id of the student
-     */
-    void resolveHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException;
-
+    void toggleHelp(Long taskId, String studentId) throws TaskNotFoundException;
 }

@@ -54,6 +54,4 @@ public class TaskDto {
     public void setCourseId(Long courseId) {
         this.courseId = courseId;
     }
-
-
 }

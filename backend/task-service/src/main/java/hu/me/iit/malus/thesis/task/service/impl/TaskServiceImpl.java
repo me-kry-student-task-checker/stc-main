@@ -66,6 +66,24 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
+    public Task get(Long taskId) {
+        Optional<Task> optTask = repository.findById(taskId);
+        if (optTask.isPresent()) {
+            Task task = optTask.get();
+            task.setComments(feedbackClient.getAllTaskComments(task.getId()));
+            task.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.task.client.dto.Service.TASK, task.getId()).getBody());
+            log.info("Task queried: {}", task);
+            return task;
+        } else {
+            log.error("No task found with this id: {}", taskId);
+            throw new TaskNotFoundException();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Set<Task> getAll(Long courseId) {
         Optional<Set<Task>> opt = repository.findAllByCourseId(courseId);
         if (opt.isPresent()) {
@@ -74,10 +92,10 @@ public class TaskServiceImpl implements TaskService {
                 task.setComments(feedbackClient.getAllTaskComments(task.getId()));
                 task.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.task.client.dto.Service.TASK, task.getId()).getBody());
             }
-            log.info("Task queried: {}", tasks);
+            log.info("Tasks queried for course ({}): {}", courseId, tasks);
             return tasks;
         } else {
-            log.error("No task found with this course id: {}", courseId);
+            log.warn("No task found for this course id: {}", courseId);
             return new HashSet<>();
         }
     }
@@ -145,37 +163,21 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public void requestHelp(Long taskId, String studentId) throws TaskNotFoundException {
-        Optional<Task> opt = repository.findById(taskId);
-        if (opt.isPresent()) {
-            Task task = opt.get();
-            task.addStudentIdToHelp(studentId);
-            repository.save(task);
-            log.info("Added an id ({}) to a task's ({}) help needed list", studentId, task);
-        } else {
-            log.error("No task found with this task id: {}", taskId);
-            throw new TaskNotFoundException();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void resolveHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
-        Optional<Task> opt = repository.findById(taskId);
-        if (opt.isPresent()) {
-            Task task = opt.get();
+    public void toggleHelp(Long taskId, String studentId) {
+        Optional<Task> optTask = repository.findById(taskId);
+        if (optTask.isPresent()) {
+            Task task = optTask.get();
             if (task.getHelpNeededStudentIds().contains(studentId)) {
                 task.getHelpNeededStudentIds().remove(studentId);
                 repository.save(task);
-                log.info("Removed an id ({}) from a task's ({}) help needed list", studentId, task);
+                log.info("Removed an id ({}) from the help needed list of task ({})", studentId, taskId);
             } else {
-                log.error("No student with this id ({}) found in the help needed list of this task: {}", studentId, task);
-                throw new StudentIdNotFoundException();
+                task.addStudentIdToHelp(studentId);
+                repository.save(task);
+                log.info("Added Student ({}) to the help needed list of task ({})", studentId, taskId);
             }
         } else {
-            log.error("No task found with this task id: {}", taskId);
+            log.error("Could not toggle help request for {} - No task found with id: {}", studentId, taskId);
             throw new TaskNotFoundException();
         }
     }
