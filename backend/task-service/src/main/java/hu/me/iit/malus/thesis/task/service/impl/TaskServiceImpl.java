@@ -125,10 +125,18 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public void changeCompletion(Long taskId, String studentId) throws TaskNotFoundException {
+    public void changeCompletion(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
         Optional<Task> opt = repository.findById(taskId);
         if (opt.isPresent()) {
             Task task = opt.get();
+
+            Student student = userClient.getStudentByEmail(studentId);
+            if (student.getAssignedCourseIds().contains(task.getCourseId())) {
+                log.warn("Cannot change task completion, as Student {} is not assigned to this course {}",
+                        studentId, task.getCourseId());
+                throw new StudentIdNotFoundException();
+            }
+
             Set<String> completedStudentIds = task.getCompletedStudentIds();
             if (completedStudentIds.contains(studentId)) {
                 completedStudentIds.remove(studentId);
@@ -167,10 +175,18 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public void toggleHelp(Long taskId, String studentId) {
+    public void toggleHelp(Long taskId, String studentId) throws StudentIdNotFoundException {
         Optional<Task> optTask = repository.findById(taskId);
         if (optTask.isPresent()) {
             Task task = optTask.get();
+
+            Student student = userClient.getStudentByEmail(studentId);
+            if (student.getAssignedCourseIds().contains(task.getCourseId())) {
+                log.warn("Cannot change task completion, as Student {} is not assigned to this course {}",
+                        studentId, task.getCourseId());
+                throw new StudentIdNotFoundException();
+            }
+
             if (task.getHelpNeededStudentIds().contains(studentId)) {
                 task.getHelpNeededStudentIds().remove(studentId);
                 repository.save(task);

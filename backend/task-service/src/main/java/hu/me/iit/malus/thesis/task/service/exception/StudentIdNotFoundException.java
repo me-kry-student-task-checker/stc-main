@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author Attila Szőke
  */
 @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Student cannot be found")
-public class StudentIdNotFoundException extends Exception {
+public class StudentIdNotFoundException extends RuntimeException {
 
     private static final String ERROR_MESSAGE = "Student with this id can not be found!";
 
