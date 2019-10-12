@@ -15,6 +15,7 @@ public class Converter {
         file.setDownloadLink(fileDescription.getDownloadLink());
         file.setUploadDate(fileDescription.getUploadDate());
         file.setUploadedBy(fileDescription.getUploadedBy());
+        file.setContentType(fileDescription.getContentType());
         file.setTagId(fileDescription.getTagId());
         return file;
     }

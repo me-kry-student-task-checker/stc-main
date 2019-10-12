@@ -2,6 +2,8 @@ package hu.me.iit.malus.thesis.filemanagement.service;
 
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
 
 import javax.servlet.http.Part;
 import java.io.IOException;
@@ -52,7 +54,7 @@ public interface FileManagementService {
      * @param id The ID of the file
      * @param service The service that uploaded the file
      */
-    void deleteFile(Long id, Service service);
+    void deleteFile(Long id, Service service, String username) throws UnsupportedOperationException, FileNotFoundException;
 
     /**
      * Queries all files by the services that uploaded them
