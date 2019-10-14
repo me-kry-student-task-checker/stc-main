@@ -45,7 +45,7 @@ public class FileManagementServiceImpl implements FileManagementService {
     @Override
     public FileDescription uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service, String user, Long tagId) throws IOException {
         String userHash = hashIt(user);
-        String fileName = file.getSubmittedFileName() + "_" + userHash;
+        String fileName = userHash + "_" + file.getSubmittedFileName();
         Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).build(), file.getInputStream());
         log.info("File successfully uploaded: {}", file.getSubmittedFileName());
         FileDescription fileDescription = new FileDescription();
@@ -210,7 +210,7 @@ public class FileManagementServiceImpl implements FileManagementService {
         String hashedUser = hashIt(userEmail);
         if (hashedUser != null) {
             fileName = fileName.replace(hashedUser, "");
-            return fileName.substring(0, fileName.length() - 1 );
+            return fileName.substring(1);
         }
 
         return fileName;
