@@ -46,7 +46,7 @@ public class FileManagementServiceImpl implements FileManagementService {
     public FileDescription uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service, String user, Long tagId) throws IOException {
         String userHash = hashIt(user);
         String fileName = userHash + "_" + file.getSubmittedFileName();
-        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).build(), file.getInputStream());
+        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(), file.getInputStream());
         log.info("File successfully uploaded: {}", file.getSubmittedFileName());
         FileDescription fileDescription = new FileDescription();
         fileDescription.setUploadDate(new Date());
