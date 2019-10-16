@@ -1,27 +1,36 @@
 <template lang="pug">
-	div.padding
-		div(v-if="showRegister")
-			registration(@registerFormChange="setRegisterForm")
-			div.controls
-				button(@click="loginUser(credentials)").buttons Sign up
-				button(@click="changeTab").buttons Back to login
-		div(v-else)
-			login(@credentialChange="setCredentials")
-			div.controls
-				button(@click="registerUser(registerForm)").buttons
-					i.fa.fa-sign-in 		Sign in
-				button(@click="changeTab").buttons Register a new account
+	div.contentPane
+		.container
+			.row
+				.col-lg-12
+					div(v-if="showRegister")
+						registration(@registerFormChange="setRegisterForm")
+						div.controlsAndMsg.form-group
+							button(@click="registerUser(registerForm) && changeTab()").buttons.form-control Sign up
+							button(@click="changeTab").buttons.form-control Back to login
+					div(v-else)
+						login(@credentialChange="setCredentials")
+						div.controlsAndMsg.form-group
+							button(@click="loginUser(credentials)").buttons.form-control Sign in
+							button(@click="changeTab").buttons.form-control Registration
+						div.controlsAndMsg
+							message(:text="'Something is messed up with your registration!'"
+								:show="status.registrationError" :type="'error'")
+							message(:text="'Please try again!'" :show="status.loginError" :type="'error'")
+							message( :text="'Please confirm your account via the email you will receive shortly!'"
+								:show="status.showConfirmAcc" :type="'success'")
 </template>
 
 <script>
-	import {mapActions} from 'vuex';
+	import {mapActions, mapState} from 'vuex';
 	import Login from '../../components/Login.vue';
 	import Registration from '../../components/Registration.vue';
+	import Message from '../../components/Message';
 
 	export default {
 		name: 'Auth',
 		components: {
-			Login, Registration
+			Login, Registration, Message
 		},
 		data: function() {
 			return {
@@ -29,6 +38,9 @@
 				credentials: {},
 				registerForm: {}
 			};
+		},
+		computed: {
+			...mapState('auth', ['status'])
 		},
 		methods: {
 			...mapActions('auth', ['loginUser', 'registerUser']),
@@ -48,17 +60,12 @@
 </script>
 
 <style lang="scss" scoped>
-	.padding {
+	.contentPane {
+		@include center;
 		background: $bg;
-		position: fixed;
-		width: 100%;
 		height: 100%;
-		left: 0;
-		top: 0;
-		z-index: 10;
-		padding-top: 13%;
 	}
-	.controls {
+	.controlsAndMsg {
 		@include center;
 		align-items: center;
 		display: flex;
@@ -74,7 +81,7 @@
 		height: 50px;
 		margin: 10px 18px 0 18px;
 		outline: none;
-		width: 450px;
+		max-width: 450px;
 		&:hover {
 			background: #333333;
 		}

@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.course;
+package hu.me.iit.malus.thesis.task;
 
 import org.junit.Test;
 

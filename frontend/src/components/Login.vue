@@ -1,10 +1,10 @@
 <template lang="pug">
-	div.loginTab
+	div.loginTab.form-group
 		h3.loginHeader Login
 		input(type="text", placeholder="Email", v-model="credential.email",
-			@keydown="emitCredentials").input
+			@keydown="emitCredentials" autocomplete="off").input.form-control
 		input(type="password", placeholder="Password", v-model="credential.password",
-			@keydown="emitCredentials").input
+			@keydown="emitCredentials" autocomplete="off").input.form-control
 </template>
 
 <script>
@@ -48,6 +48,6 @@
 		margin: 12px 18px 0 18px;
 		outline: none;
 		padding-left: 40px;
-		width: 450px;
+		max-width: 450px;
 	}
 </style>

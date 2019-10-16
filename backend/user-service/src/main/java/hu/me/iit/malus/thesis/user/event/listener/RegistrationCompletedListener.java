@@ -54,10 +54,7 @@ public class RegistrationCompletedListener implements
         Mail email = new Mail();
         email.setTo(Collections.singletonList(recipientAddress));
         email.setSubject(subject);
-
-        // Application URL (config) can be used here, if necessary
         email.setText(message + confirmationUrl);
-
         emailClient.sendMail(email);
     }
 }

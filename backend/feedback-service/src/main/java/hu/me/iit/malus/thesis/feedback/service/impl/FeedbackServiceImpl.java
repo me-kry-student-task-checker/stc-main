@@ -64,7 +64,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         log.info("Listing comments for course id: {}", courseId);
         Optional<List<CourseComment>> opt = courseCommentRepository.findAllByCourseId(courseId);
         List<CourseComment> results = opt.orElseGet(ArrayList::new);
-        results.forEach(courseComment -> fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK, courseComment.getId()));
+        results.forEach(courseComment -> courseComment.setFiles(
+                fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK,
+                        courseComment.getId()).getBody()));
 
         return results;
     }
@@ -77,7 +79,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         log.info("Listing comments for task id: {}", taskId);
         Optional<List<TaskComment>> opt = taskCommentRepository.findAllByTaskId(taskId);
         List<TaskComment> results = opt.orElseGet(ArrayList::new);
-        results.forEach(taskComment -> taskComment.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK, taskComment.getId()).getBody()));
+        results.forEach(taskComment -> taskComment.setFiles(
+                fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK,
+                        taskComment.getId()).getBody()));
 
         return results;
     }

@@ -1,14 +1,20 @@
 <template lang="pug">
-	div.regTab
+	div.regTab.form-group
 		h3.regHeader Register
 		input(type="text", placeholder="Email", v-model="registerForm.email",
-			@keydown="emitRegisterForm").input
-		input(type="password", placeholder="Password", v-model="registerForm.password",
-			@keydown="emitRegisterForm").input
+			@keydown="emitRegisterForm" autocomplete="off").input.form-control
 		input(type="text", placeholder="First Name", v-model="registerForm.firstName",
-				@keydown="emitRegisterForm").input
+			@keydown="emitRegisterForm" autocomplete="off").input.form-control
 		input(type="text", placeholder="Last Name", v-model="registerForm.lastName",
-			@keydown="emitRegisterForm").input
+			@keydown="emitRegisterForm" autocomplete="off").input.form-control
+		select( v-model="registerForm.role", @change="emitRegisterForm").input.form-control
+			option(value="" disabled selected) Select a role!
+			option(value="ROLE_Student") Student
+			option(value="ROLE_Teacher") Teacher
+		input(type="password", placeholder="Password", v-model="registerForm.password",
+			@keydown="emitRegisterForm" autocomplete="off").input.form-control
+		input(type="password", placeholder="Confirm Password", v-model="registerForm.passwordConfirm",
+			@keydown="emitRegisterForm" autocomplete="off").input.form-control
 </template>
 
 <script>
@@ -19,8 +25,10 @@
 				registerForm: {
 					email: '',
 					password: '',
+					passwordConfirm: '',
 					firstName: '',
-					lastName: ''
+					lastName: '',
+					role: ''
 				}
 			};
 		},
@@ -53,6 +61,6 @@
 		margin: 12px 18px 0 18px;
 		outline: none;
 		padding-left: 40px;
-		width: 450px;
+		max-width: 450px;
 	}
 </style>

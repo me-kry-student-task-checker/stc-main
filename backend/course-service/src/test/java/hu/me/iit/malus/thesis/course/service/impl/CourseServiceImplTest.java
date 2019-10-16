@@ -56,7 +56,7 @@ public class CourseServiceImplTest {
         Mockito.when(userClient.getTeacherByEmail(courseOwnersEmail)).thenReturn(courseOwner);
 
         // When
-        Course createdCourse = courseService.create(course);
+        Course createdCourse = courseService.create(course, courseOwnersEmail);
 
         // Then
         Mockito.verify(courseRepository, Mockito.times(1)).save(course);

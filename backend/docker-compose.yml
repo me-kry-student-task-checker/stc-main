@@ -67,7 +67,7 @@ services:
     container_name: discovery-service-peer1
     build:
       context: ./discovery-service
-      dockerfile: dockerfile-p1
+      dockerfile: dockerfile
     image: discovery-service-peer1:latest
     networks:
       - studentTaskChecker
@@ -80,7 +80,7 @@ services:
     container_name: discovery-service-peer2
     build:
       context: ./discovery-service
-      dockerfile: dockerfile-p2
+      dockerfile: dockerfile
     image: discovery-service-peer2:latest
     networks:
       - studentTaskChecker
@@ -204,3 +204,17 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
+
+#  front-end:
+#    container_name: front-end
+#    build:
+#      context: ../frontend
+#      dockerfile: dockerfile
+#    image: front-end:latest
+#    networks:
+#      - studentTaskChecker
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - gateway-service
+#    restart: on-failure

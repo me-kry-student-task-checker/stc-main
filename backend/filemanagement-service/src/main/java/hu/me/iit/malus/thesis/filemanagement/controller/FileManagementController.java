@@ -6,6 +6,8 @@ import hu.me.iit.malus.thesis.filemanagement.controller.dto.File;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Part;
 import javax.ws.rs.FormParam;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.*;
 
 /**
@@ -32,9 +35,8 @@ public class FileManagementController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<File> uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service, @FormParam("tagId") Long tagId) throws IOException {
-        //TODO: Replace with users got from header
-        FileDescription fd = fileManagementService.uploadFile(file, service, "krsztn@alma.hu", tagId);
+    public ResponseEntity<File> uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service, @FormParam("tagId") Long tagId, Principal principal) throws IOException {
+        FileDescription fd = fileManagementService.uploadFile(file, service, principal.getName(), tagId);
         if (fd == null) return ResponseEntity
                 .status(204)
                 .body(null);
@@ -45,11 +47,10 @@ public class FileManagementController {
     }
 
     @PostMapping("/uploadFiles")
-    public ResponseEntity<Set<File>> uploadFileMultipleFiles(@FormDataParam("file") ArrayList<Part> file, @FormParam("service") Service service, @FormParam("tagId") Long tagId) throws IOException {
-        //TODO: Replace with users got from header
+    public ResponseEntity<Set<File>> uploadFileMultipleFiles(@FormDataParam("file") ArrayList<Part> file, @FormParam("service") Service service, @FormParam("tagId") Long tagId, Principal principal) throws IOException {
         Set<File> result = new HashSet<>();
         for (Part f : file) {
-            FileDescription fd = fileManagementService.uploadFile(f, service, "krsztn@alma.hu", tagId);
+            FileDescription fd = fileManagementService.uploadFile(f, service, principal.getName(), tagId);
             result.add(Converter.FileDescriptionToFile(fd));
         }
 
@@ -60,8 +61,21 @@ public class FileManagementController {
 
 
     @DeleteMapping("/delete/{id}/{service}")
-    public void deleteFile(@PathVariable Long id, @PathVariable Service service) {
-        fileManagementService.deleteFile(id, service);
+    public ResponseEntity<String> deleteFile(@PathVariable Long id, @PathVariable Service service, Principal principal) {
+        try {
+            fileManagementService.deleteFile(id, service, principal.getName());
+        }catch(UnsupportedOperationException e) {
+            return ResponseEntity
+                    .status(403)
+                    .body("User does not have the privilege to delete this file!");
+        }catch (FileNotFoundException ex) {
+            return ResponseEntity
+                    .status(404)
+                    .body("File not found!");
+        }
+        return ResponseEntity
+                .status(200)
+                .body("Successful delete!");
     }
 
     @GetMapping("/download/getById/{id}")

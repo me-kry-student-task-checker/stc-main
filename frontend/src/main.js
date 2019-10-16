@@ -1,16 +1,20 @@
 import Vue from 'vue';
 import App from './App.vue';
-import router from './router/router';
+import {router} from './router/router.js';
 import store from './vuex/store';
+import useInterceptors from './helpers/interceptors';
 
 import BootstrapVue from 'bootstrap-vue/dist/bootstrap-vue.esm.min.js';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import '../node_modules/bootstrap-vue/dist/bootstrap-vue.min.css';
-import '../node_modules/font-awesome/scss/font-awesome.scss';
+import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/js/all.js';
 
 Vue.config.productionTip = false;
-
 Vue.use(BootstrapVue);
+Vue.use(require('vue-moment'));
+
+useInterceptors();
 
 new Vue({
 	router,

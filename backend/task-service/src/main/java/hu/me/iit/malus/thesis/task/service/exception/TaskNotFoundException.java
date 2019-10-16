@@ -1,16 +1,20 @@
 package hu.me.iit.malus.thesis.task.service.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * Exception class, it is thrown when a task could not be found
  *
  * @author Attila Szőke
  */
-public class TaskNotFoundException extends Exception {
+@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Task cannot be found")
+public class TaskNotFoundException extends RuntimeException {
 
-    private static final String ERORR_MESSAGE = "Task can not be found!";
+    private static final String ERROR_MESSAGE = "Task cannot be found!";
 
     public TaskNotFoundException() {
-        super(ERORR_MESSAGE);
+        super(ERROR_MESSAGE);
     }
 
     public TaskNotFoundException(String message) {

@@ -5,6 +5,8 @@ import com.google.cloud.storage.*;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,8 +45,8 @@ public class FileManagementServiceImpl implements FileManagementService {
     @Override
     public FileDescription uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service, String user, Long tagId) throws IOException {
         String userHash = hashIt(user);
-        String fileName = file.getSubmittedFileName() + "_" + userHash;
-        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).build(), file.getInputStream());
+        String fileName = userHash + "_" + file.getSubmittedFileName();
+        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(), file.getInputStream());
         log.info("File successfully uploaded: {}", file.getSubmittedFileName());
         FileDescription fileDescription = new FileDescription();
         fileDescription.setUploadDate(new Date());
@@ -119,15 +121,20 @@ public class FileManagementServiceImpl implements FileManagementService {
         return result;
     }
 
-    //TODO: As the authentication is ready, check whether the user can delete the file
     /**
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service) {
+    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
         boolean fileToBeRemovedIsPresent = fileDescriptionRepository.findById(id).isPresent();
         if (fileToBeRemovedIsPresent) {
             FileDescription fileToBeRemoved = fileDescriptionRepository.findById(id).get();
+
+            if (!fileToBeRemoved.getUploadedBy().equalsIgnoreCase(username)) {
+                log.debug("User does not have the privilege to delete file: {}", id);
+                throw new UnsupportedOperationException();
+            }
+
             BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileToBeRemoved.getName());
             boolean successful_delete = storage.delete(blobId);
 
@@ -144,7 +151,11 @@ public class FileManagementServiceImpl implements FileManagementService {
             else{
                 log.info("File could not be deleted: {}", id);
                 log.debug("No file was found with the following id: {}", id);
+                throw new FileNotFoundException();
             }
+        }else {
+            log.debug("No file was found with the following id: {}", id);
+            throw new FileNotFoundException();
         }
     }
 
@@ -199,7 +210,7 @@ public class FileManagementServiceImpl implements FileManagementService {
         String hashedUser = hashIt(userEmail);
         if (hashedUser != null) {
             fileName = fileName.replace(hashedUser, "");
-            return fileName.substring(0, fileName.length() - 1 );
+            return fileName.substring(1);
         }
 
         return fileName;
