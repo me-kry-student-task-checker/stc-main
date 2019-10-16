@@ -85,7 +85,6 @@ public class StudentRepositoryTest {
         Student studentToFind = new Student(
                 "toFind@teacher.test", "$2aHash", "Target", "Student", new ArrayList<>());
 
-
         Student studentNotToFind = new Student(
                 "nobody@student.test", "$2aHash", "Nobody", "Student", new ArrayList<>());
         studentNotToFind.setAssignedCourseIds(someIdsOfAssignedCourses);

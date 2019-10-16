@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.task.controller;
 
 import hu.me.iit.malus.thesis.task.controller.converters.Converter;
+import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.TaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.service.TaskService;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Set;
 
 /**
@@ -40,8 +42,13 @@ public class TaskController {
         return service.edit(Converter.taskDtoToTask(task));
     }
 
+    @GetMapping("/get/{taskId}")
+    public DetailedTaskDto getTask(@PathVariable Long taskId) {
+        return service.get(taskId);
+    }
+
     @GetMapping("/getAll/{courseId}")
-    public Set<Task> getAllTasks(@PathVariable Long courseId) {
+    public Set<DetailedTaskDto> getAllTasks(@PathVariable Long courseId) {
         return service.getAll(courseId);
     }
 
@@ -51,23 +58,21 @@ public class TaskController {
         service.changeDoneStatus(taskId);
     }
 
-    @PostMapping("/setComplete/{taskId}/{studentId}")
-    public void changeTasksCompletion(@PathVariable Long taskId, @PathVariable String studentId) throws TaskNotFoundException {
-        service.changeCompletion(taskId, studentId);
+    @PostMapping("/setComplete/{taskId}")
+    @PreAuthorize("hasRole('ROLE_Student')")
+    public void changeTasksCompletion(@PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
+        service.changeCompletion(taskId, principal.getName());
     }
 
     @GetMapping("/checkHelps/{taskId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public Set<String> checkIfHelpNeededOnTask(@PathVariable Long taskId) throws TaskNotFoundException {
         return service.checkIfHelpNeeded(taskId);
     }
 
-    @PostMapping("/requestHelp/{taskId}/{studentId}")
-    public void requestHelpOnTask(@PathVariable Long taskId, @PathVariable String studentId) throws TaskNotFoundException {
-        service.requestHelp(taskId, studentId);
-    }
-
-    @PostMapping("/resolveHelp/{taskId}/{studentId}")
-    public void resolveHelpOnTask(@PathVariable Long taskId, @PathVariable String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
-        service.resolveHelp(taskId, studentId);
+    @PostMapping("/toggleHelp/{taskId}")
+    @PreAuthorize("hasRole('ROLE_Student')")
+    public void toggleHelpOnTask(@PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
+        service.toggleHelp(taskId, principal.getName());
     }
 }

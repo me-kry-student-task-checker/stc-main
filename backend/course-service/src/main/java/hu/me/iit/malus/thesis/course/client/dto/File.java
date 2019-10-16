@@ -15,5 +15,6 @@ public class File {
     String downloadLink;
     Date uploadDate;
     String uploadedBy;
+    String contentType;
     Long tagId;
 }
