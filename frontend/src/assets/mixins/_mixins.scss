@@ -1,6 +1,5 @@
 @mixin center {
-	margin: auto;
-	width: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
-
-

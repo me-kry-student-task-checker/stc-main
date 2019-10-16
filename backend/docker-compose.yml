@@ -204,3 +204,17 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
+
+#  front-end:
+#    container_name: front-end
+#    build:
+#      context: ../frontend
+#      dockerfile: dockerfile
+#    image: front-end:latest
+#    networks:
+#      - studentTaskChecker
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - gateway-service
+#    restart: on-failure

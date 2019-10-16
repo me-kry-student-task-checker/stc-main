@@ -1,29 +1,30 @@
 <template lang="pug">
 	div
-		h3.header Your courses
-		div(v-if="courses.length !== 0").courseList
-			CourseCard(v-for="(course) in courses", :key="course.id", :body='course')
+		h3.header Course tasks
+		div(v-if="tasks.length !== 0").taskList
+			TaskCard(v-for='(task) in tasks', :key="task.id", :body='task')
 		div(v-else)
-			p.emptyList No courses for you, Sir!
+			p.emptyList No tasks for you, Sir!
 </template>
 
 <script>
 	import {mapActions, mapState} from 'vuex';
-	import CourseCard from '../../components/CourseCard.vue';
+	import TaskCard from '../../components/TaskCard.vue';
 
 	export default {
-		name: 'Home',
+		name: 'Tasks',
 		components: {
-			CourseCard
+			TaskCard
 		},
 		computed: {
-			...mapState('course', ['courses'])
+			...mapState('tasks', ['tasks'])
 		},
 		created() {
-			this.getCourses();
+			let id = this.$route.params.id;
+			this.getAllTasks(id);
 		},
 		methods: {
-			...mapActions('course', ['getCourses'])
+			...mapActions('tasks', ['getAllTasks'])
 		}
 	};
 </script>
@@ -36,7 +37,7 @@
 		padding-bottom: 20px;
 		text-align: center;
 	}
-	.courseList {
+	.taskList {
 		margin: 20px;
 	}
 	.emptyList {

@@ -51,7 +51,7 @@ module.exports = {
 		'max-lines': [
 			'error',
 			{
-				max: 160,
+				max: 200,
 				skipComments: true,
 				skipBlankLines: true
 			}
@@ -60,6 +60,13 @@ module.exports = {
 		'vue/script-indent': ['error', 'tab', {
 			baseIndent: 1,
 			switchCase: 1
+		}],
+		'comma-dangle': ['error', {
+			'arrays': 'never',
+			'objects': 'never',
+			'imports': 'never',
+			'exports': 'never',
+			'functions': 'never'
 		}]
 	},
 	overrides: [
