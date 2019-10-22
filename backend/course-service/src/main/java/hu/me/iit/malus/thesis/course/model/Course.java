@@ -1,12 +1,14 @@
 package hu.me.iit.malus.thesis.course.model;
 
+import com.google.common.base.Objects;
 import hu.me.iit.malus.thesis.course.client.dto.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.util.*;
 
 /**
@@ -15,11 +17,12 @@ import java.util.*;
  */
 @Entity
 @Getter @Setter @NoArgsConstructor
-@ToString @EqualsAndHashCode
+@ToString
 public class Course {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy= GenerationType.AUTO, generator="native")
+    @GenericGenerator(name="native", strategy="native")
     private Long id;
     private String name;
 
@@ -85,5 +88,18 @@ public class Course {
      */
     public void addAllComment(Set<CourseComment> commentsToAdd) {
         comments.addAll(commentsToAdd);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Course course = (Course) o;
+        return Objects.equal(id, course.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

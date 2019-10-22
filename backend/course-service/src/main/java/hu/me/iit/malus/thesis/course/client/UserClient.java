@@ -21,20 +21,8 @@ public interface UserClient {
     @PostMapping("/api/user/saveStudent")
     void saveStudent(@RequestBody Student student);
 
-    @PostMapping("/api/user/saveStudents")
-    void saveStudents(@RequestBody Set<Student> studentsToSave);
-
-    @PostMapping("/api/user/saveTeacher")
-    void saveTeacher(@RequestBody Teacher teacher);
-
-    @PostMapping("/api/user/saveTeacher")
-    void saveTeachers(@RequestBody Set<Teacher> teachersToSave);
-
-    @GetMapping("/api/user/students")
-    Set<Student> getAllStudents();
-
-    @GetMapping("/api/user/teachers")
-    Set<Teacher> getAllTeachers();
+    @PostMapping("/api/user/saveCourseCreation")
+    void saveCourseCreation(@RequestBody Long courseId);
 
     @GetMapping("/api/user/student/{email}/")
     Student getStudentByEmail(@PathVariable("email") String studentEmail);
@@ -42,17 +30,14 @@ public interface UserClient {
     @GetMapping("/api/user/student/assigned/{courseId}")
     Set<Student> getStudentsByAssignedCourseId(@PathVariable("courseId") Long courseId);
 
-    @GetMapping("/api/user/student/notassigned/{courseId}")
-    Set<Student> getStudentsByNotAssignedCourseId(@PathVariable("courseId") Long courseId);
+    @GetMapping("/api/user/isRelatedToCourse/{courseId}")
+    Boolean isRelated(@PathVariable("courseId") Long courseId);
 
     @GetMapping("/api/user/teacher/{email}/")
     Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail);
 
     @GetMapping("/api/user/teacher/created/{courseId}")
     Teacher getTeacherByCreatedCourseId(@PathVariable("courseId") Long courseId);
-
-    @GetMapping("/api/user/{email}/")
-    User getUserByEmail(@PathVariable("email") String userEmail);
 
     @GetMapping("/api/user/me")
     User getMe();

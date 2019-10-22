@@ -6,17 +6,15 @@ import hu.me.iit.malus.thesis.user.model.exception.DatabaseOperationFailedExcept
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
 import hu.me.iit.malus.thesis.user.model.exception.IllegalUserInsertionException;
 import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
-import hu.me.iit.malus.thesis.user.repository.ActivationTokenRepository;
-import hu.me.iit.malus.thesis.user.repository.AdminRepository;
-import hu.me.iit.malus.thesis.user.repository.StudentRepository;
-import hu.me.iit.malus.thesis.user.repository.TeacherRepository;
+import hu.me.iit.malus.thesis.user.repository.*;
 import hu.me.iit.malus.thesis.user.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.*;
 
 /**
@@ -24,6 +22,7 @@ import java.util.*;
  * @author Javorek Dénes
  */
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private StudentRepository studentRepository;
     private TeacherRepository teacherRepository;
@@ -103,26 +102,35 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
+        UserBaseRepository userRepository = null;
+
         switch (user.getRole()) {
             case STUDENT: {
-                Student studentToActivate = studentRepository.findByEmail(user.getEmail());
-                studentToActivate.setEnabled(true);
-                studentRepository.save(studentToActivate);
+                userRepository = studentRepository;
                 break;
             }
             case TEACHER: {
-                Teacher teacherToActivate = teacherRepository.findByEmail(user.getEmail());
-                teacherToActivate.setEnabled(true);
-                teacherRepository.save(teacherToActivate);
+                userRepository = teacherRepository;
                 break;
             }
             case ADMIN: {
-                Admin adminToActivate = adminRepository.findByEmail(user.getEmail());
-                adminToActivate.setEnabled(true);
-                adminRepository.save(adminToActivate);
+                userRepository = adminRepository;
                 break;
             }
+            default: {
+                log.warn("User corresponding to token {}, does not have a valid role, cannot activate it.", token);
+                return false;
+            }
         }
+
+        Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
+        if (optionalUser.isPresent())
+        {
+            User userToActivate = optionalUser.get();
+            userToActivate.setEnabled(true);
+            userRepository.save(userToActivate);
+        }
+
         tokenRepository.delete(activationToken);
         return true;
     }
@@ -131,11 +139,12 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public void saveStudent(Student student) {
-        if (studentRepository.existsByEmail(student.getEmail())) {
+    public void saveStudent(Student studentToSave) {
+        Optional<Student> optionalStudent = studentRepository.findByEmail(studentToSave.getEmail());
+        if (optionalStudent.isPresent()) {
             try {
-                student.setPassword(studentRepository.findByEmail(student.getEmail()).getPassword());
-                studentRepository.save(student);
+                studentToSave.setPassword(optionalStudent.get().getPassword());
+                studentRepository.save(studentToSave);
             } catch (DataAccessException e) {
                 throw new DatabaseOperationFailedException(e);
             }
@@ -150,10 +159,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void saveStudents(Set<Student> studentsToSave) {
         for (Student student : studentsToSave) {
-            if (!studentRepository.existsByEmail(student.getEmail())) {
+            Optional<Student> optionalStudent = studentRepository.findByEmail(student.getEmail());
+
+            if (!optionalStudent.isPresent()) {
                 throw new IllegalUserInsertionException();
             }
-            student.setPassword(studentRepository.findByEmail(student.getEmail()).getPassword());
+            student.setPassword(optionalStudent.get().getPassword());
         }
 
         try {
@@ -167,11 +178,13 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public void saveTeacher(Teacher teacher) {
-        if (teacherRepository.existsByEmail(teacher.getEmail())) {
+    public void saveTeacher(Teacher teacherToSave) {
+        Optional<Teacher> optionalTeacher = teacherRepository.findByEmail(teacherToSave.getEmail());
+
+        if (optionalTeacher.isPresent()) {
             try {
-                teacher.setPassword(teacherRepository.findByEmail(teacher.getEmail()).getPassword());
-                teacherRepository.save(teacher);
+                teacherToSave.setPassword(optionalTeacher.get().getPassword());
+                teacherRepository.save(teacherToSave);
             } catch (DataAccessException e) {
                 throw new DatabaseOperationFailedException(e);
             }
@@ -186,16 +199,36 @@ public class UserServiceImpl implements UserService {
     @Override
     public void saveTeachers(Set<Teacher> teachersToSave) {
         for (Teacher teacher : teachersToSave) {
-            if (!teacherRepository.existsByEmail(teacher.getEmail())) {
+            Optional<Teacher> optionalTeacher = teacherRepository.findByEmail(teacher.getEmail());
+
+            if (!optionalTeacher.isPresent()) {
                 throw new IllegalUserInsertionException();
             }
-            teacher.setPassword(teacherRepository.findByEmail(teacher.getEmail()).getPassword());
+            teacher.setPassword(optionalTeacher.get().getPassword());
         }
 
         try {
             teacherRepository.saveAll(teachersToSave);
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void saveCourseCreation(String teacherEmail, Long courseId) {
+        Optional<Teacher> optionalTeacher = teacherRepository.findLockByEmail(teacherEmail);
+
+        if (optionalTeacher.isPresent()) {
+            try {
+                Teacher teacher = optionalTeacher.get();
+                teacher.getCreatedCourseIds().add(courseId);
+                teacherRepository.save(teacher);
+            } catch (DataAccessException e) {
+                throw new DatabaseOperationFailedException(e);
+            }
+        } else {
+            throw new IllegalUserInsertionException();
         }
     }
 
@@ -229,9 +262,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public Student getStudentByEmail(String studentEmail) {
         try {
-            return  studentRepository.findByEmail(studentEmail);
-        } catch (EntityNotFoundException notFoundExc) {
-            throw new UserNotFoundException(studentEmail);
+            Optional<Student> optionalStudent = studentRepository.findByEmail(studentEmail);
+            if (!optionalStudent.isPresent()) throw new UserNotFoundException(studentEmail);
+            return optionalStudent.get();
         } catch (DataAccessException dataExc) {
             throw new DatabaseOperationFailedException(dataExc);
         }
@@ -267,10 +300,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public Teacher getTeacherByEmail(String teacherEmail) {
         try {
-            return  teacherRepository.findByEmail(teacherEmail);
-        } catch (EntityNotFoundException notFoundExc) {
-            throw new UserNotFoundException(teacherEmail);
-        }  catch (DataAccessException e) {
+            Optional<Teacher> optionalTeacher = teacherRepository.findByEmail(teacherEmail);
+            if (!optionalTeacher.isPresent()) throw new UserNotFoundException(teacherEmail);
+            return optionalTeacher.get();
+        } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
     }
@@ -297,18 +330,41 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getAnyUserByEmail(String email) {
         // TODO: Looks ugly, there are better options for Optional chaining, maybe try those later
-        Optional<User> userToLoad = Optional.ofNullable(studentRepository.findByEmail(email));
+        Optional<? extends User> userToLoad = studentRepository.findByEmail(email);
         if(!userToLoad.isPresent()) {
-            userToLoad = Optional.ofNullable(teacherRepository.findByEmail(email));
+            userToLoad = teacherRepository.findByEmail(email);
         }
         if(!userToLoad.isPresent()) {
-            userToLoad = Optional.ofNullable(adminRepository.findByEmail(email));
+            userToLoad = adminRepository.findByEmail(email);
         }
 
         if(!userToLoad.isPresent()) {
             throw new UserNotFoundException(email);
         }
         return userToLoad.get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Boolean isRelatedToCourse(String email, Long courseId) {
+        Optional<? extends User> optionalUser = studentRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            if(((Student) optionalUser.get()).getAssignedCourseIds().contains(courseId)) {
+                return Boolean.TRUE;
+            }
+            return Boolean.FALSE;
+        }
+
+        optionalUser = teacherRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            if(((Teacher) optionalUser.get()).getCreatedCourseIds().contains(courseId)) {
+                return Boolean.TRUE;
+            }
+            return Boolean.FALSE;
+        }
+        return Boolean.FALSE;
     }
 
     /**

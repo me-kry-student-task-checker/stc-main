@@ -1,9 +1,11 @@
 package hu.me.iit.malus.thesis.user.model;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
+import javax.persistence.*;
 import java.util.List;
 
 /**
@@ -17,6 +19,10 @@ import java.util.List;
 public class Teacher extends User {
 
     @ElementCollection
+    @OrderColumn(name = "index_no")
+    @CollectionTable(name = "teacher_created",
+            joinColumns = @JoinColumn(name = "user_email"))
+    @Column(name="createdCourses")
     private List<Long> createdCourseIds;
 
     public Teacher(String email, String password, String firstName, String lastName, List<Long> createdCourseIds) {

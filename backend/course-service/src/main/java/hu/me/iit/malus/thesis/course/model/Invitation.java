@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.course.model;
 
+import com.google.common.base.Objects;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -19,7 +20,6 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@EqualsAndHashCode
 public class Invitation {
 
     @Id
@@ -44,5 +44,18 @@ public class Invitation {
         cal.setTime(new Timestamp(cal.getTime().getTime()));
         cal.add(Calendar.HOUR, 24);
         return new Date(cal.getTime().getTime());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Invitation that = (Invitation) o;
+        return Objects.equal(invitationUuid, that.invitationUuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(invitationUuid);
     }
 }

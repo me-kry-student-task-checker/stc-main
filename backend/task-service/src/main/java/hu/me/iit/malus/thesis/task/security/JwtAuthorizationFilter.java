@@ -55,7 +55,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                             .map(SimpleGrantedAuthority::new)
                             .collect(Collectors.toList()));
 
-            log.info("Valid Token found, authenticating request.");
             SecurityContextHolder.getContext().setAuthentication(auth);
         } catch (JwtException e) {
             log.warn("Token header cannot be parsed, request is unauthenticated: " + e.getMessage());

@@ -1,7 +1,8 @@
 package hu.me.iit.malus.thesis.course.service.impl;
 
 import hu.me.iit.malus.thesis.course.client.*;
-import hu.me.iit.malus.thesis.course.client.dto.*;
+import hu.me.iit.malus.thesis.course.client.dto.Mail;
+import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.model.Invitation;
 import hu.me.iit.malus.thesis.course.model.exception.ForbiddenCourseEdit;
@@ -67,13 +68,9 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public Course create(Course course, String creatorsEmail) {
-        Teacher teacher = userClient.getTeacherByEmail(creatorsEmail);
-        course.setCreator(teacher);
         course.setCreationDate(Date.from(Instant.now()));
-
         Course newCourse = courseRepository.save(course);
-        teacher.getCreatedCourseIds().add(newCourse.getId());
-        userClient.saveTeacher(teacher);
+        userClient.saveCourseCreation(newCourse.getId());
         log.info("Created course: {}", newCourse);
         return newCourse;
     }
@@ -102,9 +99,11 @@ public class CourseServiceImpl implements CourseService {
 
         if (optCourse.isPresent()) {
             Course course = optCourse.get();
-            if (!findRelatedCourseIds(userEmail).contains(course.getId())) {
+            if (!userClient.isRelated(course.getId())) {
                 throw new CourseNotFoundException();
             }
+
+            //TODO: We should find a way to fire these as async requests
             course.setCreator(userClient.getTeacherByCreatedCourseId(courseId));
             course.setStudents(userClient.getStudentsByAssignedCourseId(courseId));
             course.setTasks(taskClient.getAllTasks(courseId));
@@ -126,15 +125,10 @@ public class CourseServiceImpl implements CourseService {
         List<Course> allCourses = courseRepository.findAll();
         List<Course> relatedCourses = new ArrayList<>();
         for (Course course : allCourses) {
-            if (!findRelatedCourseIds(userEmail).contains(course.getId())) {
+            if (!userClient.isRelated(course.getId())) {
                 continue;
             }
             course.setCreator(userClient.getTeacherByCreatedCourseId(course.getId()));
-            course.setStudents(userClient.getStudentsByAssignedCourseId(course.getId()));
-            course.setTasks(taskClient.getAllTasks(course.getId()));
-            course.setComments(feedbackClient.getAllCourseComments(course.getId()));
-            course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, course.getId()).getBody());
-
             relatedCourses.add(course);
         }
         log.info("Get all courses done, total number of courses is {}", relatedCourses.size());
@@ -188,25 +182,6 @@ public class CourseServiceImpl implements CourseService {
             log.warn("Invitation not found: {}", inviteUUID);
             throw new InvitationNotFoundException();
         }
-    }
-
-    /**
-     * Finds those courses (only ids), that somehow related to the given email,
-     * whether by creator or assignee.
-     * @param userEmail Email address (id) of a user.
-     * @return Ids of those course that the user is related to.
-     */
-    private List<Long> findRelatedCourseIds(String userEmail) {
-        User user = userClient.getUserByEmail(userEmail);
-
-        if (user.getRole().equals(UserRole.TEACHER)) {
-            Teacher teacher = userClient.getTeacherByEmail(userEmail);
-            return teacher.getCreatedCourseIds();
-        } else if (user.getRole().equals(UserRole.STUDENT)) {
-            Student student = userClient.getStudentByEmail(userEmail);
-            return student.getAssignedCourseIds();
-        }
-        return Collections.emptyList();
     }
 
     /**

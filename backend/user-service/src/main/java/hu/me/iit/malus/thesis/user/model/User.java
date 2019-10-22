@@ -1,8 +1,11 @@
 package hu.me.iit.malus.thesis.user.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import com.google.common.base.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -18,7 +21,7 @@ import javax.persistence.*;
 @Inheritance
 @Getter @Setter
 @AllArgsConstructor
-@ToString @EqualsAndHashCode
+@ToString
 public class User
 {
     @Id
@@ -39,5 +42,18 @@ public class User
 
     User withEmail(String email) {
         return new User(email, this.password, this.firstName, this.lastName, this.role, false);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return Objects.equal(email, user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(email);
     }
 }
