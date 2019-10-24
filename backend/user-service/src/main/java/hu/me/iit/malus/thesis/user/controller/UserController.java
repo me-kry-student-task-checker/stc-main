@@ -86,6 +86,12 @@ public class UserController {
         service.saveCourseCreation(principal.getName(), courseId);
     }
 
+    @PreAuthorize("hasRole('ROLE_Student')")
+    @PostMapping("/saveCourseAssign")
+    public void saveCourseAssign(Principal principal, @RequestBody Long courseId) {
+        service.saveCourseAssign(principal.getName(), courseId);
+    }
+
     @GetMapping("/students")
     public Set<Student> getAllStudents() {
         return service.getAllStudents();
@@ -101,6 +107,17 @@ public class UserController {
         return service.getStudentByEmail(studentEmail);
     }
 
+    @GetMapping("/teacher/{email:.+}")
+    public Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail) {
+        return service.getTeacherByEmail(teacherEmail);
+    }
+
+    @GetMapping("/{email:.+}")
+    public User getUserByEmail(@PathVariable("email") String userEmail) {
+        return service.getAnyUserByEmail(userEmail);
+    }
+
+
     @GetMapping("/student/assigned/{courseId}")
     public Set<Student> getStudentsByAssignedCourseId(@PathVariable("courseId") Long courseId) {
         return service.getStudentsByAssignedCourseId(courseId);
@@ -111,24 +128,20 @@ public class UserController {
         return service.getStudentsByNotAssignedCourseId(courseId);
     }
 
-    @GetMapping("/isRelatedToCourse/{courseId}")
+    @GetMapping("/isRelated/course/{courseId}")
     public Boolean isRelated(Principal principal, @PathVariable("courseId") Long courseId) {
         return service.isRelatedToCourse(principal.getName(), courseId);
     }
 
-    @GetMapping("/teacher/{email:.+}")
-    public Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail) {
-        return service.getTeacherByEmail(teacherEmail);
+    @GetMapping("/related/course")
+    public Set<Long> getRelatedCourseIds(Principal principal) {
+        return service.getRelatedCourseIds(principal.getName());
     }
+
 
     @GetMapping("/teacher/created/{courseId}")
     public Teacher getTeacherByCreatedCourseId(@PathVariable("courseId") Long courseId) {
         return service.getTeacherByCreatedCourseId(courseId);
-    }
-
-    @GetMapping("/{email:.+}")
-    public User getUserByEmail(@PathVariable("email") String userEmail) {
-        return service.getAnyUserByEmail(userEmail);
     }
 
     @GetMapping("/me")

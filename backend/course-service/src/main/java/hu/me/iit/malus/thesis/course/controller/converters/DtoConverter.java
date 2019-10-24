@@ -4,8 +4,8 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Collection of static Dto converter methods.
@@ -22,19 +22,19 @@ public class DtoConverter {
         return course;
     }
 
-    public static List<CourseOverviewDto> CourseToCourseOverviewList(List<Course> courseList) {
-        List<CourseOverviewDto> courseOverviewList= new ArrayList<>();
+    public static Set<CourseOverviewDto> CourseToCourseOverviewSet(Set<Course> courseSet) {
+        Set<CourseOverviewDto> courseOverviewSet= new HashSet<>();
 
-        for (Course course : courseList) {
+        for (Course course : courseSet) {
             CourseOverviewDto courseOverview = new CourseOverviewDto();
             courseOverview.setId(course.getId());
             courseOverview.setName(course.getName());
             courseOverview.setDescription(course.getDescription());
             courseOverview.setCreationDate(course.getCreationDate());
             courseOverview.setCreator(course.getCreator());
-            courseOverviewList.add(courseOverview);
+            courseOverviewSet.add(courseOverview);
         }
 
-        return courseOverviewList;
+        return courseOverviewSet;
     }
 }

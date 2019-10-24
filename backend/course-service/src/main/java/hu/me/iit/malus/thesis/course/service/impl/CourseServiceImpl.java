@@ -71,7 +71,7 @@ public class CourseServiceImpl implements CourseService {
         course.setCreationDate(Date.from(Instant.now()));
         Course newCourse = courseRepository.save(course);
         userClient.saveCourseCreation(newCourse.getId());
-        log.info("Created course: {}", newCourse);
+        log.info("Created course: {}", newCourse.getId());
         return newCourse;
     }
 
@@ -86,7 +86,7 @@ public class CourseServiceImpl implements CourseService {
             throw new ForbiddenCourseEdit();
         }
 
-        log.info("Modified course: {}", course);
+        log.info("Modified course: {}", course.getId());
         return courseRepository.save(course);
     }
 
@@ -121,15 +121,12 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public List<Course> getAll(String userEmail) {
-        List<Course> allCourses = courseRepository.findAll();
-        List<Course> relatedCourses = new ArrayList<>();
-        for (Course course : allCourses) {
-            if (!userClient.isRelated(course.getId())) {
-                continue;
-            }
+    public Set<Course> getAll(String userEmail) {
+        Set<Long> relatedCourseIds = userClient.getRelatedCourseIds();
+        Set<Course> relatedCourses = courseRepository.findAllByIdIsIn(relatedCourseIds);
+
+        for (Course course : relatedCourses) {
             course.setCreator(userClient.getTeacherByCreatedCourseId(course.getId()));
-            relatedCourses.add(course);
         }
         log.info("Get all courses done, total number of courses is {}", relatedCourses.size());
         return relatedCourses;

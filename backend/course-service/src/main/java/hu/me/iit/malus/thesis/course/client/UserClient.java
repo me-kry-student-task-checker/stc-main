@@ -24,22 +24,27 @@ public interface UserClient {
     @PostMapping("/api/user/saveCourseCreation")
     void saveCourseCreation(@RequestBody Long courseId);
 
+    @PostMapping("/api/user/saveCourseAssign")
+    void saveCourseAssign(@RequestBody Long courseId);
+
     @GetMapping("/api/user/student/{email}/")
     Student getStudentByEmail(@PathVariable("email") String studentEmail);
+
+    @GetMapping("/api/user/teacher/{email}/")
+    Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail);
 
     @GetMapping("/api/user/student/assigned/{courseId}")
     Set<Student> getStudentsByAssignedCourseId(@PathVariable("courseId") Long courseId);
 
-    @GetMapping("/api/user/isRelatedToCourse/{courseId}")
+    @GetMapping("/api/user/isRelated/course/{courseId}")
     Boolean isRelated(@PathVariable("courseId") Long courseId);
 
-    @GetMapping("/api/user/teacher/{email}/")
-    Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail);
+    @GetMapping("/api/user/related/course")
+    Set<Long> getRelatedCourseIds();
 
     @GetMapping("/api/user/teacher/created/{courseId}")
     Teacher getTeacherByCreatedCourseId(@PathVariable("courseId") Long courseId);
 
     @GetMapping("/api/user/me")
     User getMe();
-
 }

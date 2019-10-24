@@ -60,12 +60,12 @@ public class UserServiceImpl implements UserService {
             }
             case TEACHER: {
                 Teacher newTeacher = new Teacher(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.EMPTY_LIST);
+                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
                 return teacherRepository.save(newTeacher);
             }
             case STUDENT: {
                 Student newStudent = new Student(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.EMPTY_LIST);
+                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
                 return studentRepository.save(newStudent);
             }
             default:
@@ -214,6 +214,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Transactional
     @Override
     public void saveCourseCreation(String teacherEmail, Long courseId) {
@@ -228,7 +231,26 @@ public class UserServiceImpl implements UserService {
                 throw new DatabaseOperationFailedException(e);
             }
         } else {
-            throw new IllegalUserInsertionException();
+            throw new UserNotFoundException();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void saveCourseAssign(String studentEmail, Long courseId) {
+        Optional<Student> optionalStudent = studentRepository.findLockByEmail(studentEmail);
+        if (optionalStudent.isPresent()) {
+            try {
+                Student student = optionalStudent.get();
+                student.getAssignedCourseIds().add(courseId);
+                studentRepository.save(student);
+            } catch (DataAccessException e) {
+                throw new DatabaseOperationFailedException(e);
+            }
+        } else {
+            throw new UserNotFoundException();
         }
     }
 
@@ -238,7 +260,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<Student> getAllStudents() {
         try {
-            return new HashSet<>(studentRepository.findAllBy());
+            return studentRepository.findAllUsers();
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -250,7 +272,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<Teacher> getAllTeachers() {
         try {
-            return new HashSet<>(teacherRepository.findAllBy());
+            return teacherRepository.findAllUsers();
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -348,6 +370,22 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
+    public Set<Long> getRelatedCourseIds(String userEmail) {
+        Set<Long> relatedCourseIds = new HashSet<>();
+        User user = getAnyUserByEmail(userEmail);
+
+        if (user instanceof Student) {
+            relatedCourseIds.addAll(((Student) user).getAssignedCourseIds());
+        } else if (user instanceof Teacher) {
+            relatedCourseIds.addAll(((Teacher) user).getCreatedCourseIds());
+        }
+        return relatedCourseIds;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Boolean isRelatedToCourse(String email, Long courseId) {
         Optional<? extends User> optionalUser = studentRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
@@ -373,8 +411,8 @@ public class UserServiceImpl implements UserService {
      * @return True if email already exists, false otherwise
      */
     private boolean emailExists(String email) {
-        return studentRepository.findByEmail(email) != null || teacherRepository.findByEmail(email) != null ||
-                adminRepository.findByEmail(email) != null;
+        return studentRepository.findByEmail(email).isPresent() || teacherRepository.findByEmail(email).isPresent() ||
+                adminRepository.findByEmail(email).isPresent();
     }
 
 }

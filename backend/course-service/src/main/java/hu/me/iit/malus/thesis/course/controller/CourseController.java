@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Controller endpoint of this service
@@ -48,8 +49,8 @@ public class CourseController {
     }
 
     @GetMapping("/getAll")
-    public List<CourseOverviewDto> getAll(Principal principal) {
-        return DtoConverter.CourseToCourseOverviewList(service.getAll(principal.getName()));
+    public Set<CourseOverviewDto> getAll(Principal principal) {
+        return DtoConverter.CourseToCourseOverviewSet(service.getAll(principal.getName()));
     }
 
     @PostMapping("/invite/{courseId}/{studentId}")

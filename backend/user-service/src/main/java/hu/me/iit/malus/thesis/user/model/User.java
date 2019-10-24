@@ -22,7 +22,7 @@ import javax.persistence.*;
 @Getter @Setter
 @AllArgsConstructor
 @ToString
-public class User
+public abstract class User
 {
     @Id
     private final String email;
@@ -38,10 +38,6 @@ public class User
         super();
         this.email = null;
         this.enabled = false;
-    }
-
-    User withEmail(String email) {
-        return new User(email, this.password, this.firstName, this.lastName, this.role, false);
     }
 
     @Override

@@ -74,6 +74,13 @@ public interface UserService {
     void saveCourseCreation(String teacherEmail, Long courseId);
 
     /**
+     * Adds the id of a course to the assigned field of student object
+     * @param studentEmail
+     * @param courseId
+     */
+    void saveCourseAssign(String studentEmail, Long courseId);
+
+    /**
      * Returns all the saved Students
      * @return the students
      */
@@ -126,6 +133,14 @@ public interface UserService {
      * @return User
      */
     User getAnyUserByEmail(String email);
+
+    /**
+     * Returns all the course ids, that the user has connection to
+     * This connection can be "created by" or "assigned to"
+     * @param userEmail Identifier of a user
+     * @return List of course ids, that is connected to the given user
+     */
+    Set<Long> getRelatedCourseIds(String userEmail);
 
     /**
      * Returns whether the user has any connection with the given course
