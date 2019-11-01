@@ -36,7 +36,7 @@ services:
   #    networks:
   #      - studentTaskChecker
   #    ports:
-  #      - "3306"
+  #      - "3666:3306"
 
   mysql-database:
     image: mysql:5.7

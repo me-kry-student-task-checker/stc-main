@@ -131,7 +131,7 @@ public class TaskServiceImpl implements TaskService {
             Task task = opt.get();
 
             Student student = userClient.getStudentByEmail(studentId);
-            if (student.getAssignedCourseIds().contains(task.getCourseId())) {
+            if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
                 log.warn("Cannot change task completion, as Student {} is not assigned to this course {}",
                         studentId, task.getCourseId());
                 throw new StudentIdNotFoundException();
@@ -181,7 +181,7 @@ public class TaskServiceImpl implements TaskService {
             Task task = optTask.get();
 
             Student student = userClient.getStudentByEmail(studentId);
-            if (student.getAssignedCourseIds().contains(task.getCourseId())) {
+            if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
                 log.warn("Cannot change task completion, as Student {} is not assigned to this course {}",
                         studentId, task.getCourseId());
                 throw new StudentIdNotFoundException();
