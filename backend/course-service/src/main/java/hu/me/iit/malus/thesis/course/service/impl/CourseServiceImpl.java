@@ -2,7 +2,6 @@ package hu.me.iit.malus.thesis.course.service.impl;
 
 import hu.me.iit.malus.thesis.course.client.*;
 import hu.me.iit.malus.thesis.course.client.dto.Mail;
-import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.model.Invitation;
 import hu.me.iit.malus.thesis.course.model.exception.ForbiddenCourseEdit;
@@ -15,6 +14,7 @@ import hu.me.iit.malus.thesis.course.service.impl.config.InvitationConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
@@ -162,14 +162,13 @@ public class CourseServiceImpl implements CourseService {
     /**
      * {@inheritDoc}
      */
+    @Transactional
     @Override
     public void acceptInvite(String inviteUUID) throws InvitationNotFoundException {
         Optional<Invitation> opt = invitationRepository.findById(inviteUUID);
         if (opt.isPresent()) {
             Invitation invitation = opt.get();
-            Student student = userClient.getStudentByEmail(invitation.getStudentId());
-            student.getAssignedCourseIds().add(invitation.getCourseId());
-            userClient.saveStudent(student);
+            userClient.saveCourseAssign(invitation.getCourseId());
             log.info("Invitation accepted: {}", invitation);
 
             if (invitationRepository.existsById(invitation.getInvitationUuid())) {

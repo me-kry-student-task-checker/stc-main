@@ -238,6 +238,7 @@ public class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
+    @Transactional
     @Override
     public void saveCourseAssign(String studentEmail, Long courseId) {
         Optional<Student> optionalStudent = studentRepository.findLockByEmail(studentEmail);
