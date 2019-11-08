@@ -36,7 +36,15 @@ services:
   #    networks:
   #      - studentTaskChecker
   #    ports:
-  #      - "3666:3306"
+  #      - "3666:3306" # Mind the difference
+
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - 8025:8025
 
   mysql-database:
     image: mysql:5.7
@@ -118,6 +126,7 @@ services:
       - config-service
       - discovery-service-peer1
       - discovery-service-peer2
+      - mailhog
 
   task-service:
     container_name: task-service

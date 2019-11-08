@@ -16,7 +16,6 @@ import java.util.Set;
  * Defines a File's Description
  * @author Ilku Krisztian
  */
-
 @Entity
 @Getter @Setter
 @NoArgsConstructor @ToString

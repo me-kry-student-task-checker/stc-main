@@ -261,7 +261,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<Student> getAllStudents() {
         try {
-            return studentRepository.findAllUsers();
+            return new HashSet<>(studentRepository.findAll());
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -273,7 +273,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<Teacher> getAllTeachers() {
         try {
-            return teacherRepository.findAllUsers();
+            return new HashSet<>(teacherRepository.findAll());
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
