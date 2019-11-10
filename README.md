@@ -5,7 +5,7 @@
 ### Résztvevők
 Dr. Krizsán Zoltán - Konzulens
 
-Ilku Krisztián - A Google Cloud Platform API-k bemutatása és használata<br>
+Ilku Krisztián - A Google Cloud Platform bemutatása és használata<br>
 Szőke Attila - Microservice-ek a Springben<br>
 Javorek Dénes - Spring Data használata a Google Cloudban<br>
 
