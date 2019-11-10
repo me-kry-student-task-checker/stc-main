@@ -11,8 +11,6 @@ import java.util.List;
  * @author Javorek Dénes
  */
 public interface StudentRepository extends UserBaseRepository<Student> {
-    List<Student> findAllBy();
-
     @Query("SELECT s FROM Student s WHERE :courseId MEMBER OF s.assignedCourseIds")
     List<Student> findAllAssignedForCourseId(@Param("courseId") Long courseId);
 

@@ -8,7 +8,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter @Setter
 @ToString
-public class CourseDto {
+public class CourseModificationDto {
     private Long id;
     private String name;
     private String description;

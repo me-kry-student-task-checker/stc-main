@@ -3,8 +3,8 @@ package hu.me.iit.malus.thesis.user.service;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
 import hu.me.iit.malus.thesis.user.model.Student;
 import hu.me.iit.malus.thesis.user.model.Teacher;
-import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
 import hu.me.iit.malus.thesis.user.model.User;
+import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
 
 import java.util.Set;
 
@@ -42,25 +42,43 @@ public interface UserService {
      * Saves a single Student
      * @param student
      */
+    @Deprecated
     void saveStudent(Student student);
 
     /**
      * Saves a set of Students
      * @param studentsToAdd
      */
+    @Deprecated
     void saveStudents(Set<Student> studentsToAdd);
 
     /**
      * Saves a single Teacher
      * @param teacher
      */
+    @Deprecated
     void saveTeacher(Teacher teacher);
 
     /**
      * Saves a set of Teachers
      * @param teachersToAdd
      */
+    @Deprecated
     void saveTeachers(Set<Teacher> teachersToAdd);
+
+    /**
+     * Adds the id of the newly created course to a teacher object
+     * @param teacherEmail
+     * @param courseId
+     */
+    void saveCourseCreation(String teacherEmail, Long courseId);
+
+    /**
+     * Adds the id of a course to the assigned field of student object
+     * @param studentEmail
+     * @param courseId
+     */
+    void saveCourseAssign(String studentEmail, Long courseId);
 
     /**
      * Returns all the saved Students
@@ -115,4 +133,21 @@ public interface UserService {
      * @return User
      */
     User getAnyUserByEmail(String email);
+
+    /**
+     * Returns all the course ids, that the user has connection to
+     * This connection can be "created by" or "assigned to"
+     * @param userEmail Identifier of a user
+     * @return List of course ids, that is connected to the given user
+     */
+    Set<Long> getRelatedCourseIds(String userEmail);
+
+    /**
+     * Returns whether the user has any connection with the given course
+     * This connection can be "created by" or "assigned to"
+     * @param email Email address of the user
+     * @param courseId Course id of the course where the connection should be tested
+     * @return True if the user is connected to the course, false otherwise
+     */
+    Boolean isRelatedToCourse(String email, Long courseId);
 }

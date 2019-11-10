@@ -4,8 +4,8 @@ import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
 
-import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Interface of the Course Service
@@ -46,11 +46,12 @@ public interface CourseService {
     //TODO might need to use pagination
 
     /**
-     * Lists all courses
+     * Lists all related courses, but only the most important infos
+     * If you need all the data for a course, use get(courseId, userEmail) method
      * @param userEmail currently authenticated user's email
-     * @return list of courses
+     * @return set of courses that relates to the user
      */
-    List<Course> getAll(String userEmail);
+    Set<Course> getAll(String userEmail);
 
     //TODO these will need a table which contains the uuid, a courseId and the studentId
 

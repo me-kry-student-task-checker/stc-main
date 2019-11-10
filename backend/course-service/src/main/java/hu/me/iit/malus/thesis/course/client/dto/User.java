@@ -1,6 +1,9 @@
 package hu.me.iit.malus.thesis.course.client.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Aggregator class for Student and Teacher objects.
@@ -11,8 +14,8 @@ import lombok.*;
  */
 @Getter @Setter
 @AllArgsConstructor
-@ToString @EqualsAndHashCode
-public class User
+@ToString
+public abstract class User
 {
     private final String email;
     private String password;
@@ -25,9 +28,5 @@ public class User
         super();
         this.email = null;
         this.enabled = false;
-    }
-
-    public User withEmail(String email) {
-        return new User(email, this.password, this.firstName, this.lastName, this.role, false);
     }
 }

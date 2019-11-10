@@ -1,24 +1,19 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 
-import hu.me.iit.malus.thesis.course.client.dto.Teacher;
-import hu.me.iit.malus.thesis.course.client.dto.User;
 import hu.me.iit.malus.thesis.course.controller.converters.DtoConverter;
-import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
+import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
+import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
-import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Controller endpoint of this service
@@ -38,14 +33,14 @@ public class CourseController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Course createCourse(@RequestBody CourseDto courseDto, Principal principal) {
-        return service.create(DtoConverter.CourseDtoToCourse(courseDto), principal.getName());
+    public Course createCourse(@RequestBody CourseModificationDto courseModificationDto, Principal principal) {
+        return service.create(DtoConverter.CourseDtoToCourse(courseModificationDto), principal.getName());
     }
 
     @PostMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Course editCourse(@RequestBody CourseDto courseDto, Principal principal) {
-        return service.edit(DtoConverter.CourseDtoToCourse(courseDto), principal.getName());
+    public Course editCourse(@RequestBody CourseModificationDto courseModificationDto, Principal principal) {
+        return service.edit(DtoConverter.CourseDtoToCourse(courseModificationDto), principal.getName());
     }
 
     @GetMapping("/get/{courseId}")
@@ -54,8 +49,8 @@ public class CourseController {
     }
 
     @GetMapping("/getAll")
-    public List<Course> getAll(Principal principal) {
-        return service.getAll(principal.getName());
+    public Set<CourseOverviewDto> getAll(Principal principal) {
+        return DtoConverter.CourseToCourseOverviewSet(service.getAll(principal.getName()));
     }
 
     @PostMapping("/invite/{courseId}/{studentId}")

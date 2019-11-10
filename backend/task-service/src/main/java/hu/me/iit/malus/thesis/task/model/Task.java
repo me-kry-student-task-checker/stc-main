@@ -1,8 +1,13 @@
 package hu.me.iit.malus.thesis.task.model;
 
+import com.google.common.base.Objects;
 import hu.me.iit.malus.thesis.task.client.dto.File;
 import hu.me.iit.malus.thesis.task.client.dto.TaskComment;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -19,11 +24,11 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @ToString
-@EqualsAndHashCode
 public class Task {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.AUTO, generator="native")
+    @GenericGenerator(name="native", strategy="native")
     private Long id;
     private String name;
     private String description;
@@ -33,8 +38,14 @@ public class Task {
     @Transient
     private Set<File> files;
     @ElementCollection
+    @OrderColumn(name = "help_index_no")
+    @CollectionTable(name = "help_needed",
+            joinColumns = @JoinColumn(name = "task_id"))
     private Set<String> helpNeededStudentIds;
     @ElementCollection
+    @OrderColumn(name = "completed_index_no")
+    @CollectionTable(name = "completed",
+            joinColumns = @JoinColumn(name = "task_id"))
     private Set<String> completedStudentIds;
     @Transient
     private List<TaskComment> comments;
@@ -101,5 +112,18 @@ public class Task {
      */
     public void addAllComment(Set<TaskComment> commentsToAdd) {
         comments.addAll(commentsToAdd);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return Objects.equal(id, task.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

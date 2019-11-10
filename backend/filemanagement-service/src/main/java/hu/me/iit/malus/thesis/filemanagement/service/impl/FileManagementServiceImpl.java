@@ -17,7 +17,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Default implementation for FileDescription management service.
@@ -190,10 +193,10 @@ public class FileManagementServiceImpl implements FileManagementService {
      * {@inheritDoc}
      */
     public Set<FileDescription> getAllFilesByTagId(Long tagId, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service) {
-        Iterable<FileDescription> fileDescriptions = fileDescriptionRepository.findAll();
+        List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByTagId(tagId);
         Set<FileDescription> results = new HashSet<>();
         for (FileDescription fd : fileDescriptions) {
-            if (fd.getTagId().equals(tagId) && fd.getServices().contains(service)) {
+            if (fd.getServices().contains(service)) {
                 results.add(fd);
             }
         }

@@ -60,7 +60,7 @@ public class CourseServiceImplTest {
 
         // Then
         Mockito.verify(courseRepository, Mockito.times(1)).save(course);
-        Mockito.verify(userClient, Mockito.times(1)).saveTeacher(courseOwner);
+        Mockito.verify(userClient, Mockito.times(1)).saveCourseCreation(null);
         Assertions.assertThat(createdCourse).isEqualTo(course);
     }
 }

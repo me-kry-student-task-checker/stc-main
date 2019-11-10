@@ -1,11 +1,10 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 import com.google.gson.Gson;
-import hu.me.iit.malus.thesis.course.client.dto.Student;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import hu.me.iit.malus.thesis.course.client.dto.UserRole;
 import hu.me.iit.malus.thesis.course.controller.converters.DtoConverter;
-import hu.me.iit.malus.thesis.course.controller.dto.CourseDto;
+import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.helper.JwtTestHelper;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.security.config.JwtAuthConfig;
@@ -67,7 +66,7 @@ public class CourseControllerTest {
                 courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
         Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
 
-        CourseDto courseDto = new CourseDto();
+        CourseModificationDto courseDto = new CourseModificationDto();
         courseDto.setName(course.getName());
         courseDto.setDescription(course.getDescription());
 
@@ -108,7 +107,7 @@ public class CourseControllerTest {
     public void whenStudentCreateCourse_WithValidToken_returnForbidden()
             throws Exception {
         // Given
-        CourseDto courseDto = new CourseDto();
+        CourseModificationDto courseDto = new CourseModificationDto();
         courseDto.setName("Meant To Be Created");
         courseDto.setDescription("Haha, can I create this one?");
 

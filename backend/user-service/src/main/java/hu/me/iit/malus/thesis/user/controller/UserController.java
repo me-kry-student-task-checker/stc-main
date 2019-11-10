@@ -5,14 +5,15 @@ import hu.me.iit.malus.thesis.user.controller.dto.RegistrationResponse;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
 import hu.me.iit.malus.thesis.user.model.Student;
 import hu.me.iit.malus.thesis.user.model.Teacher;
-import hu.me.iit.malus.thesis.user.model.exception.UserAlreadyExistException;
 import hu.me.iit.malus.thesis.user.model.User;
+import hu.me.iit.malus.thesis.user.model.exception.UserAlreadyExistException;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -79,6 +80,18 @@ public class UserController {
         service.saveTeachers(teachersToSave);
     }
 
+    @PreAuthorize("hasRole('ROLE_Teacher')")
+    @PostMapping("/saveCourseCreation")
+    public void saveCourseCreation(Principal principal, @RequestBody Long courseId) {
+        service.saveCourseCreation(principal.getName(), courseId);
+    }
+
+    @PreAuthorize("hasRole('ROLE_Student')")
+    @PostMapping("/saveCourseAssign")
+    public void saveCourseAssign(Principal principal, @RequestBody Long courseId) {
+        service.saveCourseAssign(principal.getName(), courseId);
+    }
+
     @GetMapping("/students")
     public Set<Student> getAllStudents() {
         return service.getAllStudents();
@@ -94,6 +107,17 @@ public class UserController {
         return service.getStudentByEmail(studentEmail);
     }
 
+    @GetMapping("/teacher/{email:.+}")
+    public Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail) {
+        return service.getTeacherByEmail(teacherEmail);
+    }
+
+    @GetMapping("/{email:.+}")
+    public User getUserByEmail(@PathVariable("email") String userEmail) {
+        return service.getAnyUserByEmail(userEmail);
+    }
+
+
     @GetMapping("/student/assigned/{courseId}")
     public Set<Student> getStudentsByAssignedCourseId(@PathVariable("courseId") Long courseId) {
         return service.getStudentsByAssignedCourseId(courseId);
@@ -104,23 +128,25 @@ public class UserController {
         return service.getStudentsByNotAssignedCourseId(courseId);
     }
 
-    @GetMapping("/teacher/{email:.+}")
-    public Teacher getTeacherByEmail(@PathVariable("email") String teacherEmail) {
-        return service.getTeacherByEmail(teacherEmail);
+    @GetMapping("/isRelated/course/{courseId}")
+    public Boolean isRelated(Principal principal, @PathVariable("courseId") Long courseId) {
+        return service.isRelatedToCourse(principal.getName(), courseId);
     }
+
+    @GetMapping("/related/course")
+    public Set<Long> getRelatedCourseIds(Principal principal) {
+        return service.getRelatedCourseIds(principal.getName());
+    }
+
 
     @GetMapping("/teacher/created/{courseId}")
     public Teacher getTeacherByCreatedCourseId(@PathVariable("courseId") Long courseId) {
         return service.getTeacherByCreatedCourseId(courseId);
     }
 
-    @GetMapping("/{email:.+}")
-    public User getUserByEmail(@PathVariable("email") String userEmail) {
-        return service.getAnyUserByEmail(userEmail);
-    }
-
     @GetMapping("/me")
     public User getMe(Principal principal) {
         return service.getAnyUserByEmail(principal.getName());
     }
+
 }
