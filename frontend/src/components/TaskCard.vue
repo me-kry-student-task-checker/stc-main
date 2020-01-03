@@ -4,7 +4,7 @@
 			b-card.card(:header="body.name" footer="Click on the card to see more >>")
 				.content
 					b-card-text.points Done:
-						span.vars {{body.isDone}}
+						span.vars {{body.done}}
 					b-card-text.points Description:
 						span.vars {{body.description}}
 					b-card-text.points Creation date:

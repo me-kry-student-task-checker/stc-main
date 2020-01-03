@@ -7,22 +7,22 @@
 			.col-lg-4
 				div.panel
 					button(v-if="showComp", @click="setDone(task.id)").panelBtn Mark as done
-					i(v-if="task.isDone").fas.fa-check-circle.fa-3x.ml-2
+					i(v-if="task.done").fas.fa-check-circle.fa-3x.ml-2
 		.row
 			.col-lg-4
-				button(:disabled="task.isDone || currentUser.role !== 'STUDENT'",
+				button(:disabled="task.done || currentUser.role !== 'STUDENT'",
 					@click="setComplete(task.id)").taskControlBtn Complete
 				div.list
 					div(v-if="task.completedStudents.length !== 0")
-						p(v-for="(completedStudent) in task.completedStudents").litem {{getLine(completedStudent)}}
+						p(v-for="(completedStudent) in task.completedStudents").litem {{completedStudent.firstName}} {{completedStudent.lastName}} - {{completedStudent.email}}
 					div(v-else)
 						p Nobody completed the task yet!
 			.col-lg-4
-				button(:disabled="task.isDone || currentUser.role !== 'STUDENT'",
+				button(:disabled="task.done || currentUser.role !== 'STUDENT'",
 					@click="setHelp(task.id)").taskControlBtn Request help
 				div.list
 					div(v-if="task.helpNeededStudents.length !== 0")
-						p(v-for="(helpStudent) in task.helpNeededStudents").litem {{getLine(helpStudent)}}
+						p(v-for="(helpStudent) in task.helpNeededStudents").litem {{helpStudent.firstName}} {{helpStudent.lastName}} - {{helpStudent.email}}
 					div(v-else)
 						p Nobody needs help right now!
 			.col-lg-4
@@ -64,9 +64,6 @@
 					case 'STUDENT': return false;
 					default: return false;
 				}
-			},
-			getLine(student) {
-				return student.firstName + ' ' + student.lastName + ' - ' + student.email;
 			}
 		},
 		created() {

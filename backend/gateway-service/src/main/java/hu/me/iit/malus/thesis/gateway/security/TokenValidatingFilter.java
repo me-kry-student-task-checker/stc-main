@@ -61,10 +61,9 @@ public class TokenValidatingFilter extends AbstractGatewayFilterFactory<TokenAut
                         header(config.getInnerTokenHeader(), token).
                         build();
 
-                log.info("Request forwarded to inner service: {}", request.getPath());
                 return chain.filter(exchange.mutate().request(request).build());
             } catch (JwtException e) {
-                log.error("Request blocked, error occurred: " + e.toString());
+                log.error("Request blocked to " + e.toString());
                 return this.onError(exchange, e.getMessage());
             }
         };
@@ -95,13 +94,13 @@ public class TokenValidatingFilter extends AbstractGatewayFilterFactory<TokenAut
         List<String> headers = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
 
         if (headers.isEmpty()) {
-            throw new JwtException("Token header is empty");
+            throw new JwtException("Token header is empty: " + request.getPath());
         }
 
         String tokenHeader = headers.get(0);
 
         if (!tokenHeader.startsWith(BEARER)) {
-            throw new JwtException("Token header is invalid");
+            throw new JwtException("Token header is invalid: " + request.getPath());
         }
 
         return tokenHeader.substring((BEARER + " ").length());
