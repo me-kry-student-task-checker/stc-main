@@ -1,11 +1,12 @@
 import api from '../../api/task-api.js';
+import {router} from '../../router/router';
 
 export default {
 	namespaced: true,
 	actions: {
 		createTask({commit}, newTask) {
 			api.create(newTask).then((response) => {
-				// TODO maybe dispatch here
+				router.push({name: 'task', params: {id: response.data.id}});
 				console.log('Create task successful');
 			}).catch((error) => {
 				console.error('Create task unsuccessful', error);

@@ -1,6 +1,6 @@
 <template lang="pug">
 	div
-		router-link(:to="{name: 'course', params: {id: this.body.id}}")
+		router-link(:to="{name: 'course', params: {id: this.body.id}}").cardLink
 			b-card.card(:header="body.name" footer="Click on the card to see more >>")
 				.content
 					b-card-text.points Creator:
@@ -29,8 +29,12 @@
 </script>
 
 <style lang="scss" scoped>
+	.cardLink {
+		text-decoration: none;
+	}
 	.card {
 		background: $card-bg;
+		color: black;
 		margin: 20px;
 		&:hover {
 			background: lightgray;

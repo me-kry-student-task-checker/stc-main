@@ -4,7 +4,7 @@ export default {
 	namespaced: true,
 	actions: {
 		uploadFiles({dispatch}, params) {
-			api.uploadFiles(params.files, params.service, params.tagId).then((response) => {
+			api.createFileEntry(params.files, params.service, params.tagId).then((response) => {
 				console.log('Upload successful', {noFiles: params.files.length});
 				switch (params.service) {
 				case 'COURSE':
@@ -12,6 +12,14 @@ export default {
 					break;
 				case 'TASK':
 					dispatch('tasks/getTask', params.tagId, {root: true});
+					break;
+				case 'FEEDBACK':
+					if (params.courseToRefresh) {
+						dispatch('course/getCourse', params.courseToRefresh, {root: true});
+					}
+					if (params.taskToRefresh) {
+						dispatch('tasks/getTask', params.taskToRefresh, {root: true});
+					}
 					break;
 				}
 			}).catch((error) => {

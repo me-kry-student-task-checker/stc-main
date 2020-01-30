@@ -1,6 +1,6 @@
 <template lang="pug">
 	div.panel
-		b-form-file(size="lg", multiple="true", v-model="files", accept="image/*, .pdf, .txt, .c, .java, .html, .css",
+		b-form-file(size="lg", :multiple="true", v-model="files", accept="image/*, .pdf, .txt, .c, .java, .html, .css",
 			no-drop, :file-name-formatter="formatNames").fileForm
 		button(@click="files = []").panelBtn Reset
 		button(:disabled="files.length === 0", @click="$emit('upload-files', files)").panelBtn Upload

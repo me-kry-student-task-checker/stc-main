@@ -11,12 +11,11 @@
 			b-form-file(size="lg", :multiple="true", v-model="files", accept="image/*, .pdf, .txt, .c, .java, .html, .css",
 				no-drop, :file-name-formatter="formatNames").fileForm
 			button(@click="files = []").resetBtn
-				i.fa.fa-undo.fa-2x.mt-1.
-		div.commentList
-			div(v-if="comments.length !== 0")
-				CommentCard(v-for="(comment) in comments", :key="comment.id", :comment="comment")
-			div(v-else)
-				p No comments yet! Be the first!
+				i.fa.fa-undo.fa-2x.mt-1
+		div(v-if="comments.length !== 0").commentList
+			CommentCard(v-for="(comment) in comments", :key="comment.id", :comment="comment")
+		div(v-else).commentList
+			p No comments yet! Be the first!
 </template>
 
 <script>

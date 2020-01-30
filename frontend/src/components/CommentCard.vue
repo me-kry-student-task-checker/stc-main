@@ -2,7 +2,7 @@
 	div.commentCard
 		b-card
 			div.titleLine
-				h2.sender  {{comment.authorId}}
+				p.sender Sender: {{comment.authorId}}
 				p.date {{comment.createDate | moment('DD/MM/YYYY') }}
 			p.text {{comment.text}}
 			div(v-if="comment.files.length !== 0").files
@@ -25,15 +25,18 @@
 
 <style lang="scss" scoped>
 	.commentCard {
+		margin-bottom: 5px;
 		max-width: 1000px;
 		width: 100%;
 	}
 	.titleLine {
 		display: flex;
 		flex-direction: row;
+		justify-content: space-between;
 	}
 	.sender {
 		margin-right: 10px;
+		font-size: 20px;
 	}
 	.date {
 		color: $grey-font;

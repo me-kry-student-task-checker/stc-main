@@ -7,8 +7,8 @@
 				div.panel
 					router-link(:to="{name: 'tasks', params: {id: this.course.id}}")
 						button.panelBtn View tasks
-					button(v-if="showAdd", @click="inviteModal").panelBtn Assign students
-					button(v-if="showAdd", @click="setShowUpload").panelBtn Upload files
+					button(v-if="showTeacherContent", @click="inviteModal").panelBtn Assign students
+					button(v-if="showTeacherContent", @click="setShowUpload").panelBtn Upload files
 		.row
 			.col-lg-12
 				div(v-if="showUpload")
@@ -36,11 +36,11 @@
 				b-collapse(:visible="visible === 'files'")#files
 					b-card
 						b-card-text
-						div(v-if="course.files.length !== 0")
+						div(v-if="course.files.length !== 0").files
 							FileCard(v-for="(file) in course.files", :key="file.id", :file="file")
 						div(v-else)
 							p.emptyList No files uploaded for this course yet!
-		.row
+		div(v-if="showTeacherContent").row
 			.col-lg-12
 				b-button-group.panel
 					b-button(@click="toggleCollapse('task')",
@@ -85,9 +85,8 @@
 			...mapState(['currentUser']),
 			...mapState('course', ['course']),
 			...mapState('user', ['invitableStudents']),
-			showAdd: function() {
+			showTeacherContent: function() {
 				switch (this.currentUser.role) {
-					case 'ADMIN': return true;
 					case 'TEACHER': return true;
 					case 'STUDENT': return false;
 					default: return false;
@@ -176,6 +175,11 @@
 		margin-right: 35px;
 	}
 	.users {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+	.files {
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;

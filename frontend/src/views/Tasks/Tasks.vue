@@ -1,5 +1,6 @@
 <template lang="pug">
 	div
+		p(@click="$router.go(-1)").back << Back to Course
 		h3.header Course tasks
 		div(v-if="tasks.length !== 0").taskList
 			TaskCard(v-for='(task) in tasks', :key="task.id", :body='task')
@@ -30,6 +31,15 @@
 </script>
 
 <style lang="scss" scoped>
+	.back {
+		font-size: 20px;
+		margin-left: 50px;
+		margin-top: 25px;
+		&:hover {
+			color: $grey-font;
+			cursor: pointer;
+		}
+	}
 	.header {
 		border-bottom: 1px solid black;
 		font-size: 40px;

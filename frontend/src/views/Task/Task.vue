@@ -2,16 +2,18 @@
 	div.container-fluid
 		.row
 			.col-lg-8
+				router-link(:to="{name: 'course', params: {id: this.task.courseId}}").back << Back to Parent Course
 				h3.title {{task.name}}
 				p.desc {{task.description}}
 			.col-lg-4
 				div.panel
 					button(v-if="showComp", @click="setDone(task.id)").panelBtn Mark as done
-					i(v-if="task.done").fas.fa-check-circle.fa-3x.ml-2
+					div(v-if="task.done")
+						i.fas.fa-check-circle.fa-3x.ml-2
 		.row
 			.col-lg-4
 				button(:disabled="task.done || currentUser.role !== 'STUDENT'",
-					@click="setComplete(task.id)").taskControlBtn Complete
+					@click="setComplete(task.id)", v-if="currentUser.role !== 'TEACHER'").taskControlBtn Complete
 				div.list
 					div(v-if="task.completedStudents.length !== 0")
 						p(v-for="(completedStudent) in task.completedStudents").litem {{completedStudent.firstName}} {{completedStudent.lastName}} - {{completedStudent.email}}
@@ -19,7 +21,7 @@
 						p Nobody completed the task yet!
 			.col-lg-4
 				button(:disabled="task.done || currentUser.role !== 'STUDENT'",
-					@click="setHelp(task.id)").taskControlBtn Request help
+					@click="setHelp(task.id)", v-if="currentUser.role !== 'TEACHER'").taskControlBtn Request help
 				div.list
 					div(v-if="task.helpNeededStudents.length !== 0")
 						p(v-for="(helpStudent) in task.helpNeededStudents").litem {{helpStudent.firstName}} {{helpStudent.lastName}} - {{helpStudent.email}}
@@ -29,8 +31,8 @@
 				button(:disabled="!showComp", @click="setShowUpload").taskControlBtn Upload file
 				div(v-if="showUpload")
 					FileUpload(@upload-files="upload")
-				div.fList
-					div(v-if="task.files.length !== 0")
+				div
+					div(v-if="task.files.length !== 0").fList
 						FileCard(v-for="(file) in task.files", :key="file.id", :file="file")
 					div(v-else)
 						p.emptyList No files uploaded for this task yet!
@@ -94,6 +96,16 @@
 </script>
 
 <style lang="scss" scoped>
+	.back {
+		color: black;
+		font-size: 20px;
+		margin-left: 50px;
+		&:hover {
+			color: $grey-font;
+			cursor: pointer;
+			text-decoration: none;
+		}
+	}
 	.title {
 		margin-top: 20px;
 		margin-left: 10px;
