@@ -1,4 +1,7 @@
 ### How to run backend
+
+docker-compose up --build
+
 Linux or MacOS is preferred, Windows works too but Docker shows unpredictable behaviour there sometimes.
 Install Docker and Docker-compose and configure it, so it doesn't need sudo (mainly for convenience's sake).
 After a fresh pull or if you change something, you have to 'mvn clean install' the respective modules.

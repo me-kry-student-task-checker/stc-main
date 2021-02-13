@@ -1,0 +1,17 @@
+# Port of the config server.
+server:
+  port: 8888
+
+# git repository where the properties of the clients reside.
+# dont get any bad ideas cheeky person, this rsa key only grants pull access.
+spring:
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/local-config
+logging:
+  file: service.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
