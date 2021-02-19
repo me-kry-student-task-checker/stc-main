@@ -5,7 +5,7 @@ consts:
 # Name of the service, by which it finds its property file and the uri of the config server to fetch from.
 spring:
   application:
-    name: filemanagement-service
+    name: task-service
   cloud:
     config:
       uri: http://${consts.config-host}:${consts.config-port} # config ip from setup_docker.sh

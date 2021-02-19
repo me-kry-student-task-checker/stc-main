@@ -1,0 +1,17 @@
+# Eureka config profiles, two peer profiles and a development default profile for testing
+hosts:
+  peer1Host: localhost # docker containers can find others on the same network by container name
+
+server:
+  port: 8761
+eureka:
+  instance:
+    prefer-ip-address: false
+    appname: eureka-cluster
+  client:
+    serviceUrl:
+      defaultZone: http://${hosts.peer1Host}:${server.port}/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+    healthcheck:
+      enabled: true
