@@ -1,29 +1,16 @@
-# frontend
+## StudentTaskChecker webes kliens
 
-## Project setup
-```
-npm install
-```
+### Rendszerkövetelmények
+- NodeJs 15.7.0 (ezt használtam, de lehet régebbi is jó)
+- npm 7.0.11
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+### Fontos parancsok
+1. `npm install`
+    - lehúzza a függőségeket
+2. `npm run serve`
+    - elindít egy dev szervert a `localhost:3000`
+    - a kéréseket proxyzni fogja a szervernek (egészen pontosan a `localhost:8060`-ra)
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Futattás
+Akkor fog csak jól működni ha teljesen felfutott a [backenden](https://github.com/me-kry-student-task-checker/main/blob/master/backend/README.md) az összes szerviz.
+Sorrendben az *1.* és *2.* parancs szükséges, majd a `localhost:3000`-en lesz elérhető a weboldal.
