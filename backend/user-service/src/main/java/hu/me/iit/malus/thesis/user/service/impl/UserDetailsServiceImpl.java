@@ -3,6 +3,7 @@ package hu.me.iit.malus.thesis.user.service.impl;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
 import hu.me.iit.malus.thesis.user.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,6 +19,7 @@ import java.util.List;
  * Implementation of a common Spring interface, used to load user data by its identifier during authentication.
  * @author Javorek Dénes
  */
+@Slf4j
 @Service
 @Qualifier("customUserDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {

@@ -20,7 +20,9 @@
     <description>Thesis project for students of the University of Miskolc</description>
 
     <properties>
-        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
         <spring.cloud.version>2.1.2.RELEASE</spring.cloud.version>
         <jjwt.version>0.9.0</jjwt.version>
         <javax.servlet.version>2.5</javax.servlet.version>
