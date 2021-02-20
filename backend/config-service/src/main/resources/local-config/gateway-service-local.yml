@@ -1,0 +1,51 @@
+server:
+  port: 8060
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: authentication
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/auth
+        - id: registration
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/registration,/api/user/confirmation**
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - TokenValidatingFilter
+        - id: course-service
+          uri: lb://course-service
+          predicates:
+            - Path=/api/course/**
+          filters:
+            - TokenValidatingFilter
+        - id: task-service
+          uri: lb://task-service
+          predicates:
+            - Path=/api/task/**
+          filters:
+            - TokenValidatingFilter
+        - id: feedback-service
+          uri: lb://feedback-service
+          predicates:
+            - Path=/api/feedback/**
+          filters:
+            - TokenValidatingFilter
+        - id: filemanagement-service
+          uri: lb://filemanagement-service
+          predicates:
+            - Path=/api/filemanagement/**
+          filters:
+            - TokenValidatingFilter
