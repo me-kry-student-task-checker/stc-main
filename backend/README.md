@@ -1,25 +1,42 @@
-### How to run backend
+## StudentTaskChecker szerver
 
-docker-compose up --build
+### Rendszerkövetelmények
+- OpenJDK 11
+- Maven
+- Docker (Linux és Windows is lehet, Windowson WSL2-es megoldás ajánlott)
+- Docker Compose
 
-Linux or MacOS is preferred, Windows works too but Docker shows unpredictable behaviour there sometimes.
-Install Docker and Docker-compose and configure it, so it doesn't need sudo (mainly for convenience's sake).
-After a fresh pull or if you change something, you have to 'mvn clean install' the respective modules.
-To run the services use docker-script.sh. <br>
-It accepts 4 arguments: <br>
-    - init: forcibly recreates containers, picks up on changes, slow <br>
-    - start: starts every container, if something needs building it uses cached resources so doesn't pick up on changes,
-             doesn't affect running containers, fast <br>
-    - stop: stops and removes all containers, removes the network <br>
-    - recreate ${container_name}: recreates a container completely from scratch <br>
-    - restart ${container_name}: restarts a container <br>
+### Fontos parancsok
 
-### Other infos
-Services reach each other by their container names, thanks to the Docker built-in DNS service.
-Their IP is dynamically set, the script shows them but you can 'docker inspect ${container_name}' to see them for yourself.
-From browser, you can reach the containers by their IPs and Ports.
-To read logs use Kitematic or 'docker logs ${container_name} -f' command.
-To check out a container's file system use 'docker exec -it ${container_name} bash' command.
+1. `mvn clean package`
+    - összerakja a jar fájlokat amiket majd a konténerek futtatnak.
+    - kell az alábbiakhoz.
 
-### Windows solutions
-To reach containers you must run 'route add 172.18.0.0 mask 255.255.0.0 10.0.75.2 -p'.
+2. `docker-compose up -d` 
+    - elindul az alkalmazás, a docker felépíti a konténereket és imageket ha még nem léteznek. 
+    - nem frissülnek a konténerek a hatására ha már léteznek, csak elindulnak. 
+    - -d => detached, nem tolja ki a konzolra az összes konténer logját.
+    
+3. `docker-compose down` 
+    - leállítja a konténereket
+
+4. `docker-compose build --no-cache --parallel` 
+    - Felépíti az összes konténert, jó akkor ha szeretnénk az egészet teljesen újraépíteni mert például van valami változás a forráskódban.
+    - --no-cache => nem használja a cachelt fájlokat építéskor, tehát mindig aktuális de lassabb.
+    - --parallel => több szálon épít, gyorsabb.
+
+5. `docker-compose build --no-cache --parallel ${szerviz-név}` 
+    - ugyanaz mint a felette lévő, csak meg lehet adni egy konténert a `docker-compose.yml` fájlból és csak azt építi újra.
+
+### Futattás
+Az *1.* és *2.* parancs elég a futtatáshoz, a *4.* és *5.* akkor szükséges ha változásokat szeretnénk eszközölni és látni.
+Eltart pár percig míg felfut az egész, géptől függően. 
+A folyamatot a Docker Desktop GUI-ban lehet nyomonkövetni, ott lehet látni az egyes konténerek logjait.
+Pár exception lehetséges, nem kell megijedni, ha nem hal meg teljesen és exitál akkor majd megoldja. 
+Ilyenkor regisztrálni akar a discovery szervizbe és ha nem megy neki akkor a kitolja a stacktracet a logra, de később újra próbálja.
+Továbbá ha a discovery szerviz felfutott akkor a `localhost:8761`-en lesz látható az egyes szervizek állapotáról egy táblázat.
+Ha minden UP állapotú akkor a [frontend](https://github.com/me-kry-student-task-checker/main/blob/master/frontend/README.md) is indulhat.
+
+#### Előre felvitt bejelentkezési adatok: 
+- *e-mail:* bob@ross.com
+- *password:* happy123
