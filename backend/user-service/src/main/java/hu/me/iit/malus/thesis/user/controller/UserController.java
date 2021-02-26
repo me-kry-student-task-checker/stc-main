@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.user.controller;
 
+import hu.me.iit.malus.thesis.user.controller.dto.CourseAssignmentDto;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationResponse;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
@@ -60,36 +61,16 @@ public class UserController {
                 .body("Account activated. You can login now.");
     }
 
-    @PostMapping("/saveStudent")
-    public void saveStudent(@RequestBody Student student) {
-        service.saveStudent(student);
-    }
-
-    @PostMapping("/saveStudents")
-    public void saveStudents(@RequestBody Set<Student> studentsToSave) {
-        service.saveStudents(studentsToSave);
-    }
-
-    @PostMapping("/saveTeacher")
-    public void saveTeacher(@RequestBody Teacher teacher) {
-        service.saveTeacher(teacher);
-    }
-
-    @PostMapping("/saveTeachers")
-    public void saveTeachers(@RequestBody Set<Teacher> teachersToSave) {
-        service.saveTeachers(teachersToSave);
-    }
-
     @PreAuthorize("hasRole('ROLE_Teacher')")
     @PostMapping("/saveCourseCreation")
     public void saveCourseCreation(Principal principal, @RequestBody Long courseId) {
         service.saveCourseCreation(principal.getName(), courseId);
     }
 
-    @PreAuthorize("hasRole('ROLE_Student')")
-    @PostMapping("/saveCourseAssign")
-    public void saveCourseAssign(Principal principal, @RequestBody Long courseId) {
-        service.saveCourseAssign(principal.getName(), courseId);
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PostMapping("/assignStudentsToCourse")
+    public void assignStudentsToCourse(@RequestBody CourseAssignmentDto dto) {
+        service.assignStudentsToCourse(dto.getCourseId(), dto.getStudentEmails());
     }
 
     @GetMapping("/students")

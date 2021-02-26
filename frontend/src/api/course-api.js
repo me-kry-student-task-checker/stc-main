@@ -11,6 +11,6 @@ export default {
 		return axios.get('/api/course/get/' + id);
 	},
 	inviteStudents(courseId, students) {
-		return axios.post('/api/course/invite/' + courseId, students);
+		return axios.post('/api/user/assignStudentsToCourse', {courseId: courseId, studentEmails: students});
 	}
 };

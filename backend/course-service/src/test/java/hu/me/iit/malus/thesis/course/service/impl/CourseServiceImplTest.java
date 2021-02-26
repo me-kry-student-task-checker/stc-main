@@ -7,7 +7,6 @@ import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
-import hu.me.iit.malus.thesis.course.repository.InvitationRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Test;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 @RunWith(SpringRunner.class)
 public class CourseServiceImplTest {
     @Mock private CourseRepository courseRepository;
-    @Mock private InvitationRepository invitationRepository;
     @Mock private TaskClient taskClient;
     @Mock private FeedbackClient feedbackClient;
     @Mock private UserClient userClient;
@@ -37,7 +35,6 @@ public class CourseServiceImplTest {
     @After
     public void reset() {
         Mockito.reset(courseRepository);
-        Mockito.reset(invitationRepository);
         Mockito.reset(taskClient);
         Mockito.reset(feedbackClient);
         Mockito.reset(userClient);
