@@ -1,11 +1,10 @@
 package hu.me.iit.malus.thesis.task.controller;
 
-import hu.me.iit.malus.thesis.task.controller.converters.Converter;
+import hu.me.iit.malus.thesis.task.controller.dto.BriefTaskDto;
+import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
-import hu.me.iit.malus.thesis.task.controller.dto.TaskDto;
-import hu.me.iit.malus.thesis.task.model.Task;
+import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.service.TaskService;
-import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,16 +31,16 @@ public class TaskController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Task createTask(@RequestBody TaskDto task) {
-        return service.create(Converter.taskDtoToTask(task));
+    public BriefTaskDto createTask(@RequestBody CreateTaskDto dto) {
+        return service.create(dto);
     }
 
     @PostMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Task editTask(@RequestBody TaskDto task) {
-        return service.edit(Converter.taskDtoToTask(task));
+    public BriefTaskDto editTask(@RequestBody EditTaskDto dto) {
+        return service.edit(dto);
     }
-
+    
     @GetMapping("/get/{taskId}")
     public DetailedTaskDto getTask(@PathVariable Long taskId) {
         return service.get(taskId);

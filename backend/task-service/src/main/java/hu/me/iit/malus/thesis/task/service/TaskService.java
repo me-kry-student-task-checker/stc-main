@@ -1,7 +1,9 @@
 package hu.me.iit.malus.thesis.task.service;
 
+import hu.me.iit.malus.thesis.task.controller.dto.BriefTaskDto;
+import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
-import hu.me.iit.malus.thesis.task.model.Task;
+import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 
@@ -21,7 +23,7 @@ public interface TaskService {
      * @param task the new task
      * @return the saved task
      */
-    Task create(Task task);
+    BriefTaskDto create(CreateTaskDto task);
 
     /**
      * Adds a new task to the database or updates an existing one
@@ -29,7 +31,7 @@ public interface TaskService {
      * @param task the new task
      * @return the saved task
      */
-    Task edit(Task task);
+    BriefTaskDto edit(EditTaskDto task);
 
     /**
      * Returns a single Task by its id

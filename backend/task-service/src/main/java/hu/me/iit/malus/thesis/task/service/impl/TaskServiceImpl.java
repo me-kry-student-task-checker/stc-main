@@ -4,10 +4,14 @@ import hu.me.iit.malus.thesis.task.client.FeedbackClient;
 import hu.me.iit.malus.thesis.task.client.FileManagementClient;
 import hu.me.iit.malus.thesis.task.client.UserClient;
 import hu.me.iit.malus.thesis.task.client.dto.Student;
+import hu.me.iit.malus.thesis.task.controller.dto.BriefTaskDto;
+import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
+import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.repository.TaskRepository;
 import hu.me.iit.malus.thesis.task.service.TaskService;
+import hu.me.iit.malus.thesis.task.service.converters.Converter;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -49,23 +53,26 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public Task create(Task task) {
-        task.setDone(false);
-        task.setCreationDate(new Date());
-        log.info("Task created: {}", task);
-        return repository.save(task);
+    public BriefTaskDto create(CreateTaskDto dto) {
+        Task newTask = Converter.taskDtoToTask(dto);
+        newTask.setDone(false);
+        newTask.setCreationDate(new Date());
+        Task savedTask = repository.save(newTask);
+        log.info("Task created: {}", dto);
+        return Converter.taskToTaskDto(savedTask);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Task edit(Task task) {
-        Task taskToChange = repository.getOne(task.getId());
-        taskToChange.setName(task.getName());
-        taskToChange.setDescription(task.getDescription());
-        log.info("Task edited: {}", task);
-        return repository.save(task);
+    public BriefTaskDto edit(EditTaskDto dto) {
+        Task taskToChange = repository.getOne(dto.getId());
+        taskToChange.setName(dto.getName());
+        taskToChange.setDescription(dto.getDescription());
+        Task editedTask = repository.save(taskToChange);
+        log.info("Task edited: {}", editedTask);
+        return Converter.taskToTaskDto(editedTask);
     }
 
     /**
