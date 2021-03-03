@@ -14,8 +14,8 @@ import hu.me.iit.malus.thesis.task.service.TaskService;
 import hu.me.iit.malus.thesis.task.service.converters.Converter;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -30,24 +30,13 @@ import java.util.Set;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
-    private TaskRepository repository;
-    private FeedbackClient feedbackClient;
-    private FileManagementClient fileManagementClient;
-    private UserClient userClient;
-
-    /**
-     * Instantiates a new TaskServiceImpl class
-     */
-    @Autowired
-    public TaskServiceImpl(TaskRepository repository, FeedbackClient feedbackClient, FileManagementClient fileManagementClient,
-                           UserClient userClient) {
-        this.repository = repository;
-        this.feedbackClient = feedbackClient;
-        this.fileManagementClient = fileManagementClient;
-        this.userClient = userClient;
-    }
+    private final TaskRepository repository;
+    private final FeedbackClient feedbackClient;
+    private final FileManagementClient fileManagementClient;
+    private final UserClient userClient;
 
     /**
      * {@inheritDoc}
