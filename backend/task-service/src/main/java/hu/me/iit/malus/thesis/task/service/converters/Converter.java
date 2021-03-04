@@ -2,7 +2,6 @@ package hu.me.iit.malus.thesis.task.service.converters;
 
 import hu.me.iit.malus.thesis.task.controller.dto.BriefTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
-import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 
 public class Converter {
@@ -10,7 +9,7 @@ public class Converter {
     private Converter() {
     }
 
-    public static Task taskDtoToTask(CreateTaskDto taskDto) {
+    public static Task createTaskFromTaskDto(CreateTaskDto taskDto) {
         Task task = new Task();
         task.setName(taskDto.getName());
         task.setCourseId(taskDto.getCourseId());
@@ -18,16 +17,7 @@ public class Converter {
         return task;
     }
 
-    public static Task taskDtoToTask(EditTaskDto taskDto) {
-        Task task = new Task();
-        task.setId(taskDto.getId());
-        task.setName(taskDto.getName());
-        task.setCourseId(taskDto.getCourseId());
-        task.setDescription(taskDto.getDescription());
-        return task;
-    }
-
-    public static BriefTaskDto taskToTaskDto(Task task) {
+    public static BriefTaskDto createBriefTaskDtoFromTask(Task task) {
         BriefTaskDto briefTaskDto = new BriefTaskDto();
         briefTaskDto.setId(task.getId());
         briefTaskDto.setName(task.getName());

@@ -4,10 +4,8 @@ import hu.me.iit.malus.thesis.task.client.dto.File;
 import hu.me.iit.malus.thesis.task.client.dto.Student;
 import hu.me.iit.malus.thesis.task.client.dto.TaskComment;
 import hu.me.iit.malus.thesis.task.model.Task;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -21,10 +19,8 @@ import java.util.Set;
  *
  * @author Javorek Dénes
  */
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
-@ToString
 public class DetailedTaskDto {
 
     @Min(1)

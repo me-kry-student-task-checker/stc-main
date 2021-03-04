@@ -1,15 +1,13 @@
 package hu.me.iit.malus.thesis.task.controller.dto;
 
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
+@Data
 @NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
 public class CreateTaskDto {
 
     @NotBlank
