@@ -24,8 +24,8 @@ import java.util.Set;
  * @author Attila Szőke
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
@@ -40,8 +40,8 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Course create(Course course, String creatorsEmail) {
         course.setCreationDate(Date.from(Instant.now()));
-        Course newCourse = this.courseRepository.save(course);
-        this.userClient.saveCourseCreation(newCourse.getId());
+        Course newCourse = courseRepository.save(course);
+        userClient.saveCourseCreation(newCourse.getId());
         log.debug("Created course: {}", newCourse.getId());
         return newCourse;
     }
@@ -51,7 +51,7 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public Course edit(Course course, String editorsEmail) {
-        Course oldCourse = this.courseRepository.getOne(course.getId());
+        Course oldCourse = courseRepository.getOne(course.getId());
 
         if (!oldCourse.getCreator().getEmail().equals(editorsEmail)) {
             log.warn("Creator of this course {} is not the editor: {}!", course, editorsEmail);
@@ -59,7 +59,7 @@ public class CourseServiceImpl implements CourseService {
         }
 
         log.debug("Modified course: {}", course.getId());
-        return this.courseRepository.save(course);
+        return courseRepository.save(course);
     }
 
     /**
@@ -67,21 +67,21 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public Course get(Long courseId, String userEmail) throws CourseNotFoundException {
-        Optional<Course> optCourse = this.courseRepository.findById(courseId);
+        Optional<Course> optCourse = courseRepository.findById(courseId);
 
         if (optCourse.isPresent()) {
             Course course = optCourse.get();
-            if (!this.userClient.isRelated(course.getId())) {
+            if (!userClient.isRelated(course.getId())) {
                 log.warn("User {} is not realated to this course {}!", userEmail, course);
                 throw new CourseNotFoundException();
             }
 
             //TODO: We should find a way to fire these as async requests
-            course.setCreator(this.userClient.getTeacherByCreatedCourseId(courseId));
-            course.setStudents(this.userClient.getStudentsByAssignedCourseId(courseId));
-            course.setTasks(this.taskClient.getAllTasks(courseId));
-            course.setFiles(this.fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, courseId).getBody());
-            course.setComments(this.feedbackClient.getAllCourseComments(courseId));
+            course.setCreator(userClient.getTeacherByCreatedCourseId(courseId));
+            course.setStudents(userClient.getStudentsByAssignedCourseId(courseId));
+            course.setTasks(taskClient.getAllTasks(courseId));
+            course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, courseId).getBody());
+            course.setComments(feedbackClient.getAllCourseComments(courseId));
             log.debug("Course found: {}", courseId);
             return course;
         } else {
@@ -95,11 +95,11 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public Set<Course> getAll(String userEmail) {
-        Set<Long> relatedCourseIds = this.userClient.getRelatedCourseIds();
-        Set<Course> relatedCourses = this.courseRepository.findAllByIdIsIn(relatedCourseIds);
+        Set<Long> relatedCourseIds = userClient.getRelatedCourseIds();
+        Set<Course> relatedCourses = courseRepository.findAllByIdIsIn(relatedCourseIds);
 
         for (Course course : relatedCourses) {
-            course.setCreator(this.userClient.getTeacherByCreatedCourseId(course.getId()));
+            course.setCreator(userClient.getTeacherByCreatedCourseId(course.getId()));
         }
         log.debug("Get all courses done, total number of courses is {}", relatedCourses.size());
         return relatedCourses;
