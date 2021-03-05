@@ -7,10 +7,14 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 import java.security.Principal;
 import java.util.List;
 import java.util.Set;
@@ -22,29 +26,25 @@ import java.util.Set;
  */
 @RestController
 @RequestMapping("/api/course")
+@RequiredArgsConstructor
 public class CourseController {
 
-    private CourseService service;
-
-    @Autowired
-    public CourseController(CourseService service) {
-        this.service = service;
-    }
+    private final CourseService service;
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Course createCourse(@RequestBody CourseModificationDto courseModificationDto, Principal principal) {
+    public Course createCourse(@Valid @RequestBody CourseModificationDto courseModificationDto, Principal principal) {
         return service.create(DtoConverter.CourseDtoToCourse(courseModificationDto), principal.getName());
     }
 
     @PostMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Course editCourse(@RequestBody CourseModificationDto courseModificationDto, Principal principal) {
+    public Course editCourse(@Valid @RequestBody CourseModificationDto courseModificationDto, Principal principal) {
         return service.edit(DtoConverter.CourseDtoToCourse(courseModificationDto), principal.getName());
     }
 
     @GetMapping("/get/{courseId}")
-    public Course get(@PathVariable Long courseId, Principal principal) {
+    public Course get(@PathVariable @Min(1) Long courseId, Principal principal) {
         return service.get(courseId, principal.getName());
     }
 
@@ -54,18 +54,18 @@ public class CourseController {
     }
 
     @PostMapping("/invite/{courseId}/{studentId}")
-    public void invite(@PathVariable Long courseId, @PathVariable String studentId) {
+    public void invite(@PathVariable @Min(1) Long courseId, @PathVariable @Min(1) String studentId) {
         service.invite(courseId, studentId);
     }
 
     @PostMapping("/invite/{courseId}")
-    public void invite(@PathVariable Long courseId, @RequestBody List<String> studentIds) {
+    public void invite(@PathVariable @Min(1) Long courseId, @RequestBody List<String> studentIds) {
         service.invite(courseId, studentIds);
     }
 
     @PostMapping("/acceptInvitation/{invitationUuid}")
     @PreAuthorize("hasRole('ROLE_Student')")
-    public void acceptInvite(@PathVariable String invitationUuid) throws InvitationNotFoundException {
+    public void acceptInvite(@PathVariable @NotEmpty String invitationUuid) throws InvitationNotFoundException {
         service.acceptInvite(invitationUuid);
     }
 
