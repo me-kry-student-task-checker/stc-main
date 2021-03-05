@@ -30,46 +30,46 @@ public class TaskController {
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public @Valid BriefTaskDto createTask(@Valid @RequestBody CreateTaskDto dto) {
-        return this.service.create(dto);
+        return service.create(dto);
     }
 
     @PostMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public @Valid BriefTaskDto editTask(@Valid @RequestBody EditTaskDto dto) {
-        return this.service.edit(dto);
+        return service.edit(dto);
     }
 
     @GetMapping("/get/{taskId}")
     public @Valid DetailedTaskDto getTask(@Min(1) @PathVariable Long taskId) {
-        return this.service.get(taskId);
+        return service.get(taskId);
     }
 
     @GetMapping("/getAll/{courseId}")
     public Set<@Valid DetailedTaskDto> getAllTasks(@Min(1) @PathVariable Long courseId) {
-        return this.service.getAll(courseId);
+        return service.getAll(courseId);
     }
 
     @PostMapping("/setDone/{taskId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public void changeTasksDoneStatus(@Min(1) @PathVariable Long taskId) throws TaskNotFoundException {
-        this.service.changeDoneStatus(taskId);
+        service.changeDoneStatus(taskId);
     }
 
     @PostMapping("/setComplete/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
     public void changeTasksCompletion(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
-        this.service.changeCompletion(taskId, principal.getName());
+        service.changeCompletion(taskId, principal.getName());
     }
 
     @GetMapping("/checkHelps/{taskId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public Set<String> checkIfHelpNeededOnTask(@Min(1) @PathVariable Long taskId) throws TaskNotFoundException {
-        return this.service.checkIfHelpNeeded(taskId);
+        return service.checkIfHelpNeeded(taskId);
     }
 
     @PostMapping("/toggleHelp/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
     public void toggleHelpOnTask(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
-        this.service.toggleHelp(taskId, principal.getName());
+        service.toggleHelp(taskId, principal.getName());
     }
 }

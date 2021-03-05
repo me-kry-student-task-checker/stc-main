@@ -45,7 +45,7 @@ public class TaskServiceImpl implements TaskService {
     public BriefTaskDto create(CreateTaskDto dto) {
         Task newTask = Converter.createTaskFromTaskDto(dto);
         newTask.setCreationDate(new Date());
-        Task savedTask = this.repository.save(newTask);
+        Task savedTask = repository.save(newTask);
         log.debug("Task created: {}", dto);
         return Converter.createBriefTaskDtoFromTask(savedTask);
     }
@@ -55,10 +55,10 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public BriefTaskDto edit(EditTaskDto dto) {
-        Task taskToChange = this.repository.getOne(dto.getId());
+        Task taskToChange = repository.getOne(dto.getId());
         taskToChange.setName(dto.getName());
         taskToChange.setDescription(dto.getDescription());
-        Task editedTask = this.repository.save(taskToChange);
+        Task editedTask = repository.save(taskToChange);
         log.debug("Task edited: {}", editedTask);
         return Converter.createBriefTaskDtoFromTask(editedTask);
     }
@@ -68,9 +68,9 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public DetailedTaskDto get(Long taskId) {
-        Optional<Task> optTask = this.repository.findById(taskId);
+        Optional<Task> optTask = repository.findById(taskId);
         if (optTask.isPresent()) {
-            DetailedTaskDto taskDto = this.getDetailedTask(optTask.get());
+            DetailedTaskDto taskDto = getDetailedTask(optTask.get());
             log.debug("Task queried by id: {}, successfully", taskId);
             return taskDto;
         } else {
@@ -84,12 +84,12 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public Set<DetailedTaskDto> getAll(Long courseId) {
-        Optional<Set<Task>> optTasks = this.repository.findAllByCourseId(courseId);
+        Optional<Set<Task>> optTasks = repository.findAllByCourseId(courseId);
         if (optTasks.isPresent()) {
             Set<DetailedTaskDto> taskDtos = new HashSet<>();
             Set<Task> tasks = optTasks.get();
             for (Task task : tasks) {
-                taskDtos.add(this.getDetailedTask(task));
+                taskDtos.add(getDetailedTask(task));
             }
             log.debug("Tasks queried for course: {}, found {} tasks", courseId, taskDtos.size());
             return taskDtos;
@@ -104,11 +104,11 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public void changeDoneStatus(Long taskId) throws TaskNotFoundException {
-        Optional<Task> opt = this.repository.findById(taskId);
+        Optional<Task> opt = repository.findById(taskId);
         if (opt.isPresent()) {
             Task task = opt.get();
             task.setDone(!task.isDone());
-            this.repository.save(task);
+            repository.save(task);
             log.debug("Task's ({}) done status changed to: {}", task, !task.isDone());
         } else {
             log.warn("No task found with this task id: {}", taskId);
@@ -121,11 +121,11 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public void changeCompletion(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
-        Optional<Task> opt = this.repository.findById(taskId);
+        Optional<Task> opt = repository.findById(taskId);
         if (opt.isPresent()) {
             Task task = opt.get();
 
-            Student student = this.userClient.getStudentByEmail(studentId);
+            Student student = userClient.getStudentByEmail(studentId);
             if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
                 log.warn("Cannot change task completion, as Student {} is not assigned to this course {}",
                         studentId, task.getCourseId());
@@ -136,12 +136,12 @@ public class TaskServiceImpl implements TaskService {
             if (completedStudentIds.contains(studentId)) {
                 completedStudentIds.remove(studentId);
                 task.setCompletedStudentIds(completedStudentIds);
-                this.repository.save(task);
+                repository.save(task);
                 log.debug("From a task's ({}) completion list this student was removed: {}", task, studentId);
                 return;
             }
             task.addStudentIdToCompleted(studentId);
-            this.repository.save(task);
+            repository.save(task);
             log.debug("To task's ({}) completion list this student was added: {}", task, studentId);
         } else {
             log.warn("No task found with this task id: {}", taskId);
@@ -154,7 +154,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public Set<String> checkIfHelpNeeded(Long taskId) throws TaskNotFoundException {
-        Optional<Task> opt = this.repository.findById(taskId);
+        Optional<Task> opt = repository.findById(taskId);
         if (opt.isPresent()) {
             Task task = opt.get();
             Set<String> helpNeededList = task.getHelpNeededStudentIds();
@@ -171,11 +171,11 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public void toggleHelp(Long taskId, String studentId) throws StudentIdNotFoundException {
-        Optional<Task> optTask = this.repository.findById(taskId);
+        Optional<Task> optTask = repository.findById(taskId);
         if (optTask.isPresent()) {
             Task task = optTask.get();
 
-            Student student = this.userClient.getStudentByEmail(studentId);
+            Student student = userClient.getStudentByEmail(studentId);
             if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
                 log.warn("Cannot change task completion, as Student {} is not assigned to this course {}",
                         studentId, task.getCourseId());
@@ -184,11 +184,11 @@ public class TaskServiceImpl implements TaskService {
 
             if (task.getHelpNeededStudentIds().contains(studentId)) {
                 task.getHelpNeededStudentIds().remove(studentId);
-                this.repository.save(task);
+                repository.save(task);
                 log.debug("Removed an id ({}) from the help needed list of task ({})", studentId, taskId);
             } else {
                 task.addStudentIdToHelp(studentId);
-                this.repository.save(task);
+                repository.save(task);
                 log.debug("Added Student ({}) to the help needed list of task ({})", studentId, taskId);
             }
         } else {
@@ -200,7 +200,7 @@ public class TaskServiceImpl implements TaskService {
     private DetailedTaskDto getDetailedTask(Task task) {
         DetailedTaskDto taskDto = new DetailedTaskDto(task);
 
-        Set<Student> allStudentsInCourse = this.userClient.getStudentsByAssignedCourseId(task.getCourseId());
+        Set<Student> allStudentsInCourse = userClient.getStudentsByAssignedCourseId(task.getCourseId());
         Set<Student> completed = new HashSet<>();
         Set<Student> helpNeeded = new HashSet<>();
         for (Student student : allStudentsInCourse) {
@@ -211,8 +211,8 @@ public class TaskServiceImpl implements TaskService {
         }
         taskDto.setCompletedStudents(completed);
         taskDto.setHelpNeededStudents(helpNeeded);
-        taskDto.setComments(this.feedbackClient.getAllTaskComments(task.getId()));
-        taskDto.setFiles(this.fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.task.client.dto.Service.TASK, task.getId()).getBody());
+        taskDto.setComments(feedbackClient.getAllTaskComments(task.getId()));
+        taskDto.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.task.client.dto.Service.TASK, task.getId()).getBody());
 
         return taskDto;
     }
