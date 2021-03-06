@@ -10,9 +10,11 @@ import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOpera
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -24,11 +26,13 @@ import java.util.Set;
 
 /**
  * Default implementation for FileDescription management service.
+ *
  * @author Ilku Krisztian
  **/
 @Service
 @Slf4j
-public class FileManagementServiceImpl implements FileManagementService {
+@Profile("google")
+public class FileManagementServiceImplGoogleBucket implements FileManagementService {
 
 
     private static Storage storage = null;
@@ -37,7 +41,7 @@ public class FileManagementServiceImpl implements FileManagementService {
     private FileDescriptionRepository fileDescriptionRepository;
 
     @Autowired
-    public FileManagementServiceImpl(FileDescriptionRepository fileDescriptionRepository) {
+    public FileManagementServiceImplGoogleBucket(FileDescriptionRepository fileDescriptionRepository) {
         storage = StorageOptions.getDefaultInstance().getService();
         this.fileDescriptionRepository = fileDescriptionRepository;
     }
@@ -203,9 +207,16 @@ public class FileManagementServiceImpl implements FileManagementService {
         return results;
     }
 
+    @Override
+    public File getFile(String name) {
+        // no implementation as it is not needed when google buckets are used
+        return null;
+    }
+
     /**
      * Removes the generated hash from the file name
-     * @param fileName The file name that contains the hash
+     *
+     * @param fileName  The file name that contains the hash
      * @param userEmail The user that uploaded the file, and also hash is generated from this
      * @return The original file name that the user uploaded in the first place
      */

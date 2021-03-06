@@ -6,6 +6,7 @@ import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundExce
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
 
 import javax.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
@@ -72,9 +73,18 @@ public interface FileManagementService {
 
     /**
      * Queries all files based on the id set and given outside of fileservice filtered by service
-     * @param tagId - The id, given when a file is sent in
+     *
+     * @param tagId   - The id, given when a file is sent in
      * @param service - The service which sent the file in
      * @return Filtered Set of files based on the given parameters
      */
     Set<FileDescription> getAllFilesByTagId(Long tagId, Service service);
+
+    /**
+     * Returns a file;
+     *
+     * @param name name of the file
+     * @return the file
+     */
+    File getFile(String name);
 }

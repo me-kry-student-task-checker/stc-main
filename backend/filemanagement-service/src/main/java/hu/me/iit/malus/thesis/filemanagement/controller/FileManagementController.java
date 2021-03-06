@@ -10,6 +10,7 @@ import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundExce
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,9 @@ import javax.servlet.http.Part;
 import javax.ws.rs.FormParam;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Controller endpoint of this service, which handles file transfers
@@ -133,5 +136,10 @@ public class FileManagementController {
         return ResponseEntity
                 .status(200)
                 .body(results);
+    }
+
+    @GetMapping("/download/link/{name}")
+    public ResponseEntity<FileSystemResource> getByLink(@PathVariable String name) {
+        return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFile(name)));
     }
 }
