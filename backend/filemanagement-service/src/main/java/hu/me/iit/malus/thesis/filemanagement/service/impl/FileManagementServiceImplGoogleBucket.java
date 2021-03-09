@@ -1,14 +1,17 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 
-import com.google.cloud.storage.*;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -32,25 +35,20 @@ import java.util.Set;
 @Service
 @Slf4j
 @Profile("google")
+@RequiredArgsConstructor
 public class FileManagementServiceImplGoogleBucket implements FileManagementService {
 
 
     private static Storage storage = null;
     @Value("${google-cloud-bucket-name}")
     private String BUCKET_NAME;
-    private FileDescriptionRepository fileDescriptionRepository;
-
-    @Autowired
-    public FileManagementServiceImplGoogleBucket(FileDescriptionRepository fileDescriptionRepository) {
-        storage = StorageOptions.getDefaultInstance().getService();
-        this.fileDescriptionRepository = fileDescriptionRepository;
-    }
+    private final FileDescriptionRepository fileDescriptionRepository;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public FileDescription uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service, String user, Long tagId) throws IOException {
+    public FileDescription uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.model.Service service, String user, Long tagId) throws IOException {
         String userHash = hashIt(user);
         String fileName = userHash + "_" + file.getSubmittedFileName();
         Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(), file.getInputStream());
@@ -132,7 +130,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
+    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
         boolean fileToBeRemovedIsPresent = fileDescriptionRepository.findById(id).isPresent();
         if (fileToBeRemovedIsPresent) {
             FileDescription fileToBeRemoved = fileDescriptionRepository.findById(id).get();
@@ -170,7 +168,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * {@inheritDoc}
      */
     @Override
-    public Set<FileDescription> getAllFilesByServices(hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service) {
+    public Set<FileDescription> getAllFilesByServices(hu.me.iit.malus.thesis.filemanagement.model.Service service) {
         Set<FileDescription> files = new HashSet<>();
         for (FileDescription fd : fileDescriptionRepository.findAllByServices(service)) {
             fd.setName(removeHash(fd.getName(), fd.getUploadedBy()));
@@ -196,7 +194,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     /**
      * {@inheritDoc}
      */
-    public Set<FileDescription> getAllFilesByTagId(Long tagId, hu.me.iit.malus.thesis.filemanagement.controller.dto.Service service) {
+    public Set<FileDescription> getAllFilesByTagId(Long tagId, hu.me.iit.malus.thesis.filemanagement.model.Service service) {
         List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByTagId(tagId);
         Set<FileDescription> results = new HashSet<>();
         for (FileDescription fd : fileDescriptions) {

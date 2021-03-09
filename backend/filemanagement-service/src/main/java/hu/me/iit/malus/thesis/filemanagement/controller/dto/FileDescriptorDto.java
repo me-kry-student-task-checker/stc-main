@@ -4,11 +4,12 @@ import lombok.*;
 
 import java.util.Date;
 
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class File {
+public class FileDescriptorDto {
 
     Long id;
     String name;
