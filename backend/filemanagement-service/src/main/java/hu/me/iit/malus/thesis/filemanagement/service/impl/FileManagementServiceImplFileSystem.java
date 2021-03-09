@@ -1,6 +1,5 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
-import com.google.api.client.util.Value;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.model.Service;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
@@ -11,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 
 import javax.servlet.http.Part;
 import java.io.File;
@@ -20,14 +20,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Local filesystem based implementation for the File management service.
+ *
+ * @author Attila Szőke
+ **/
 @org.springframework.stereotype.Service
 @Slf4j
 @RequiredArgsConstructor
 @Profile("!google")
 public class FileManagementServiceImplFileSystem implements FileManagementService {
 
-    @Value("${files.uploadDir}")
-    private String uploadDir;
+    private static final String FILE_DIR_PROP = "files.upload.dir";
+
+    private final Environment env; // environment is used for retrieving the upload destination from cloud props file, because @Value sets null
     private final FileDescriptionRepository fileDescriptionRepository;
 
     /**
@@ -55,6 +61,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
             }
         }
 
+        String uploadDir = env.getProperty(FILE_DIR_PROP);
         File targetFile = new File(uploadDir + File.separator + fileName);
         FileUtils.copyInputStreamToFile(file.getInputStream(), targetFile);
         log.debug("File successfully uploaded: {}", file.getSubmittedFileName());
@@ -132,6 +139,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * {@inheritDoc}
      */
     public File getFile(String name) {
+        String uploadDir = env.getProperty(FILE_DIR_PROP);
         return new File(uploadDir + File.separator + name);
     }
 

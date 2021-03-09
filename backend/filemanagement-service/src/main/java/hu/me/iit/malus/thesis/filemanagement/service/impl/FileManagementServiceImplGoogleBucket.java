@@ -1,10 +1,7 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.*;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
@@ -28,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Default implementation for FileDescription management service.
+ * Google bucket based implementation for File management service.
  *
  * @author Ilku Krisztian
  **/
@@ -39,7 +36,7 @@ import java.util.Set;
 public class FileManagementServiceImplGoogleBucket implements FileManagementService {
 
 
-    private static Storage storage = null;
+    private static final Storage storage = StorageOptions.getDefaultInstance().getService();
     @Value("${google-cloud-bucket-name}")
     private String BUCKET_NAME;
     private final FileDescriptionRepository fileDescriptionRepository;
