@@ -78,55 +78,6 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * {@inheritDoc}
      */
     @Override
-    public FileDescription getById(Long id) {
-        boolean isPresent = fileDescriptionRepository.findById(id).isPresent();
-        if (isPresent) {
-            log.info("File found: {}", id);
-            FileDescription result = fileDescriptionRepository.findById(id).get();
-            result.setName(removeHash(result.getName(), result.getUploadedBy()));
-            return result;
-        }
-
-        log.info("File could not be found: {}", id);
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<FileDescription> getAllByFileName(String filename) {
-        Iterable<FileDescription> fileDescriptionList = fileDescriptionRepository.findAll();
-        Set<FileDescription> results = new HashSet<>();
-        for (FileDescription fd : fileDescriptionList) {
-            String unHashedFileName = removeHash(fd.getName(), fd.getUploadedBy());
-            if (unHashedFileName.equalsIgnoreCase(filename)) {
-                fd.setName(unHashedFileName);
-                results.add(fd);
-            }
-        }
-        log.info("Files found by file name: {}", filename);
-        return results;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<FileDescription> getAllFiles() {
-        Iterable<FileDescription> fileDescriptions = fileDescriptionRepository.findAll();
-        Set<FileDescription> result = new HashSet<>();
-        for (FileDescription i : fileDescriptions) {
-            i.setName(removeHash(i.getName(), i.getUploadedBy()));
-            result.add(i);
-        }
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
         boolean fileToBeRemovedIsPresent = fileDescriptionRepository.findById(id).isPresent();
         if (fileToBeRemovedIsPresent) {
@@ -165,19 +116,6 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * {@inheritDoc}
      */
     @Override
-    public Set<FileDescription> getAllFilesByServices(hu.me.iit.malus.thesis.filemanagement.model.Service service) {
-        Set<FileDescription> files = new HashSet<>();
-        for (FileDescription fd : fileDescriptionRepository.findAllByServices(service)) {
-            fd.setName(removeHash(fd.getName(), fd.getUploadedBy()));
-            files.add(fd);
-        }
-        return files;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Set<FileDescription> getAllFilesByUsers(String userEmail) {
         Iterable<FileDescription> fileDescriptionList = fileDescriptionRepository.findAllByUploadedBy(userEmail);
         Set<FileDescription> results = new HashSet<>();
@@ -191,7 +129,8 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     /**
      * {@inheritDoc}
      */
-    public Set<FileDescription> getAllFilesByTagId(Long tagId, hu.me.iit.malus.thesis.filemanagement.model.Service service) {
+    @Override
+    public Set<FileDescription> getAllFilesByServiceAndTagId(Long tagId, hu.me.iit.malus.thesis.filemanagement.model.Service service) {
         List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByTagId(tagId);
         Set<FileDescription> results = new HashSet<>();
         for (FileDescription fd : fileDescriptions) {

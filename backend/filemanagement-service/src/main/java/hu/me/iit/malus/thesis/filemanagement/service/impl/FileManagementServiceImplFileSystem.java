@@ -15,10 +15,7 @@ import org.springframework.core.env.Environment;
 import javax.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Local filesystem based implementation for the File management service.
@@ -76,40 +73,36 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * {@inheritDoc}
      */
     @Override
-    public FileDescription getById(Long id) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<FileDescription> getAllByFileName(String filename) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<FileDescription> getAllFiles() {
-        return new HashSet<>();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void deleteFile(Long id, Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
+        Optional<FileDescription> opt = fileDescriptionRepository.findById(id);
+        if (opt.isPresent()) {
+            FileDescription fileDescription = opt.get();
 
-    }
+            if (!fileDescription.getUploadedBy().equalsIgnoreCase(username)) {
+                log.debug("User does not have the privilege to delete file: {}", id);
+                throw new UnsupportedOperationException();
+            }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<FileDescription> getAllFilesByServices(Service services) {
-        return null;
+            String uploadDir = env.getProperty(FILE_DIR_PROP);
+            File targetFile = new File(uploadDir + File.separator + fileDescription.getName());
+
+            if (targetFile.delete()) {
+                fileDescription.getServices().remove(service);
+                if (fileDescription.getServices().isEmpty()) {
+                    fileDescriptionRepository.delete(fileDescription);
+                } else {
+                    fileDescriptionRepository.save(fileDescription);
+                }
+                log.info("File successfully deleted: {}, {}", id, service);
+            } else {
+                log.info("File could not be deleted: {}", id);
+                log.debug("No file was found with the following id: {}", id);
+                throw new FileNotFoundException();
+            }
+        } else {
+            log.debug("No file was found with the following id: {}", id);
+            throw new FileNotFoundException();
+        }
     }
 
     /**
@@ -117,14 +110,17 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      */
     @Override
     public Set<FileDescription> getAllFilesByUsers(String userEmail) {
-        return null;
+        List<FileDescription> fileDescriptionList = fileDescriptionRepository.findAllByUploadedBy(userEmail);
+        Set<FileDescription> results = new HashSet<>(fileDescriptionList);
+        log.info("Files found by file name: {}", userEmail);
+        return results;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Set<FileDescription> getAllFilesByTagId(Long tagId, Service service) {
+    public Set<FileDescription> getAllFilesByServiceAndTagId(Long tagId, Service service) {
         List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByTagId(tagId);
         Set<FileDescription> results = new HashSet<>();
         for (FileDescription fd : fileDescriptions) {
