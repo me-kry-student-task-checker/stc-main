@@ -7,6 +7,9 @@ import java.util.List;
 
 /**
  * File Description Repository that handles the database operations
+ *
+ * @author Ilku Krisztián
+ * @author Attila Szőke
  */
 public interface FileDescriptionRepository extends JpaRepository<FileDescription, Long> {
     List<FileDescription> findAllByUploadedBy(String uploadedBy);

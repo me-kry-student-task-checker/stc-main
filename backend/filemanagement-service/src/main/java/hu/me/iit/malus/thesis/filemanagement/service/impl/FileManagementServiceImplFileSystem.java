@@ -79,7 +79,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
             FileDescription fileDescription = opt.get();
 
             if (!fileDescription.getUploadedBy().equalsIgnoreCase(username)) {
-                log.debug("User does not have the privilege to delete file: {}", id);
+                log.warn("User does not have the privilege to delete file: {}", id);
                 throw new UnsupportedOperationException();
             }
 
@@ -93,10 +93,9 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
                 } else {
                     fileDescriptionRepository.save(fileDescription);
                 }
-                log.info("File successfully deleted: {}, {}", id, service);
+                log.debug("File successfully deleted: {}, {}", id, service);
             } else {
-                log.info("File could not be deleted: {}", id);
-                log.debug("No file was found with the following id: {}", id);
+                log.error("File could not be deleted: {}", id);
                 throw new FileNotFoundException();
             }
         } else {
@@ -109,10 +108,10 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * {@inheritDoc}
      */
     @Override
-    public Set<FileDescription> getAllFilesByUsers(String userEmail) {
+    public Set<FileDescription> getAllFilesByUser(String userEmail) {
         List<FileDescription> fileDescriptionList = fileDescriptionRepository.findAllByUploadedBy(userEmail);
         Set<FileDescription> results = new HashSet<>(fileDescriptionList);
-        log.info("Files found by file name: {}", userEmail);
+        log.debug("Files found by user {}: {}", userEmail, results);
         return results;
     }
 
@@ -128,13 +127,14 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
                 results.add(fd);
             }
         }
+        log.debug("Files found by file service {} and tagId {}: {}", service, tagId, results);
         return results;
     }
 
     /**
      * {@inheritDoc}
      */
-    public File getFile(String name) {
+    public File getFileByName(String name) {
         String uploadDir = env.getProperty(FILE_DIR_PROP);
         return new File(uploadDir + File.separator + name);
     }

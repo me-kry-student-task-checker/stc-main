@@ -24,7 +24,9 @@ import java.util.Set;
 
 /**
  * Controller endpoint of this service, which handles file transfers
+ *
  * @author Ilku Krisztián
+ * @author Attila Szőke
  */
 @RestController
 @RequestMapping("/api/filemanagement")
@@ -49,13 +51,14 @@ public class FileManagementController {
 
     @DeleteMapping("/delete/{id}/{service}")
     public ResponseEntity<String> deleteFile(@PathVariable Long id, @PathVariable Service service, Principal principal) {
+        // TODO controller advice try catch helyett mindenhol a controllerben
         try {
             fileManagementService.deleteFile(id, service, principal.getName());
         }catch(UnsupportedOperationException e) {
             return ResponseEntity
                     .status(403)
                     .body("User does not have the privilege to delete this file!");
-        }catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             return ResponseEntity
                     .status(404)
                     .body("File not found!");
@@ -65,26 +68,27 @@ public class FileManagementController {
                 .body("Successful delete!");
     }
 
-    @GetMapping("/download/getByUser/{user}")
-    public ResponseEntity<Set<FileDescriptorDto>> getFileByFileUser(@PathVariable String user) {
+    @GetMapping("/download/getByUser/{userEmail}")
+    public ResponseEntity<Set<FileDescriptorDto>> getFilesByUser(@PathVariable String userEmail) {
+        // TODO user from principal
         Set<FileDescriptorDto> fileDescriptorDtos = new HashSet<>();
-        fileManagementService.getAllFilesByUsers(user).forEach(fd -> fileDescriptorDtos.add(Converter.FileDescriptionToFile(fd)));
+        fileManagementService.getAllFilesByUser(userEmail).forEach(fd -> fileDescriptorDtos.add(Converter.FileDescriptionToFile(fd)));
         return ResponseEntity
                 .status(200)
                 .body(fileDescriptorDtos);
     }
 
     @GetMapping("/download/getByTagId/{service}/{tagId}")
-    public ResponseEntity<Set<FileDescriptorDto>> getAllFilesByTagId(@PathVariable Service service, @PathVariable Long tagId) {
+    public ResponseEntity<Set<FileDescriptorDto>> getFilesByTagIdAndService(@PathVariable Service service, @PathVariable Long tagId) {
         Set<FileDescriptorDto> results = new HashSet<>();
         fileManagementService.getAllFilesByServiceAndTagId(tagId, service).forEach(fileDescription -> results.add(Converter.FileDescriptionToFile(fileDescription)));
         return ResponseEntity
                 .status(200)
                 .body(results);
     }
-    
+
     @GetMapping("/download/link/{name}")
-    public ResponseEntity<FileSystemResource> getByLink(@PathVariable String name) {
-        return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFile(name)));
+    public ResponseEntity<FileSystemResource> getFileByName(@PathVariable String name) {
+        return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFileByName(name)));
     }
 }

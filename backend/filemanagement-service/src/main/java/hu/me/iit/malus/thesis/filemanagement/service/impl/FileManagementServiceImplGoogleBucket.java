@@ -49,7 +49,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         String userHash = hashIt(user);
         String fileName = userHash + "_" + file.getSubmittedFileName();
         Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(), file.getInputStream());
-        log.info("File successfully uploaded: {}", file.getSubmittedFileName());
+        log.debug("File successfully uploaded: {}", file.getSubmittedFileName());
         FileDescription fileDescription = new FileDescription();
         fileDescription.setUploadDate(new Date());
         fileDescription.setName(fileName);
@@ -69,7 +69,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             }
         }
         fileDescriptionRepository.save(fileDescription);
-        log.info("File description successfully saved to database: {}", fileDescription);
+        log.debug("File description successfully saved to database: {}", fileDescription);
         fileDescription.setName(file.getSubmittedFileName());
         return fileDescription;
     }
@@ -84,7 +84,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             FileDescription fileToBeRemoved = fileDescriptionRepository.findById(id).get();
 
             if (!fileToBeRemoved.getUploadedBy().equalsIgnoreCase(username)) {
-                log.debug("User does not have the privilege to delete file: {}", id);
+                log.warn("User does not have the privilege to delete file: {}", id);
                 throw new UnsupportedOperationException();
             }
 
@@ -99,11 +99,10 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
                 }else {
                     fileDescriptionRepository.save(fd);
                 }
-                log.info("File successfully deleted: {}, {}", id, service);
+                log.debug("File successfully deleted: {}, {}", id, service);
             }
             else{
-                log.info("File could not be deleted: {}", id);
-                log.debug("No file was found with the following id: {}", id);
+                log.error("File could not be deleted: {}", id);
                 throw new FileNotFoundException();
             }
         }else {
@@ -116,13 +115,13 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * {@inheritDoc}
      */
     @Override
-    public Set<FileDescription> getAllFilesByUsers(String userEmail) {
+    public Set<FileDescription> getAllFilesByUser(String userEmail) {
         Iterable<FileDescription> fileDescriptionList = fileDescriptionRepository.findAllByUploadedBy(userEmail);
         Set<FileDescription> results = new HashSet<>();
         for (FileDescription fd : fileDescriptionList) {
             results.add(fd);
         }
-        log.info("Files found by file name: {}", userEmail);
+        log.debug("Files found by file name: {}", userEmail);
         return results;
     }
 
@@ -142,7 +141,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     }
 
     @Override
-    public File getFile(String name) {
+    public File getFileByName(String name) {
         // no implementation as it is not needed when google buckets are used
         return null;
     }
