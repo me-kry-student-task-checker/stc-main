@@ -49,52 +49,78 @@ public class CourseControllerTest {
         public JwtTestHelper jwtTestHelper() {
             return new JwtTestHelper();
         }
+
+        @Bean
+        CourseService courseService(
+                 CourseRepository courseRepository,
+                 InvitationRepository invitationRepository,
+                 TaskClient taskClient,
+                 FeedbackClient feedbackClient,
+                 UserClient userClient,
+                 FileManagementClient fileManagementClient,
+                 EmailClient emailClient,
+                 InvitationConfig invitationConfig
+        ) { return new CourseServiceImpl(courseRepository, invitationRepository, taskClient, feedbackClient,userClient, fileManagementClient, emailClient, invitationConfig);
+        }
     }
 
     @Autowired private MockMvc mvc;
     @Autowired private Gson gson;
     @Autowired private JwtTestHelper jwtHelper;
+    @Autowired private CourseRepository courseRepository;
 
-    @MockBean private CourseService courseService;
+ //   @MockBean private CourseService courseService;
+
+    private final String courseOwnersEmail = "teacher@test.test";
+
+    private Course getCourseForTeacher() {
+        Teacher courseOwner = new Teacher(
+                courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
+        return new Course("Meant To Be Created", "Creation tester", courseOwner);
+    }
+
+    private String getTeacherJWT(){
+        return jwtHelper.createValidJWT(courseOwnersEmail, UserRole.TEACHER.getRoleString());
+    }
 
     @Test
     public void whenCreateCourse_WithValidToken_returnOkAndTheSameCourse()
             throws Exception {
         // Given
-        String courseOwnersEmail = "teacher@test.test";
-        Teacher courseOwner = new Teacher(
-                courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
-        Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
+        Course course = getCourseForTeacher();
 
-        CourseModificationDto courseDto = new CourseModificationDto();
-        courseDto.setName(course.getName());
-        courseDto.setDescription(course.getDescription());
-
-        given(courseService.create(DtoConverter.CourseDtoToCourse(courseDto), courseOwnersEmail)).willReturn(course);
+        CourseModificationDto courseDto = CourseModificationDto.builder()
+                .name(course.getName())
+                .description(course.getDescription())
+                .build();
 
         // When
         MvcResult response = mvc.perform(post("/api/course/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(gson.toJson(courseDto))
-                .header(jwtHelper.getJwtHeader(), jwtHelper.createValidJWT(courseOwnersEmail, UserRole.TEACHER.getRoleString())))
+                .header(jwtHelper.getJwtHeader(), getTeacherJWT()))
                 .andExpect(status().isOk())
                 .andReturn();
         Course responseCourse = gson.fromJson(response.getResponse().getContentAsString(), Course.class);
 
         // Then
         Assertions.assertThat(course).isEqualTo(responseCourse);
+        Optional<Course> byId = courseRepository.findById(course.getId());
+        Course course1 = byId.get();
+        assertThat(course1, notNullValue());
+        // assertThat(course1.getId(), greaterThan(0));
+
+
     }
 
     @Test
     public void whenCreateCourse_WithoutToken_returnUnauthorized()
             throws Exception {
         // Given
-        String courseOwnersEmail = "teacher@test.test";
-        Teacher courseOwner = new Teacher(
-                courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
-        Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
+        Course course = getCourseForTeacher();
 
-        given(courseService.create(course, courseOwnersEmail)).willReturn(course);
+
+      //  given(courseService.create(course, courseOwnersEmail)).willReturn(course);
 
         // When
         mvc.perform(post("/api/course/create")
@@ -107,9 +133,10 @@ public class CourseControllerTest {
     public void whenStudentCreateCourse_WithValidToken_returnForbidden()
             throws Exception {
         // Given
-        CourseModificationDto courseDto = new CourseModificationDto();
-        courseDto.setName("Meant To Be Created");
-        courseDto.setDescription("Haha, can I create this one?");
+        CourseModificationDto courseDto = CourseModificationDto.builder()
+                .name("Meant To Be Created")
+                .description("Haha, can I create this one?")
+                .build();
 
         // When
         mvc.perform(post("/api/course/create")
@@ -117,5 +144,19 @@ public class CourseControllerTest {
                 .content(gson.toJson(courseDto))
                 .header(jwtHelper.getJwtHeader(), jwtHelper.createValidJWT("bob", UserRole.STUDENT.getRoleString())))
                 .andExpect(status().isForbidden()); // Then
+    }
+
+    @Test
+    public void whenTeacherCreateCourse_WithInvalidInput_returnBadRequest()
+            throws Exception {
+        // Given
+        CourseModificationDto courseDto = CourseModificationDto.builder().name("Meant To Be Created").build();
+
+        // When
+        mvc.perform(post("/api/course/create")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(courseDto))
+                .header(jwtHelper.getJwtHeader(), getTeacherJWT()))
+                .andExpect(status().isBadRequest()); // Then
     }
 }
