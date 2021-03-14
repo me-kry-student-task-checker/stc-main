@@ -4,14 +4,18 @@ import hu.me.iit.malus.thesis.task.client.FeedbackClient;
 import hu.me.iit.malus.thesis.task.client.FileManagementClient;
 import hu.me.iit.malus.thesis.task.client.UserClient;
 import hu.me.iit.malus.thesis.task.client.dto.Student;
+import hu.me.iit.malus.thesis.task.controller.dto.BriefTaskDto;
+import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
+import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.repository.TaskRepository;
 import hu.me.iit.malus.thesis.task.service.TaskService;
+import hu.me.iit.malus.thesis.task.service.converters.Converter;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -26,46 +30,37 @@ import java.util.Set;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
-    private TaskRepository repository;
-    private FeedbackClient feedbackClient;
-    private FileManagementClient fileManagementClient;
-    private UserClient userClient;
+    private final TaskRepository repository;
+    private final FeedbackClient feedbackClient;
+    private final FileManagementClient fileManagementClient;
+    private final UserClient userClient;
 
     /**
-     * Instantiates a new TaskServiceImpl class
+     * {@inheritDoc}
      */
-    @Autowired
-    public TaskServiceImpl(TaskRepository repository, FeedbackClient feedbackClient, FileManagementClient fileManagementClient,
-                           UserClient userClient) {
-        this.repository = repository;
-        this.feedbackClient = feedbackClient;
-        this.fileManagementClient = fileManagementClient;
-        this.userClient = userClient;
+    @Override
+    public BriefTaskDto create(CreateTaskDto dto) {
+        Task newTask = Converter.createTaskFromTaskDto(dto);
+        newTask.setCreationDate(new Date());
+        Task savedTask = repository.save(newTask);
+        log.debug("Task created: {}", dto);
+        return Converter.createBriefTaskDtoFromTask(savedTask);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Task create(Task task) {
-        task.setDone(false);
-        task.setCreationDate(new Date());
-        log.info("Task created: {}", task);
-        return repository.save(task);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Task edit(Task task) {
-        Task taskToChange = repository.getOne(task.getId());
-        taskToChange.setName(task.getName());
-        taskToChange.setDescription(task.getDescription());
-        log.info("Task edited: {}", task);
-        return repository.save(task);
+    public BriefTaskDto edit(EditTaskDto dto) {
+        Task taskToChange = repository.getOne(dto.getId());
+        taskToChange.setName(dto.getName());
+        taskToChange.setDescription(dto.getDescription());
+        Task editedTask = repository.save(taskToChange);
+        log.debug("Task edited: {}", editedTask);
+        return Converter.createBriefTaskDtoFromTask(editedTask);
     }
 
     /**
@@ -76,10 +71,10 @@ public class TaskServiceImpl implements TaskService {
         Optional<Task> optTask = repository.findById(taskId);
         if (optTask.isPresent()) {
             DetailedTaskDto taskDto = getDetailedTask(optTask.get());
-            log.info("Task queried by id: {}, successfully", taskId);
+            log.debug("Task queried by id: {}, successfully", taskId);
             return taskDto;
         } else {
-            log.error("No task found with this id: {}", taskId);
+            log.warn("No task found with this id: {}", taskId);
             throw new TaskNotFoundException();
         }
     }
@@ -96,7 +91,7 @@ public class TaskServiceImpl implements TaskService {
             for (Task task : tasks) {
                 taskDtos.add(getDetailedTask(task));
             }
-            log.info("Tasks queried for course: {}, found {} tasks", courseId, taskDtos.size());
+            log.debug("Tasks queried for course: {}, found {} tasks", courseId, taskDtos.size());
             return taskDtos;
         } else {
             log.warn("No task found for this course id: {}", courseId);
@@ -114,9 +109,9 @@ public class TaskServiceImpl implements TaskService {
             Task task = opt.get();
             task.setDone(!task.isDone());
             repository.save(task);
-            log.info("Task's ({}) done status changed to: {}", task, !task.isDone());
+            log.debug("Task's ({}) done status changed to: {}", task, !task.isDone());
         } else {
-            log.error("No task found with this task id: {}", taskId);
+            log.warn("No task found with this task id: {}", taskId);
             throw new TaskNotFoundException();
         }
     }
@@ -142,14 +137,14 @@ public class TaskServiceImpl implements TaskService {
                 completedStudentIds.remove(studentId);
                 task.setCompletedStudentIds(completedStudentIds);
                 repository.save(task);
-                log.info("From a task's ({}) completion list this student was removed: {}", task, studentId);
+                log.debug("From a task's ({}) completion list this student was removed: {}", task, studentId);
                 return;
             }
             task.addStudentIdToCompleted(studentId);
             repository.save(task);
-            log.info("To task's ({}) completion list this student was added: {}", task, studentId);
+            log.debug("To task's ({}) completion list this student was added: {}", task, studentId);
         } else {
-            log.error("No task found with this task id: {}", taskId);
+            log.warn("No task found with this task id: {}", taskId);
             throw new TaskNotFoundException();
         }
     }
@@ -163,10 +158,10 @@ public class TaskServiceImpl implements TaskService {
         if (opt.isPresent()) {
             Task task = opt.get();
             Set<String> helpNeededList = task.getHelpNeededStudentIds();
-            log.info("Task's ({}) help needed list returned: {}", task, helpNeededList);
+            log.debug("Task's ({}) help needed list returned: {}", task, helpNeededList);
             return helpNeededList;
         } else {
-            log.error("No task found with this task id: {}", taskId);
+            log.warn("No task found with this task id: {}", taskId);
             throw new TaskNotFoundException();
         }
     }
@@ -190,14 +185,14 @@ public class TaskServiceImpl implements TaskService {
             if (task.getHelpNeededStudentIds().contains(studentId)) {
                 task.getHelpNeededStudentIds().remove(studentId);
                 repository.save(task);
-                log.info("Removed an id ({}) from the help needed list of task ({})", studentId, taskId);
+                log.debug("Removed an id ({}) from the help needed list of task ({})", studentId, taskId);
             } else {
                 task.addStudentIdToHelp(studentId);
                 repository.save(task);
-                log.info("Added Student ({}) to the help needed list of task ({})", studentId, taskId);
+                log.debug("Added Student ({}) to the help needed list of task ({})", studentId, taskId);
             }
         } else {
-            log.error("Could not toggle help request for {} - No task found with id: {}", studentId, taskId);
+            log.warn("Could not toggle help request for {} - No task found with id: {}", studentId, taskId);
             throw new TaskNotFoundException();
         }
     }
