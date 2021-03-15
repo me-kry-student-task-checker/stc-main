@@ -3,12 +3,16 @@ package hu.me.iit.malus.thesis.user.service.impl;
 import hu.me.iit.malus.thesis.user.client.EmailClient;
 import hu.me.iit.malus.thesis.user.client.dto.Mail;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
+import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
+import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
+import hu.me.iit.malus.thesis.user.controller.dto.UserDto;
 import hu.me.iit.malus.thesis.user.model.*;
 import hu.me.iit.malus.thesis.user.model.exception.DatabaseOperationFailedException;
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
 import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
 import hu.me.iit.malus.thesis.user.repository.*;
 import hu.me.iit.malus.thesis.user.service.UserService;
+import hu.me.iit.malus.thesis.user.service.converter.Converter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of UserService
@@ -175,9 +180,13 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<Student> getAllStudents() {
+    public Set<StudentDto> getAllStudents() {
         try {
-            return new HashSet<>(studentRepository.findAll());
+            return studentRepository
+                    .findAll()
+                    .stream()
+                    .map(Converter::createStudentDtoFromStudent)
+                    .collect(Collectors.toSet());
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -187,9 +196,13 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<Teacher> getAllTeachers() {
+    public Set<TeacherDto> getAllTeachers() {
         try {
-            return new HashSet<>(teacherRepository.findAll());
+            return teacherRepository
+                    .findAll()
+                    .stream()
+                    .map(Converter::createTeacherDtoFromTeacher)
+                    .collect(Collectors.toSet());
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -199,11 +212,11 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Student getStudentByEmail(String studentEmail) {
+    public StudentDto getStudentByEmail(String studentEmail) {
         try {
             Optional<Student> optionalStudent = studentRepository.findByEmail(studentEmail);
-            if (!optionalStudent.isPresent()) throw new UserNotFoundException(studentEmail);
-            return optionalStudent.get();
+            if (optionalStudent.isEmpty()) throw new UserNotFoundException(studentEmail);
+            return Converter.createStudentDtoFromStudent(optionalStudent.get());
         } catch (DataAccessException dataExc) {
             throw new DatabaseOperationFailedException(dataExc);
         }
@@ -213,9 +226,12 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<Student> getStudentsByAssignedCourseId(Long courseId) {
+    public Set<StudentDto> getStudentsByAssignedCourseId(Long courseId) {
         try {
-            return new HashSet<>(studentRepository.findAllAssignedForCourseId(courseId));
+            return studentRepository.findAllAssignedForCourseId(courseId)
+                    .stream()
+                    .map(Converter::createStudentDtoFromStudent)
+                    .collect(Collectors.toSet());
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -225,9 +241,12 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<Student> getStudentsByNotAssignedCourseId(Long courseId) {
+    public Set<StudentDto> getStudentsByNotAssignedCourseId(Long courseId) {
         try {
-            return new HashSet<>(studentRepository.findAllNotAssignedForCourseId(courseId));
+            return studentRepository.findAllNotAssignedForCourseId(courseId)
+                    .stream()
+                    .map(Converter::createStudentDtoFromStudent)
+                    .collect(Collectors.toSet());
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -237,11 +256,11 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Teacher getTeacherByEmail(String teacherEmail) {
+    public TeacherDto getTeacherByEmail(String teacherEmail) {
         try {
             Optional<Teacher> optionalTeacher = teacherRepository.findByEmail(teacherEmail);
-            if (!optionalTeacher.isPresent()) throw new UserNotFoundException(teacherEmail);
-            return optionalTeacher.get();
+            if (optionalTeacher.isEmpty()) throw new UserNotFoundException(teacherEmail);
+            return Converter.createTeacherDtoFromTeacher(optionalTeacher.get());
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -251,36 +270,16 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Teacher getTeacherByCreatedCourseId(Long courseId) {
+    public TeacherDto getTeacherByCreatedCourseId(Long courseId) {
         try {
             Optional<Teacher> optTeacher = teacherRepository.findByCreatedCourseId(courseId);
-            if (!optTeacher.isPresent()) {
+            if (optTeacher.isEmpty()) {
                 throw new UserNotFoundException();
             }
-            return optTeacher.get();
+            return Converter.createTeacherDtoFromTeacher(optTeacher.get());
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public User getAnyUserByEmail(String email) {
-        // TODO: Looks ugly, there are better options for Optional chaining, maybe try those later
-        Optional<? extends User> userToLoad = studentRepository.findByEmail(email);
-        if(!userToLoad.isPresent()) {
-            userToLoad = teacherRepository.findByEmail(email);
-        }
-        if(!userToLoad.isPresent()) {
-            userToLoad = adminRepository.findByEmail(email);
-        }
-
-        if(!userToLoad.isPresent()) {
-            throw new UserNotFoundException(email);
-        }
-        return userToLoad.get();
     }
 
     /**
@@ -303,10 +302,30 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
+    public User getAnyUserByEmail(String email) {
+        // TODO: Looks ugly, there are better options for Optional chaining, maybe try those later
+        Optional<? extends User> userToLoad = studentRepository.findByEmail(email);
+        if (userToLoad.isEmpty()) {
+            userToLoad = teacherRepository.findByEmail(email);
+        }
+        if (userToLoad.isEmpty()) {
+            userToLoad = adminRepository.findByEmail(email);
+        }
+
+        if (userToLoad.isEmpty()) {
+            throw new UserNotFoundException(email);
+        }
+        return userToLoad.get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Boolean isRelatedToCourse(String email, Long courseId) {
         Optional<? extends User> optionalUser = studentRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
-            if(((Student) optionalUser.get()).getAssignedCourseIds().contains(courseId)) {
+            if (((Student) optionalUser.get()).getAssignedCourseIds().contains(courseId)) {
                 return Boolean.TRUE;
             }
             return Boolean.FALSE;
@@ -324,12 +343,24 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Checks whether a given email address already exists in our system, or not.
+     *
      * @param email To check
      * @return True if email already exists, false otherwise
      */
     private boolean emailExists(String email) {
         return studentRepository.findByEmail(email).isPresent() || teacherRepository.findByEmail(email).isPresent() ||
                 adminRepository.findByEmail(email).isPresent();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public UserDto getDtoFromAnyUser(User user) {
+        if (user instanceof Student) {
+            return Converter.createStudentDtoFromStudent((Student) user);
+        } else {
+            return Converter.createTeacherDtoFromTeacher((Teacher) user);
+        }
     }
 
 }
