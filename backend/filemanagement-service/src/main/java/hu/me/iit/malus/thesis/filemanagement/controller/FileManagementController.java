@@ -15,11 +15,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Part;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.ws.rs.FormParam;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,7 +41,10 @@ public class FileManagementController {
     private final FileManagementService fileManagementService;
 
     @PostMapping("/uploadFiles")
-    public ResponseEntity<Set<FileDescriptorDto>> uploadFiles(@FormDataParam("file") ArrayList<Part> file, @FormParam("service") Service service, @FormParam("tagId") Long tagId, Principal principal) throws IOException {
+    public ResponseEntity<@Size(min = 1) Set<@Valid FileDescriptorDto>> uploadFiles(@FormDataParam("file") @Size(min = 1) List<Part> file,
+                                                                                    @FormParam("service") @NotNull Service service,
+                                                                                    @FormParam("tagId") @Min(1) Long tagId,
+                                                                                    Principal principal) throws IOException {
         Set<FileDescriptorDto> result = new HashSet<>();
         for (Part f : file) {
             FileDescription fd = fileManagementService.uploadFile(f, service, principal.getName(), tagId);
@@ -50,11 +58,11 @@ public class FileManagementController {
 
 
     @DeleteMapping("/delete/{id}/{service}")
-    public ResponseEntity<String> deleteFile(@PathVariable Long id, @PathVariable Service service, Principal principal) {
+    public ResponseEntity<String> deleteFile(@PathVariable @Min(1) Long id, @PathVariable @NotNull Service service, Principal principal) {
         // TODO controller advice try catch helyett mindenhol a controllerben
         try {
             fileManagementService.deleteFile(id, service, principal.getName());
-        }catch(UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException e) {
             return ResponseEntity
                     .status(403)
                     .body("User does not have the privilege to delete this file!");
@@ -69,7 +77,7 @@ public class FileManagementController {
     }
 
     @GetMapping("/download/getByUser/{userEmail}")
-    public ResponseEntity<Set<FileDescriptorDto>> getFilesByUser(@PathVariable String userEmail) {
+    public ResponseEntity<Set<@Valid FileDescriptorDto>> getFilesByUser(@PathVariable @NotBlank String userEmail) {
         // TODO user from principal
         Set<FileDescriptorDto> fileDescriptorDtos = new HashSet<>();
         fileManagementService.getAllFilesByUser(userEmail).forEach(fd -> fileDescriptorDtos.add(Converter.FileDescriptionToFile(fd)));
@@ -79,7 +87,8 @@ public class FileManagementController {
     }
 
     @GetMapping("/download/getByTagId/{service}/{tagId}")
-    public ResponseEntity<Set<FileDescriptorDto>> getFilesByTagIdAndService(@PathVariable Service service, @PathVariable Long tagId) {
+    public ResponseEntity<Set<@Valid FileDescriptorDto>> getFilesByTagIdAndService(@PathVariable @NotNull Service service,
+                                                                                   @PathVariable @Min(1) Long tagId) {
         Set<FileDescriptorDto> results = new HashSet<>();
         fileManagementService.getAllFilesByServiceAndTagId(tagId, service).forEach(fileDescription -> results.add(Converter.FileDescriptionToFile(fileDescription)));
         return ResponseEntity
@@ -88,7 +97,7 @@ public class FileManagementController {
     }
 
     @GetMapping("/download/link/{name}")
-    public ResponseEntity<FileSystemResource> getFileByName(@PathVariable String name) {
+    public ResponseEntity<FileSystemResource> getFileByName(@PathVariable @NotBlank String name) {
         return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFileByName(name)));
     }
 }
