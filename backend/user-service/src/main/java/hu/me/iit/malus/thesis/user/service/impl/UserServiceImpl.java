@@ -161,10 +161,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void assignStudentsToCourse(Long courseId, List<String> studentEmails) {
-        Mail mail = new Mail();
-        mail.setTo(studentEmails);
-        mail.setSubject("Course assignment notification");
-        mail.setText("You have been assigned to a course.");
         studentRepository.findAllLockByEmailIn(studentEmails).forEach(student -> {
             try {
                 student.getAssignedCourseIds().add(courseId);
@@ -173,7 +169,7 @@ public class UserServiceImpl implements UserService {
                 throw new DatabaseOperationFailedException(e);
             }
         });
-        emailClient.sendMail(mail);
+        emailClient.sendMail(new Mail(studentEmails, "Course assignment notification", "You have been assigned to a course."));
     }
 
     /**
