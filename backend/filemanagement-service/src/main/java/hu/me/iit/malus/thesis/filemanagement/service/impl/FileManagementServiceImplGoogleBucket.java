@@ -79,34 +79,29 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      */
     @Override
     public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
-        boolean fileToBeRemovedIsPresent = fileDescriptionRepository.findById(id).isPresent();
-        if (fileToBeRemovedIsPresent) {
-            FileDescription fileToBeRemoved = fileDescriptionRepository.findById(id).get();
-
-            if (!fileToBeRemoved.getUploadedBy().equalsIgnoreCase(username)) {
-                log.warn("User does not have the privilege to delete file: {}", id);
-                throw new UnsupportedOperationException();
-            }
-
-            BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileToBeRemoved.getName());
-            boolean successful_delete = storage.delete(blobId);
-
-            if (successful_delete) {
-                FileDescription fd = fileDescriptionRepository.findById(id).get();
-                fd.getServices().remove(service);
-                if (fd.getServices().isEmpty()) {
-                    fileDescriptionRepository.delete(fileToBeRemoved);
-                }else {
-                    fileDescriptionRepository.save(fd);
-                }
-                log.debug("File successfully deleted: {}, {}", id, service);
-            }
-            else{
-                log.error("File could not be deleted: {}", id);
-                throw new FileNotFoundException();
-            }
-        }else {
+        FileDescription fileToBeRemoved = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
+            return new FileNotFoundException();
+        });
+
+        if (!fileToBeRemoved.getUploadedBy().equalsIgnoreCase(username)) {
+            log.warn("User does not have the privilege to delete file: {}", id);
+            throw new UnsupportedOperationException();
+        }
+
+        BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileToBeRemoved.getName());
+        
+        boolean deleteSuccessful = storage.delete(blobId);
+        if (deleteSuccessful) {
+            fileToBeRemoved.getServices().remove(service);
+            if (fileToBeRemoved.getServices().isEmpty()) {
+                fileDescriptionRepository.delete(fileToBeRemoved);
+            } else {
+                fileDescriptionRepository.save(fileToBeRemoved);
+            }
+            log.debug("File successfully deleted: {}, {}", id, service);
+        } else {
+            log.error("File could not be deleted: {}", id);
             throw new FileNotFoundException();
         }
     }

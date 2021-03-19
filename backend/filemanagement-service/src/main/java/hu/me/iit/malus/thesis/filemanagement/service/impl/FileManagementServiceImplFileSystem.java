@@ -15,7 +15,10 @@ import org.springframework.core.env.Environment;
 import javax.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Local filesystem based implementation for the File management service.
@@ -74,34 +77,33 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      */
     @Override
     public void deleteFile(Long id, Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
-        Optional<FileDescription> opt = fileDescriptionRepository.findById(id);
-        if (opt.isPresent()) {
-            FileDescription fileDescription = opt.get();
-
-            if (!fileDescription.getUploadedBy().equalsIgnoreCase(username)) {
-                log.warn("User does not have the privilege to delete file: {}", id);
-                throw new UnsupportedOperationException();
-            }
-
-            String uploadDir = env.getProperty(FILE_DIR_PROP);
-            File targetFile = new File(uploadDir + File.separator + fileDescription.getName());
-
-            if (targetFile.delete()) {
-                fileDescription.getServices().remove(service);
-                if (fileDescription.getServices().isEmpty()) {
-                    fileDescriptionRepository.delete(fileDescription);
-                } else {
-                    fileDescriptionRepository.save(fileDescription);
-                }
-                log.debug("File successfully deleted: {}, {}", id, service);
-            } else {
-                log.error("File could not be deleted: {}", id);
-                throw new FileNotFoundException();
-            }
-        } else {
+        FileDescription fileDescription = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
+            return new FileNotFoundException();
+        });
+
+        if (!fileDescription.getUploadedBy().equalsIgnoreCase(username)) {
+            log.warn("User does not have the privilege to delete file: {}", id);
+            throw new UnsupportedOperationException();
+        }
+
+        String uploadDir = env.getProperty(FILE_DIR_PROP);
+        File targetFile = new File(uploadDir + File.separator + fileDescription.getName());
+
+        boolean deleteSuccessful = targetFile.delete();
+        if (deleteSuccessful) {
+            fileDescription.getServices().remove(service);
+            if (fileDescription.getServices().isEmpty()) {
+                fileDescriptionRepository.delete(fileDescription);
+            } else {
+                fileDescriptionRepository.save(fileDescription);
+            }
+            log.debug("File successfully deleted: {}, {}", id, service);
+        } else {
+            log.error("File could not be deleted: {}", id);
             throw new FileNotFoundException();
         }
+
     }
 
     /**
