@@ -1,0 +1,15 @@
+consts:
+  config-host: localhost # a dockerized service can find it's config server on a docker network by docker it's container name
+  config-port: 8888
+
+# Name of the service, by which it finds its property file and the uri of the config server to fetch from.
+spring:
+  application:
+    name: filemanagement-service
+  cloud:
+    config:
+      uri: http://${consts.config-host}:${consts.config-port} # config ip from setup_docker.sh
+      fail-fast: true #if it cannot get its config files it retries (spring retry default values apply) and then fails
+      retry:
+        max-attempts: 15 #If your pc is slow to start the config service and something fails because of it, up this number a bit
+      profile: google

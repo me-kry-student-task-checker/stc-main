@@ -1,7 +1,6 @@
 package hu.me.iit.malus.thesis.filemanagement.model;
 
 import com.google.common.base.Objects;
-import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
