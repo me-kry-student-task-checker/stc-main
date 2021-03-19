@@ -1,13 +1,11 @@
 package hu.me.iit.malus.thesis.user.client.dto;
 
-import lombok.*;
+import lombok.Data;
 
 import javax.validation.constraints.Email;
 import java.util.List;
 
-@Getter @Setter
-@ToString @EqualsAndHashCode
-@NoArgsConstructor
+@Data
 public class Mail {
 
     private List<@Email String> to;
@@ -16,4 +14,10 @@ public class Mail {
     private String[] bccs;
     private String text;
     private String replyTo;
+
+    public Mail(List<@Email String> to, String subject, String text) {
+        this.to = to;
+        this.subject = subject;
+        this.text = text;
+    }
 }

@@ -3,16 +3,16 @@ package hu.me.iit.malus.thesis.user.controller.dto;
 import hu.me.iit.malus.thesis.user.controller.validation.MatchingPasswords;
 import hu.me.iit.malus.thesis.user.controller.validation.ValidPassword;
 import hu.me.iit.malus.thesis.user.controller.validation.ValidRole;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-@Getter @Setter
-@MatchingPasswords (message = "registration.invalid.passwordConfirm")
+@Data
+@MatchingPasswords(message = "registration.invalid.passwordConfirm")
 public class RegistrationRequest {
+
     @NotNull (message = "registration.required.email")
     @Email (message = "registration.invalid.email")
     private String email;

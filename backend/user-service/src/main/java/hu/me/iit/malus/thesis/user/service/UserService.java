@@ -1,8 +1,9 @@
 package hu.me.iit.malus.thesis.user.service;
 
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
-import hu.me.iit.malus.thesis.user.model.Student;
-import hu.me.iit.malus.thesis.user.model.Teacher;
+import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
+import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
+import hu.me.iit.malus.thesis.user.controller.dto.UserDto;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
 
@@ -63,14 +64,14 @@ public interface UserService {
      *
      * @return the students
      */
-    Set<Student> getAllStudents();
+    Set<StudentDto> getAllStudents();
 
     /**
      * Returns all the saved Teachers
      *
      * @return the teachers
      */
-    Set<Teacher> getAllTeachers();
+    Set<TeacherDto> getAllTeachers();
 
     /**
      * Returns a single Student by its email (identifier)
@@ -78,7 +79,7 @@ public interface UserService {
      * @param studentEmail Student's email
      * @return The corresponding Student
      */
-    Student getStudentByEmail(String studentEmail);
+    StudentDto getStudentByEmail(String studentEmail);
 
     /**
      * Returns all the Students who has been assigned to a course
@@ -86,7 +87,7 @@ public interface UserService {
      * @param courseId Id of a course, that the Students assigned to
      * @return The corresponding Students
      */
-    Set<Student> getStudentsByAssignedCourseId(Long courseId);
+    Set<StudentDto> getStudentsByAssignedCourseId(Long courseId);
 
     /**
      * Returns all the Students who is not already assigned to the given course
@@ -94,7 +95,7 @@ public interface UserService {
      * @param courseId Id of a course, that the Student NOT assigned to
      * @return The corresponding Students
      */
-    Set<Student> getStudentsByNotAssignedCourseId(Long courseId);
+    Set<StudentDto> getStudentsByNotAssignedCourseId(Long courseId);
 
     /**
      * Returns a single Teacher by its email (identifier)
@@ -102,7 +103,7 @@ public interface UserService {
      * @param teacherEmail Teacher's email
      * @return The corresponding Teacher
      */
-    Teacher getTeacherByEmail(String teacherEmail);
+    TeacherDto getTeacherByEmail(String teacherEmail);
 
     /**
      * Returns a single Teacher by a course id, that he owns
@@ -110,15 +111,7 @@ public interface UserService {
      * @param courseId Id of a course, that the Teacher has created before
      * @return The corresponding Teacher
      */
-    Teacher getTeacherByCreatedCourseId(Long courseId);
-
-    /**
-     * Return a complete User object, queried by its email (identifier)
-     *
-     * @param email of the User
-     * @return User any user by email
-     */
-    User getAnyUserByEmail(String email);
+    TeacherDto getTeacherByCreatedCourseId(Long courseId);
 
     /**
      * Returns all the course ids, that the user has connection to
@@ -138,4 +131,20 @@ public interface UserService {
      * @return True if the user is connected to the course, false otherwise
      */
     Boolean isRelatedToCourse(String email, Long courseId);
+
+    /**
+     * Return a complete User object, queried by its email (identifier)
+     *
+     * @param email of the User
+     * @return User any user by email
+     */
+    User getAnyUserByEmail(String email);
+
+    /**
+     * Gets a dto from user, for the controller to use.
+     *
+     * @param user the user
+     * @return the dto
+     */
+    UserDto getDtoFromAnyUser(User user);
 }

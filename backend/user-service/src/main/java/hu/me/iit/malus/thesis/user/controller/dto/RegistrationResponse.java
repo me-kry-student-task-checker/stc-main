@@ -2,13 +2,12 @@ package hu.me.iit.malus.thesis.user.controller.dto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.validation.ObjectError;
 
 import java.util.List;
 
-@Getter @Setter
+@Data
 public class RegistrationResponse {
     private String message;
     private String error;
