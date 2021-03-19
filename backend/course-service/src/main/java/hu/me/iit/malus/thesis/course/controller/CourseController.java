@@ -6,7 +6,6 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
-import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +15,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.security.Principal;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -52,21 +50,4 @@ public class CourseController {
     public Set<CourseOverviewDto> getAll(Principal principal) {
         return DtoConverter.CourseToCourseOverviewSet(service.getAll(principal.getName()));
     }
-
-    @PostMapping("/invite/{courseId}/{studentId}")
-    public void invite(@PathVariable @Min(1) Long courseId, @PathVariable @Min(1) String studentId) {
-        service.invite(courseId, studentId);
-    }
-
-    @PostMapping("/invite/{courseId}")
-    public void invite(@PathVariable @Min(1) Long courseId, @RequestBody List<String> studentIds) {
-        service.invite(courseId, studentIds);
-    }
-
-    @PostMapping("/acceptInvitation/{invitationUuid}")
-    @PreAuthorize("hasRole('ROLE_Student')")
-    public void acceptInvite(@PathVariable @NotEmpty String invitationUuid) throws InvitationNotFoundException {
-        service.acceptInvite(invitationUuid);
-    }
-
 }

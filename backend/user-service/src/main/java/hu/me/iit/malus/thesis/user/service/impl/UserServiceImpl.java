@@ -1,15 +1,16 @@
 package hu.me.iit.malus.thesis.user.service.impl;
 
+import hu.me.iit.malus.thesis.user.client.EmailClient;
+import hu.me.iit.malus.thesis.user.client.dto.Mail;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
 import hu.me.iit.malus.thesis.user.model.*;
 import hu.me.iit.malus.thesis.user.model.exception.DatabaseOperationFailedException;
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
-import hu.me.iit.malus.thesis.user.model.exception.IllegalUserInsertionException;
 import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
 import hu.me.iit.malus.thesis.user.repository.*;
 import hu.me.iit.malus.thesis.user.service.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,27 +20,20 @@ import java.util.*;
 
 /**
  * Default implementation of UserService
+ *
  * @author Javorek Dénes
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private StudentRepository studentRepository;
-    private TeacherRepository teacherRepository;
-    private AdminRepository adminRepository;
-    private ActivationTokenRepository tokenRepository;
-    private BCryptPasswordEncoder passwordEncoder;
 
-    @Autowired
-    public UserServiceImpl(StudentRepository studentRepository, TeacherRepository teacherRepository,
-                           AdminRepository adminRepository, ActivationTokenRepository tokenRepository,
-                           BCryptPasswordEncoder passwordEncoder) {
-        this.studentRepository = studentRepository;
-        this.teacherRepository = teacherRepository;
-        this.adminRepository = adminRepository;
-        this.tokenRepository = tokenRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final StudentRepository studentRepository;
+    private final TeacherRepository teacherRepository;
+    private final AdminRepository adminRepository;
+    private final ActivationTokenRepository tokenRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final EmailClient emailClient;
 
     /**
      * {@inheritDoc}
@@ -138,85 +132,6 @@ public class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void saveStudent(Student studentToSave) {
-        Optional<Student> optionalStudent = studentRepository.findByEmail(studentToSave.getEmail());
-        if (optionalStudent.isPresent()) {
-            try {
-                studentToSave.setPassword(optionalStudent.get().getPassword());
-                studentRepository.save(studentToSave);
-            } catch (DataAccessException e) {
-                throw new DatabaseOperationFailedException(e);
-            }
-        } else {
-            throw new IllegalUserInsertionException();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void saveStudents(Set<Student> studentsToSave) {
-        for (Student student : studentsToSave) {
-            Optional<Student> optionalStudent = studentRepository.findByEmail(student.getEmail());
-
-            if (!optionalStudent.isPresent()) {
-                throw new IllegalUserInsertionException();
-            }
-            student.setPassword(optionalStudent.get().getPassword());
-        }
-
-        try {
-            studentRepository.saveAll(studentsToSave);
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationFailedException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void saveTeacher(Teacher teacherToSave) {
-        Optional<Teacher> optionalTeacher = teacherRepository.findByEmail(teacherToSave.getEmail());
-
-        if (optionalTeacher.isPresent()) {
-            try {
-                teacherToSave.setPassword(optionalTeacher.get().getPassword());
-                teacherRepository.save(teacherToSave);
-            } catch (DataAccessException e) {
-                throw new DatabaseOperationFailedException(e);
-            }
-        } else {
-            throw new IllegalUserInsertionException();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void saveTeachers(Set<Teacher> teachersToSave) {
-        for (Teacher teacher : teachersToSave) {
-            Optional<Teacher> optionalTeacher = teacherRepository.findByEmail(teacher.getEmail());
-
-            if (!optionalTeacher.isPresent()) {
-                throw new IllegalUserInsertionException();
-            }
-            teacher.setPassword(optionalTeacher.get().getPassword());
-        }
-
-        try {
-            teacherRepository.saveAll(teachersToSave);
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationFailedException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Transactional
     @Override
     public void saveCourseCreation(String teacherEmail, Long courseId) {
@@ -240,19 +155,20 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @Override
-    public void saveCourseAssign(String studentEmail, Long courseId) {
-        Optional<Student> optionalStudent = studentRepository.findLockByEmail(studentEmail);
-        if (optionalStudent.isPresent()) {
+    public void assignStudentsToCourse(Long courseId, List<String> studentEmails) {
+        Mail mail = new Mail();
+        mail.setTo(studentEmails);
+        mail.setSubject("Course assignment notification");
+        mail.setText("You have been assigned to a course.");
+        studentRepository.findAllLockByEmailIn(studentEmails).forEach(student -> {
             try {
-                Student student = optionalStudent.get();
                 student.getAssignedCourseIds().add(courseId);
                 studentRepository.save(student);
             } catch (DataAccessException e) {
                 throw new DatabaseOperationFailedException(e);
             }
-        } else {
-            throw new UserNotFoundException();
-        }
+        });
+        emailClient.sendMail(mail);
     }
 
     /**

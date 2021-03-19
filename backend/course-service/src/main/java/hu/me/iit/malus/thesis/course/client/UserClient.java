@@ -24,9 +24,6 @@ public interface UserClient {
     @PostMapping("/api/user/saveCourseCreation")
     void saveCourseCreation(@RequestBody Long courseId);
 
-    @PostMapping("/api/user/saveCourseAssign")
-    void saveCourseAssign(@RequestBody Long courseId);
-
     @GetMapping("/api/user/student/{email}/")
     Student getStudentByEmail(@PathVariable("email") String studentEmail);
 

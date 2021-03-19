@@ -2,9 +2,7 @@ package hu.me.iit.malus.thesis.course.service;
 
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
-import hu.me.iit.malus.thesis.course.service.exception.InvitationNotFoundException;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -43,40 +41,12 @@ public interface CourseService {
      */
     Course get(Long courseId, String userEmail) throws CourseNotFoundException;
 
-    //TODO might need to use pagination
-
     /**
-     * Lists all related courses, but only the most important infos
-     * If you need all the data for a course, use get(courseId, userEmail) method
+     * Lists all related courses, but only the most important infos.
+     *
      * @param userEmail currently authenticated user's email
      * @return set of courses that relates to the user
      */
     Set<Course> getAll(String userEmail);
-
-    //TODO these will need a table which contains the uuid, a courseId and the studentId
-
-    /**
-     * Sends an invitation email to a student, which if accepted assigns a student to a course
-     *
-     * @param studentEmail the assignees email
-     * @param courseId  the courses id
-     * @return the UUID of the invitation
-     */
-    void invite(Long courseId, String studentEmail);
-
-    /**
-     * Sends multiple invitation e-mails to multiple students
-     *
-     * @param studentEmails the assignees email
-     * @param courseId  the courses id
-     * @return the UUID of the invitation
-     */
-    void invite(Long courseId, List<String> studentEmails);
-
-    /**
-     * Based on the UUID assigns a student to a course
-     *
-     * @param inviteUUID the UUID by which the student is assigned
-     */
-    void acceptInvite(String inviteUUID) throws InvitationNotFoundException;
+    
 }
