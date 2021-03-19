@@ -140,18 +140,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void saveCourseCreation(String teacherEmail, Long courseId) {
-        Optional<Teacher> optionalTeacher = teacherRepository.findLockByEmail(teacherEmail);
-
-        if (optionalTeacher.isPresent()) {
-            try {
-                Teacher teacher = optionalTeacher.get();
-                teacher.getCreatedCourseIds().add(courseId);
-                teacherRepository.save(teacher);
-            } catch (DataAccessException e) {
-                throw new DatabaseOperationFailedException(e);
-            }
-        } else {
-            throw new UserNotFoundException();
+        Teacher teacher = teacherRepository.findLockByEmail(teacherEmail).orElseThrow(UserNotFoundException::new);
+        try {
+            teacher.getCreatedCourseIds().add(courseId);
+            teacherRepository.save(teacher);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationFailedException(e);
         }
     }
 
@@ -209,10 +203,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public StudentDto getStudentByEmail(String studentEmail) {
+        Student student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
         try {
-            Optional<Student> optionalStudent = studentRepository.findByEmail(studentEmail);
-            if (optionalStudent.isEmpty()) throw new UserNotFoundException(studentEmail);
-            return Converter.createStudentDtoFromStudent(optionalStudent.get());
+            return Converter.createStudentDtoFromStudent(student);
         } catch (DataAccessException dataExc) {
             throw new DatabaseOperationFailedException(dataExc);
         }
@@ -253,10 +246,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public TeacherDto getTeacherByEmail(String teacherEmail) {
+        Teacher teacher = teacherRepository.findByEmail(teacherEmail).orElseThrow(() -> new UserNotFoundException(teacherEmail));
         try {
-            Optional<Teacher> optionalTeacher = teacherRepository.findByEmail(teacherEmail);
-            if (optionalTeacher.isEmpty()) throw new UserNotFoundException(teacherEmail);
-            return Converter.createTeacherDtoFromTeacher(optionalTeacher.get());
+            return Converter.createTeacherDtoFromTeacher(teacher);
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -267,12 +259,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public TeacherDto getTeacherByCreatedCourseId(Long courseId) {
+        Teacher teacher = teacherRepository.findByCreatedCourseId(courseId).orElseThrow(UserNotFoundException::new);
         try {
-            Optional<Teacher> optTeacher = teacherRepository.findByCreatedCourseId(courseId);
-            if (optTeacher.isEmpty()) {
-                throw new UserNotFoundException();
-            }
-            return Converter.createTeacherDtoFromTeacher(optTeacher.get());
+            return Converter.createTeacherDtoFromTeacher(teacher);
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
