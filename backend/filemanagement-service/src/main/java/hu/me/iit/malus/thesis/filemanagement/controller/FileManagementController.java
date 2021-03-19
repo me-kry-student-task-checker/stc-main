@@ -2,53 +2,50 @@ package hu.me.iit.malus.thesis.filemanagement.controller;
 
 
 import hu.me.iit.malus.thesis.filemanagement.controller.converters.Converter;
-import hu.me.iit.malus.thesis.filemanagement.controller.dto.File;
-import hu.me.iit.malus.thesis.filemanagement.controller.dto.Service;
+import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
+import hu.me.iit.malus.thesis.filemanagement.model.Service;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
+import lombok.RequiredArgsConstructor;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Part;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.ws.rs.FormParam;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Controller endpoint of this service, which handles file transfers
+ *
  * @author Ilku Krisztián
+ * @author Attila Szőke
  */
 @RestController
 @RequestMapping("/api/filemanagement")
+@RequiredArgsConstructor
 public class FileManagementController {
 
-    private FileManagementService fileManagementService;
-
-    @Autowired
-    public FileManagementController(FileManagementService fileManagementService) {
-        this.fileManagementService = fileManagementService;
-    }
-
-    @PostMapping("/upload")
-    public ResponseEntity<File> uploadFile(@FormDataParam("file") Part file, @FormParam("service") Service service, @FormParam("tagId") Long tagId, Principal principal) throws IOException {
-        FileDescription fd = fileManagementService.uploadFile(file, service, principal.getName(), tagId);
-        if (fd == null) return ResponseEntity
-                .status(204)
-                .body(null);
-
-        return ResponseEntity
-                .status(200)
-                .body(Converter.FileDescriptionToFile(fd));
-    }
+    private final FileManagementService fileManagementService;
 
     @PostMapping("/uploadFiles")
-    public ResponseEntity<Set<File>> uploadFileMultipleFiles(@FormDataParam("file") ArrayList<Part> file, @FormParam("service") Service service, @FormParam("tagId") Long tagId, Principal principal) throws IOException {
-        Set<File> result = new HashSet<>();
+    public ResponseEntity<@Size(min = 1) Set<@Valid FileDescriptorDto>> uploadFiles(@FormDataParam("file") @Size(min = 1) List<Part> file,
+                                                                                    @FormParam("service") @NotNull Service service,
+                                                                                    @FormParam("tagId") @Min(1) Long tagId,
+                                                                                    Principal principal) throws IOException {
+        Set<FileDescriptorDto> result = new HashSet<>();
         for (Part f : file) {
             FileDescription fd = fileManagementService.uploadFile(f, service, principal.getName(), tagId);
             result.add(Converter.FileDescriptionToFile(fd));
@@ -61,14 +58,15 @@ public class FileManagementController {
 
 
     @DeleteMapping("/delete/{id}/{service}")
-    public ResponseEntity<String> deleteFile(@PathVariable Long id, @PathVariable Service service, Principal principal) {
+    public ResponseEntity<String> deleteFile(@PathVariable @Min(1) Long id, @PathVariable @NotNull Service service, Principal principal) {
+        // TODO controller advice try catch helyett mindenhol a controllerben
         try {
             fileManagementService.deleteFile(id, service, principal.getName());
-        }catch(UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException e) {
             return ResponseEntity
                     .status(403)
                     .body("User does not have the privilege to delete this file!");
-        }catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             return ResponseEntity
                     .status(404)
                     .body("File not found!");
@@ -78,60 +76,28 @@ public class FileManagementController {
                 .body("Successful delete!");
     }
 
-    @GetMapping("/download/getById/{id}")
-    public ResponseEntity<File> getFileById(@PathVariable Long id){
-        FileDescription fd = fileManagementService.getById(id);
-        if(fd == null) {
-            return ResponseEntity
-                    .status(204)
-                    .body(null);
-        }
+    @GetMapping("/download/getByUser/{userEmail}")
+    public ResponseEntity<Set<@Valid FileDescriptorDto>> getFilesByUser(@PathVariable @NotBlank String userEmail) {
+        // TODO user from principal
+        Set<FileDescriptorDto> fileDescriptorDtos = new HashSet<>();
+        fileManagementService.getAllFilesByUser(userEmail).forEach(fd -> fileDescriptorDtos.add(Converter.FileDescriptionToFile(fd)));
         return ResponseEntity
                 .status(200)
-                .body(Converter.FileDescriptionToFile(fd));
-    }
-
-    @GetMapping("/download/getByFilename/{filename}")
-    public ResponseEntity<Set<File>> getFileByFileName(@PathVariable String filename){
-        Set<File> files = new HashSet<>();
-        fileManagementService.getAllByFileName(filename).forEach(fd -> files.add(Converter.FileDescriptionToFile(fd)));
-        return ResponseEntity
-                .status(200)
-                .body(files);
-    }
-
-    @GetMapping("/download/getByUser/{user}")
-    public ResponseEntity<Set<File>> getFileByFileUser(@PathVariable String user){
-        Set<File> files = new HashSet<>();
-        fileManagementService.getAllFilesByUsers(user).forEach(fd -> files.add(Converter.FileDescriptionToFile(fd)));
-        return ResponseEntity
-                .status(200)
-                .body(files);
-    }
-
-    @GetMapping("/download/getByService/{service}")
-    public ResponseEntity<Set<File>> getAllFilesByService(@PathVariable Service service) {
-        Set<FileDescription> files = new HashSet<>(fileManagementService.getAllFilesByServices(service));
-        return ResponseEntity
-                .status(200)
-                .body(new HashSet<>(Converter.FileDescriptionsToFiles(files)));
-    }
-
-    @GetMapping("/download/getAll")
-    public ResponseEntity<Set<File>> getAllFiles() {
-        Set<File> files = new HashSet<>();
-        fileManagementService.getAllFiles().forEach(fileDescription -> files.add(Converter.FileDescriptionToFile(fileDescription)));
-        return ResponseEntity
-                .status(200)
-                .body(files);
+                .body(fileDescriptorDtos);
     }
 
     @GetMapping("/download/getByTagId/{service}/{tagId}")
-    public ResponseEntity<Set<File>> getAllFilesByTagId(@PathVariable Service service, @PathVariable Long tagId) {
-        Set<File> results = new HashSet<>();
-        fileManagementService.getAllFilesByTagId(tagId, service).forEach(fileDescription -> results.add(Converter.FileDescriptionToFile(fileDescription)));
+    public ResponseEntity<Set<@Valid FileDescriptorDto>> getFilesByTagIdAndService(@PathVariable @NotNull Service service,
+                                                                                   @PathVariable @Min(1) Long tagId) {
+        Set<FileDescriptorDto> results = new HashSet<>();
+        fileManagementService.getAllFilesByServiceAndTagId(tagId, service).forEach(fileDescription -> results.add(Converter.FileDescriptionToFile(fileDescription)));
         return ResponseEntity
                 .status(200)
                 .body(results);
+    }
+
+    @GetMapping("/download/link/{name}")
+    public ResponseEntity<FileSystemResource> getFileByName(@PathVariable @NotBlank String name) {
+        return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFileByName(name)));
     }
 }

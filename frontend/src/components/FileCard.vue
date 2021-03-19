@@ -8,12 +8,12 @@
 
 		b-modal(:id="getId", hide-footer, :title="file.name", size="lg")
 			div(v-if="getFileType === 'IMAGE'")
-				b-img(fluid-grow, thumbnail, :src="file.downloadLink", :alt="file.name")
+				b-img(fluid-grow, thumbnail, v-auth-image="file.downloadLink", :alt="file.name")
 			//div(v-else-if="getFileType === 'TEXT'")
 
 			//div(v-else-if="getFileType === 'PDF'")
 
-			a(:href="file.downloadLink") Download Link
+			// a(:href="file.downloadLink") Download Link
 </template>
 
 <script>
