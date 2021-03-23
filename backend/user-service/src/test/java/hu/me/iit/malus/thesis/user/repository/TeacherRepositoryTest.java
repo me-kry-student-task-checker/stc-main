@@ -41,11 +41,11 @@ public class TeacherRepositoryTest {
         List<Long> someIdsOfCreatedCourses = Arrays.asList(1L, 2L, 6L, criteriaCourseId, 5L, 60L);
 
         Teacher teacherToFind = new Teacher(
-                "toFind@teacher.test", "$2aHash", "Target", "Teacher", new ArrayList<>());
+                "toFind@teacher.test", "$2aHash", "Target", "Teacher", new ArrayList<>(), null);
         teacherToFind.setCreatedCourseIds(someIdsOfCreatedCourses);
 
         Teacher teacherToNotToFind = new Teacher(
-                "nobody@teacher.test", "$2aHash", "Nobody", "Teacher", new ArrayList<>());
+                "nobody@teacher.test", "$2aHash", "Nobody", "Teacher", new ArrayList<>(), null);
 
         entityManager.persist(teacherToFind);
         entityManager.persist(teacherToNotToFind);
@@ -66,7 +66,7 @@ public class TeacherRepositoryTest {
         List<Long> someIdsOfCreatedCourses = Arrays.asList(1L, 2L, 6L, 5L, 60L);
 
         Teacher teacherNotToFind = new Teacher(
-                "toFind@teacher.test", "$2aHash", "Target", "Teacher", new ArrayList<>());
+                "toFind@teacher.test", "$2aHash", "Target", "Teacher", new ArrayList<>(), null);
         teacherNotToFind.setCreatedCourseIds(someIdsOfCreatedCourses);
 
         entityManager.persist(teacherNotToFind);

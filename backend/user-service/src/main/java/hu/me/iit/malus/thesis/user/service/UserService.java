@@ -4,8 +4,10 @@ import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
 import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
 import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
 import hu.me.iit.malus.thesis.user.controller.dto.UserDto;
+import hu.me.iit.malus.thesis.user.model.Activity;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
+import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
 
 import java.util.List;
 import java.util.Set;
@@ -147,4 +149,14 @@ public interface UserService {
      * @return the dto
      */
     UserDto getDtoFromAnyUser(User user);
+
+    /**
+     * Updates the last activity of a user.
+     *
+     * @param email        the user id
+     * @param lastActivity the new activity
+     * @return the saved activity
+     * @throws UserNotFoundException thrown when the user cannot be found
+     */
+    Activity saveLastActivity(String email, Activity lastActivity) throws UserNotFoundException;
 }

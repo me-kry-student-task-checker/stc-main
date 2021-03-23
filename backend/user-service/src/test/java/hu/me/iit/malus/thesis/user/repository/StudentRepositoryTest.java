@@ -38,11 +38,11 @@ public class StudentRepositoryTest {
         List<Long> someIdsOfAssignedCourses = Arrays.asList(1L, 2L, 6L, criteriaCourseId, 5L, 60L);
 
         Student studentToFind = new Student(
-                "toFind@teacher.test", "$2aHash", "Target", "Student", new ArrayList<>());
+                "toFind@teacher.test", "$2aHash", "Target", "Student", new ArrayList<>(), null);
         studentToFind.setAssignedCourseIds(someIdsOfAssignedCourses);
 
         Student studentToNotToFind = new Student(
-                "nobody@student.test", "$2aHash", "Nobody", "Student", new ArrayList<>());
+                "nobody@student.test", "$2aHash", "Nobody", "Student", new ArrayList<>(), null);
 
         entityManager.persist(studentToFind);
         entityManager.persist(studentToNotToFind);
@@ -63,7 +63,7 @@ public class StudentRepositoryTest {
         List<Long> someIdsOfCreatedCourses = Arrays.asList(1L, 2L, 6L, 5L, 60L);
 
         Student studentToNotToFind = new Student(
-                "nobody@student.test", "$2aHash", "Nobody", "Student", new ArrayList<>());
+                "nobody@student.test", "$2aHash", "Nobody", "Student", new ArrayList<>(), null);
         studentToNotToFind.setAssignedCourseIds(someIdsOfCreatedCourses);
 
         entityManager.persist(studentToNotToFind);
@@ -83,10 +83,10 @@ public class StudentRepositoryTest {
         List<Long> someIdsOfAssignedCourses = Arrays.asList(1L, 2L, 6L, criteriaCourseId, 5L, 60L);
 
         Student studentToFind = new Student(
-                "toFind@teacher.test", "$2aHash", "Target", "Student", new ArrayList<>());
+                "toFind@teacher.test", "$2aHash", "Target", "Student", new ArrayList<>(), null);
 
         Student studentNotToFind = new Student(
-                "nobody@student.test", "$2aHash", "Nobody", "Student", new ArrayList<>());
+                "nobody@student.test", "$2aHash", "Nobody", "Student", new ArrayList<>(), null);
         studentNotToFind.setAssignedCourseIds(someIdsOfAssignedCourses);
 
         entityManager.persist(studentToFind);

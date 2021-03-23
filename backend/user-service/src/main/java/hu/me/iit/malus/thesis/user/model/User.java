@@ -33,6 +33,9 @@ public abstract class User
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private boolean enabled;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "activity_id", referencedColumnName = "id")
+    private Activity lastActivity;
 
     public User() {
         super();

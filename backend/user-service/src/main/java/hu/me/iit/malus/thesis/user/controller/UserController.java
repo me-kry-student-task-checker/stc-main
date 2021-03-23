@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.user.controller;
 
 import hu.me.iit.malus.thesis.user.controller.dto.*;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
+import hu.me.iit.malus.thesis.user.model.Activity;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.model.exception.UserAlreadyExistException;
 import hu.me.iit.malus.thesis.user.service.UserService;
@@ -116,6 +117,11 @@ public class UserController {
     @GetMapping("/me")
     public UserDto getMe(Principal principal) {
         return service.getDtoFromAnyUser(service.getAnyUserByEmail(principal.getName()));
+    }
+
+    @PostMapping("/saveLastActivity")
+    public Activity saveLastActivity(@RequestBody Activity lastActivity, Principal principal) {
+        return service.saveLastActivity(principal.getName(), lastActivity);
     }
 
 }

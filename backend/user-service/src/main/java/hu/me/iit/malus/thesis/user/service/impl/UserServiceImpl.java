@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final TeacherRepository teacherRepository;
     private final AdminRepository adminRepository;
     private final ActivationTokenRepository tokenRepository;
+    private final ActivityRepository activityRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailClient emailClient;
 
@@ -54,17 +55,17 @@ public class UserServiceImpl implements UserService {
         switch (userRole) {
             case ADMIN: {
                 Admin newAdmin = new Admin(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName());
+                        registrationRequest.getFirstName(), registrationRequest.getLastName(), null);
                 return adminRepository.save(newAdmin);
             }
             case TEACHER: {
                 Teacher newTeacher = new Teacher(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
+                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList(), null);
                 return teacherRepository.save(newTeacher);
             }
             case STUDENT: {
                 Student newStudent = new Student(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
+                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList(), null);
                 return studentRepository.save(newStudent);
             }
             default:
@@ -348,4 +349,26 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Activity saveLastActivity(String email, Activity lastActivity) throws UserNotFoundException {
+        User user = getAnyUserByEmail(email);
+        Activity activity = user.getLastActivity();
+        user.setLastActivity(lastActivity);
+        if (activity != null) activityRepository.deleteById(activity.getId());
+        switch (user.getRole()) {
+            case ADMIN:
+                user = adminRepository.save((Admin) user);
+                break;
+            case TEACHER:
+                user = teacherRepository.save((Teacher) user);
+                break;
+            case STUDENT:
+                user = studentRepository.save((Student) user);
+                break;
+        }
+        return user.getLastActivity();
+    }
 }
