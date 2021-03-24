@@ -22,4 +22,6 @@ public abstract class UserDto {
 
     @NotNull
     private UserRole role;
+
+    private ActivityDto lastActivity;
 }

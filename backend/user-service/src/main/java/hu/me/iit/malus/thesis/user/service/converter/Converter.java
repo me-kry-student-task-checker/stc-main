@@ -1,11 +1,17 @@
 package hu.me.iit.malus.thesis.user.service.converter;
 
+import hu.me.iit.malus.thesis.user.controller.dto.ActivityDto;
+import hu.me.iit.malus.thesis.user.controller.dto.ActivitySaveDto;
 import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
 import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
+import hu.me.iit.malus.thesis.user.model.Activity;
 import hu.me.iit.malus.thesis.user.model.Student;
 import hu.me.iit.malus.thesis.user.model.Teacher;
 
 public class Converter {
+
+    private Converter() {
+    }
 
     public static StudentDto createStudentDtoFromStudent(Student student) {
         StudentDto dto = new StudentDto();
@@ -14,6 +20,7 @@ public class Converter {
         dto.setLastName(student.getLastName());
         dto.setRole(student.getRole());
         dto.setAssignedCourseIds(student.getAssignedCourseIds());
+        dto.setLastActivity(createActivityDtoFromActivity(student.getLastActivity()));
         return dto;
     }
 
@@ -24,6 +31,22 @@ public class Converter {
         dto.setLastName(teacher.getLastName());
         dto.setRole(teacher.getRole());
         dto.setCreatedCourseIds(teacher.getCreatedCourseIds());
+        dto.setLastActivity(createActivityDtoFromActivity(teacher.getLastActivity()));
         return dto;
+    }
+
+    public static ActivityDto createActivityDtoFromActivity(Activity activity) {
+        ActivityDto dto = new ActivityDto();
+        dto.setId(activity.getId());
+        dto.setType(activity.getType());
+        dto.setTagId(activity.getTagId());
+        return dto;
+    }
+
+    public static Activity createActivityFromActivitySaveDto(ActivitySaveDto dto) {
+        Activity activity = new Activity();
+        activity.setType(dto.getType());
+        activity.setTagId(dto.getTagId());
+        return activity;
     }
 }

@@ -2,10 +2,7 @@ package hu.me.iit.malus.thesis.user.service.impl;
 
 import hu.me.iit.malus.thesis.user.client.EmailClient;
 import hu.me.iit.malus.thesis.user.client.dto.Mail;
-import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
-import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
-import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
-import hu.me.iit.malus.thesis.user.controller.dto.UserDto;
+import hu.me.iit.malus.thesis.user.controller.dto.*;
 import hu.me.iit.malus.thesis.user.model.*;
 import hu.me.iit.malus.thesis.user.model.exception.DatabaseOperationFailedException;
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
@@ -353,11 +350,11 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Activity saveLastActivity(String email, Activity lastActivity) throws UserNotFoundException {
+    public ActivityDto saveLastActivity(String email, ActivitySaveDto newActivity) throws UserNotFoundException {
         User user = getAnyUserByEmail(email);
-        Activity activity = user.getLastActivity();
-        user.setLastActivity(lastActivity);
-        if (activity != null) activityRepository.deleteById(activity.getId());
+        Activity oldActivity = user.getLastActivity();
+        user.setLastActivity(Converter.createActivityFromActivitySaveDto(newActivity));
+        if (oldActivity != null) activityRepository.deleteById(oldActivity.getId());
         switch (user.getRole()) {
             case ADMIN:
                 user = adminRepository.save((Admin) user);
@@ -369,6 +366,6 @@ public class UserServiceImpl implements UserService {
                 user = studentRepository.save((Student) user);
                 break;
         }
-        return user.getLastActivity();
+        return Converter.createActivityDtoFromActivity(user.getLastActivity());
     }
 }
