@@ -1,16 +1,22 @@
 package hu.me.iit.malus.thesis.feedback.service.impl;
 
 import hu.me.iit.malus.thesis.feedback.client.FileManagementClient;
+import hu.me.iit.malus.thesis.feedback.client.dto.ActivitySaveDto;
+import hu.me.iit.malus.thesis.feedback.client.dto.UserClient;
+import hu.me.iit.malus.thesis.feedback.client.dto.enums.ActivityType;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.repository.CourseCommentRepository;
 import hu.me.iit.malus.thesis.feedback.repository.TaskCommentRepository;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Default implementation of Feedback Service interface.
@@ -19,22 +25,13 @@ import java.util.*;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
 
-    private CourseCommentRepository courseCommentRepository;
-    private TaskCommentRepository taskCommentRepository;
-    private FileManagementClient fileManagementClient;
-
-    /**
-     * Instantiates a new FeedbackServiceImpl
-     */
-    @Autowired
-    public FeedbackServiceImpl(CourseCommentRepository courseCommentRepository, TaskCommentRepository taskCommentRepository,
-                               FileManagementClient fileManagementClient) {
-        this.courseCommentRepository = courseCommentRepository;
-        this.taskCommentRepository = taskCommentRepository;
-        this.fileManagementClient = fileManagementClient;
-    }
+    private final CourseCommentRepository courseCommentRepository;
+    private final TaskCommentRepository taskCommentRepository;
+    private final FileManagementClient fileManagementClient;
+    private final UserClient userClient;
 
     /**
      * {@inheritDoc}
@@ -42,6 +39,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public CourseComment createCourseComment(CourseComment courseComment) {
         log.info("Created course comment: {}", courseComment);
+        userClient.saveLastActivity(new ActivitySaveDto(ActivityType.FEEDBACK_COURSE));
         courseComment.setCreateDate(new Date());
         return courseCommentRepository.save(courseComment);
     }
@@ -52,6 +50,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public TaskComment createTaskComment(TaskComment taskComment) {
         log.info("Created task comment: {}", taskComment);
+        userClient.saveLastActivity(new ActivitySaveDto(ActivityType.FEEDBACK_TASK));
         taskComment.setCreateDate(new Date());
         return taskCommentRepository.save(taskComment);
     }

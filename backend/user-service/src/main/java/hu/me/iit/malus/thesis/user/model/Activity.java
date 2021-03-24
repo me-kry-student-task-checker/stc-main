@@ -13,6 +13,5 @@ public class Activity {
     private Long id;
     @Enumerated(EnumType.STRING)
     private ActivityType type;
-    private Long tagId;
 
 }

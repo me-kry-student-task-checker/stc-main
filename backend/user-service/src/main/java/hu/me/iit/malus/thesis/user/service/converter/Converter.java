@@ -36,17 +36,18 @@ public class Converter {
     }
 
     public static ActivityDto createActivityDtoFromActivity(Activity activity) {
-        ActivityDto dto = new ActivityDto();
-        dto.setId(activity.getId());
-        dto.setType(activity.getType());
-        dto.setTagId(activity.getTagId());
-        return dto;
+        if (activity != null) {
+            ActivityDto dto = new ActivityDto();
+            dto.setId(activity.getId());
+            dto.setType(activity.getType());
+            return dto;
+        }
+        return null;
     }
 
     public static Activity createActivityFromActivitySaveDto(ActivitySaveDto dto) {
         Activity activity = new Activity();
         activity.setType(dto.getType());
-        activity.setTagId(dto.getTagId());
         return activity;
     }
 }
