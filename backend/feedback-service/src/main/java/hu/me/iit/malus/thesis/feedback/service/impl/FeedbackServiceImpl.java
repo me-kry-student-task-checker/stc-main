@@ -1,8 +1,9 @@
 package hu.me.iit.malus.thesis.feedback.service.impl;
 
 import hu.me.iit.malus.thesis.feedback.client.FileManagementClient;
+import hu.me.iit.malus.thesis.feedback.client.NotificationClient;
+import hu.me.iit.malus.thesis.feedback.client.UserClient;
 import hu.me.iit.malus.thesis.feedback.client.dto.ActivitySaveDto;
-import hu.me.iit.malus.thesis.feedback.client.dto.UserClient;
 import hu.me.iit.malus.thesis.feedback.client.dto.enums.ActivityType;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,27 +34,40 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final TaskCommentRepository taskCommentRepository;
     private final FileManagementClient fileManagementClient;
     private final UserClient userClient;
+    private final NotificationClient notificationClient;
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Transactional(rollbackOn = RuntimeException.class)
     public CourseComment createCourseComment(CourseComment courseComment) {
-        log.info("Created course comment: {}", courseComment);
-        userClient.saveLastActivity(new ActivitySaveDto(ActivityType.FEEDBACK_COURSE));
         courseComment.setCreateDate(new Date());
-        return courseCommentRepository.save(courseComment);
+        CourseComment savedComment = courseCommentRepository.save(courseComment);
+        userClient.saveLastActivity(new ActivitySaveDto(ActivityType.FEEDBACK_COURSE));
+        boolean doSendNotification = userClient.getNotificationPreferences().get(ActivityType.FEEDBACK_COURSE);
+        if (doSendNotification) {
+            notificationClient.sendNotification();
+        }
+        log.info("Created course comment: {}", savedComment);
+        return savedComment;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    @Transactional(rollbackOn = RuntimeException.class)
     public TaskComment createTaskComment(TaskComment taskComment) {
-        log.info("Created task comment: {}", taskComment);
-        userClient.saveLastActivity(new ActivitySaveDto(ActivityType.FEEDBACK_TASK));
         taskComment.setCreateDate(new Date());
-        return taskCommentRepository.save(taskComment);
+        TaskComment savedComment = taskCommentRepository.save(taskComment);
+        userClient.saveLastActivity(new ActivitySaveDto(ActivityType.FEEDBACK_TASK));
+        boolean doSendNotification = userClient.getNotificationPreferences().get(ActivityType.FEEDBACK_TASK);
+        if (doSendNotification) {
+            notificationClient.sendNotification();
+        }
+        log.info("Created task comment: {}", savedComment);
+        return savedComment;
     }
 
     /**
