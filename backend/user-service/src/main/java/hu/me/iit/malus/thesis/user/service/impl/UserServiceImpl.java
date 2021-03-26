@@ -368,4 +368,12 @@ public class UserServiceImpl implements UserService {
         }
         return Converter.createActivityDtoFromActivity(user.getLastActivity());
     }
+
+    @Override
+    public Map<Activity.ActivityType, Boolean> getNotificationPreferences() {
+        HashMap<Activity.ActivityType, Boolean> preferenceMap = new HashMap<>();
+        preferenceMap.put(Activity.ActivityType.FEEDBACK_COURSE, true);
+        preferenceMap.put(Activity.ActivityType.FEEDBACK_TASK, true);
+        return preferenceMap;
+    }
 }

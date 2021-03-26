@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.user.controller;
 
 import hu.me.iit.malus.thesis.user.controller.dto.*;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
+import hu.me.iit.malus.thesis.user.model.Activity;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.model.exception.UserAlreadyExistException;
 import hu.me.iit.malus.thesis.user.service.UserService;
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.security.Principal;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -121,6 +123,11 @@ public class UserController {
     @PostMapping("/saveLastActivity")
     public @Valid ActivityDto saveLastActivity(@RequestBody @Valid ActivitySaveDto lastActivity, Principal principal) {
         return service.saveLastActivity(principal.getName(), lastActivity);
+    }
+
+    @GetMapping("/notificationPreferences")
+    public Map<Activity.ActivityType, Boolean> getNotificationPreferences() {
+        return service.getNotificationPreferences();
     }
 
 }

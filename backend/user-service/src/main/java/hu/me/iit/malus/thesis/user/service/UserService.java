@@ -1,11 +1,13 @@
 package hu.me.iit.malus.thesis.user.service;
 
 import hu.me.iit.malus.thesis.user.controller.dto.*;
+import hu.me.iit.malus.thesis.user.model.Activity;
 import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
 import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -155,4 +157,13 @@ public interface UserService {
      * @throws UserNotFoundException thrown when the user cannot be found
      */
     ActivityDto saveLastActivity(String email, ActivitySaveDto newActivity) throws UserNotFoundException;
+
+
+    /**
+     * Gets the global notification preferences.
+     *
+     * @return a map of notification preferences
+     */
+    Map<Activity.ActivityType, Boolean> getNotificationPreferences();
+    // TODO preferences of a user, and set preferences option
 }

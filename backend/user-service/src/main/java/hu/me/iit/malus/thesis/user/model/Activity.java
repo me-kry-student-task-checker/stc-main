@@ -14,4 +14,8 @@ public class Activity {
     @Enumerated(EnumType.STRING)
     private ActivityType type;
 
+    public enum ActivityType {
+        FEEDBACK_COURSE,
+        FEEDBACK_TASK
+    }
 }
