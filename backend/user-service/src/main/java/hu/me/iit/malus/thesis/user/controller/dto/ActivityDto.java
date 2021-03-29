@@ -12,4 +12,7 @@ public class ActivityDto {
     private Long id;
 
     private Activity.ActivityType type;
+
+    @Min(1)
+    private Long parentId;
 }

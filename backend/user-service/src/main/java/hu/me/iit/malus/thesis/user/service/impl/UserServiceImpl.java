@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
                     "There is already an account with that email address: " + registrationRequest.getEmail());
         }
 
-        UserRole userRole = UserRole.fromString(registrationRequest.getRole());
+        User.UserRole userRole = User.UserRole.fromString(registrationRequest.getRole());
         switch (userRole) {
             case ADMIN: {
                 Admin newAdmin = new Admin(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
@@ -369,6 +369,9 @@ public class UserServiceImpl implements UserService {
         return Converter.createActivityDtoFromActivity(user.getLastActivity());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Map<Activity.ActivityType, Boolean> getNotificationPreferences() {
         HashMap<Activity.ActivityType, Boolean> preferenceMap = new HashMap<>();

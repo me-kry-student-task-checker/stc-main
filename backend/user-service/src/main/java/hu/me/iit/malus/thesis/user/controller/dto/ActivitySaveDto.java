@@ -7,5 +7,6 @@ import lombok.Data;
 public class ActivitySaveDto {
 
     private Activity.ActivityType type;
+    private Long parentId;
 
 }

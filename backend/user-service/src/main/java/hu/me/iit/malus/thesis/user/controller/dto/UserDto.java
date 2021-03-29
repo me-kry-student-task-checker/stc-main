@@ -1,6 +1,6 @@
 package hu.me.iit.malus.thesis.user.controller.dto;
 
-import hu.me.iit.malus.thesis.user.model.UserRole;
+import hu.me.iit.malus.thesis.user.model.User;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -21,7 +21,7 @@ public abstract class UserDto {
     private String lastName;
 
     @NotNull
-    private UserRole role;
+    private User.UserRole role;
 
     private ActivityDto lastActivity;
 }

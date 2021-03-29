@@ -40,6 +40,7 @@ public class Converter {
             ActivityDto dto = new ActivityDto();
             dto.setId(activity.getId());
             dto.setType(activity.getType());
+            dto.setParentId(activity.getParentId());
             return dto;
         }
         return null;
@@ -48,6 +49,7 @@ public class Converter {
     public static Activity createActivityFromActivitySaveDto(ActivitySaveDto dto) {
         Activity activity = new Activity();
         activity.setType(dto.getType());
+        activity.setParentId(dto.getParentId());
         return activity;
     }
 }

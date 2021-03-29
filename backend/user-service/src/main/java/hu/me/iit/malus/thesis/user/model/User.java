@@ -34,7 +34,7 @@ public abstract class User
     private UserRole role;
     private boolean enabled;
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "activity_id", referencedColumnName = "id")
+    @JoinColumn(name = "last_activity_id", referencedColumnName = "id")
     private Activity lastActivity;
 
     public User() {
@@ -54,5 +54,27 @@ public abstract class User
     @Override
     public int hashCode() {
         return Objects.hashCode(email);
+    }
+
+    @Getter
+    public enum UserRole {
+        ADMIN("ROLE_Admin"),
+        TEACHER("ROLE_Teacher"),
+        STUDENT("ROLE_Student");
+
+        private String roleString;
+
+        UserRole(String roleString) {
+            this.roleString = roleString;
+        }
+
+        public static UserRole fromString(String string) {
+            for (UserRole role : UserRole.values()) {
+                if (role.roleString.equalsIgnoreCase(string)) {
+                    return role;
+                }
+            }
+            throw new IllegalStateException("The given string is not a valid role");
+        }
     }
 }

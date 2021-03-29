@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -33,6 +34,7 @@ public class Comment {
     private Long id;
     private String authorId;
     private String text;
+    @CreationTimestamp
     private Date createDate;
     @Transient private Set<File> files;
 

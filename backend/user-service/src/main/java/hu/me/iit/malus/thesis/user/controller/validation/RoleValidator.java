@@ -1,15 +1,16 @@
 package hu.me.iit.malus.thesis.user.controller.validation;
 
 
-import hu.me.iit.malus.thesis.user.model.UserRole;
+import hu.me.iit.malus.thesis.user.model.User;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 /**
  * Custom constraint validator, to check that the field can be converted to UserRole enum
- * @see hu.me.iit.malus.thesis.user.model.UserRole
+ *
  * @author Javorek Dénes
+ * @see User.UserRole
  */
 public class RoleValidator implements ConstraintValidator<ValidRole, Object> {
     @Override
@@ -29,7 +30,7 @@ public class RoleValidator implements ConstraintValidator<ValidRole, Object> {
             final String string = (String) object;
 
             try {
-                UserRole.fromString(string);
+                User.UserRole.fromString(string);
                 return true;
             } catch (IllegalArgumentException illegalArgE) {
                 return false;
