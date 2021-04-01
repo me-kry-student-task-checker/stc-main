@@ -341,6 +341,8 @@ public class UserServiceImpl implements UserService {
     public UserDto getDtoFromAnyUser(User user) {
         if (user instanceof Student) {
             return Converter.createStudentDtoFromStudent((Student) user);
+        } else if (user instanceof Admin) {
+            return Converter.createAdminDtoFromStudent((Admin) user);
         } else {
             return Converter.createTeacherDtoFromTeacher((Teacher) user);
         }

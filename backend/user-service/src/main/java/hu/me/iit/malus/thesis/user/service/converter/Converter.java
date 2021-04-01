@@ -1,10 +1,8 @@
 package hu.me.iit.malus.thesis.user.service.converter;
 
-import hu.me.iit.malus.thesis.user.controller.dto.ActivityDto;
-import hu.me.iit.malus.thesis.user.controller.dto.ActivitySaveDto;
-import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
-import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
+import hu.me.iit.malus.thesis.user.controller.dto.*;
 import hu.me.iit.malus.thesis.user.model.Activity;
+import hu.me.iit.malus.thesis.user.model.Admin;
 import hu.me.iit.malus.thesis.user.model.Student;
 import hu.me.iit.malus.thesis.user.model.Teacher;
 
@@ -32,6 +30,16 @@ public class Converter {
         dto.setRole(teacher.getRole());
         dto.setCreatedCourseIds(teacher.getCreatedCourseIds());
         dto.setLastActivity(createActivityDtoFromActivity(teacher.getLastActivity()));
+        return dto;
+    }
+
+    public static AdminDto createAdminDtoFromStudent(Admin admin) {
+        AdminDto dto = new AdminDto();
+        dto.setEmail(admin.getEmail());
+        dto.setFirstName(admin.getFirstName());
+        dto.setLastName(admin.getLastName());
+        dto.setRole(admin.getRole());
+        dto.setLastActivity(createActivityDtoFromActivity(admin.getLastActivity()));
         return dto;
     }
 
