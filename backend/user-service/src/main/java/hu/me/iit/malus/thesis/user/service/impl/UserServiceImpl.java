@@ -352,7 +352,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public ActivityDto saveLastActivity(String email, ActivitySaveDto newActivity) throws UserNotFoundException {
+    public ActivityTransactionDto saveLastActivity(String email, ActivitySaveDto newActivity) throws UserNotFoundException {
         User user = getAnyUserByEmail(email);
         Activity oldActivity = user.getLastActivity();
         user.setLastActivity(Converter.createActivityFromActivitySaveDto(newActivity));
@@ -368,7 +368,31 @@ public class UserServiceImpl implements UserService {
                 user = studentRepository.save((Student) user);
                 break;
         }
-        return Converter.createActivityDtoFromActivity(user.getLastActivity());
+        return new ActivityTransactionDto(
+                user.getEmail(),
+                Converter.createActivityDtoFromActivity(oldActivity),
+                Converter.createActivityDtoFromActivity(user.getLastActivity())
+        );
+    }
+
+    @Override
+    public void rollBackActivity(ActivityTransactionDto dto) {
+        User user = getAnyUserByEmail(dto.getUserId());
+        Activity oldActivity = Converter.createActivityFromActivityDto(dto.getOldActivity());
+        user.setLastActivity(oldActivity);
+        // TODO private method
+        switch (user.getRole()) {
+            case ADMIN:
+                adminRepository.save((Admin) user);
+                break;
+            case TEACHER:
+                teacherRepository.save((Teacher) user);
+                break;
+            case STUDENT:
+                studentRepository.save((Student) user);
+                break;
+        }
+        activityRepository.deleteById(dto.getNewActivity().getId());
     }
 
     /**

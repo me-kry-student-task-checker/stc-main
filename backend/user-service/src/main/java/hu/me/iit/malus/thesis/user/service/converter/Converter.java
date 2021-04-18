@@ -60,4 +60,16 @@ public class Converter {
         activity.setParentId(dto.getParentId());
         return activity;
     }
+
+    public static Activity createActivityFromActivityDto(ActivityDto dto) {
+        if (dto != null) {
+            Activity activity = new Activity();
+            activity.setId(dto.getId());
+            activity.setType(dto.getType());
+            activity.setCreateDate(dto.getCreateDate());
+            activity.setParentId(dto.getParentId());
+            return activity;
+        }
+        return null;
+    }
 }

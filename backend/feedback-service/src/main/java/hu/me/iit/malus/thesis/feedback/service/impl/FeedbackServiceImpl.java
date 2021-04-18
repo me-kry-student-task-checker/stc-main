@@ -4,6 +4,7 @@ import hu.me.iit.malus.thesis.feedback.client.FileManagementClient;
 import hu.me.iit.malus.thesis.feedback.client.NotificationClient;
 import hu.me.iit.malus.thesis.feedback.client.UserClient;
 import hu.me.iit.malus.thesis.feedback.client.dto.ActivitySaveDto;
+import hu.me.iit.malus.thesis.feedback.client.dto.ActivityTransactionDto;
 import hu.me.iit.malus.thesis.feedback.client.dto.enums.ActivityType;
 import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentCreateDto;
 import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentDetailsDto;
@@ -48,10 +49,16 @@ public class FeedbackServiceImpl implements FeedbackService {
         CourseComment savedComment = DtoConverter.courseCommentCreateDtoToCourseComment(dto);
         savedComment.setAuthorId(authorId);
         savedComment = courseCommentRepository.save(savedComment);
-        userClient.saveLastActivity(new ActivitySaveDto(ActivityType.FEEDBACK_COURSE, dto.getCourseId()));
-        boolean doSendNotification = userClient.getNotificationPreferences().get(ActivityType.FEEDBACK_COURSE);
-        if (doSendNotification) {
-            notificationClient.sendNotification();
+        ActivityTransactionDto transactionDto = userClient.saveLastActivity(new ActivitySaveDto(ActivityType.FEEDBACK_COURSE, dto.getCourseId()));
+        try {
+            boolean doSendNotification = userClient.getNotificationPreferences().get(ActivityType.FEEDBACK_COURSE);
+            if (doSendNotification) {
+                notificationClient.sendNotification();
+            }
+        } catch (RuntimeException e) {
+            // TODO mi van ha a rollback kap exceptiont
+            userClient.rollBackActivity(transactionDto);
+            throw e;
         }
         log.debug("Created course comment: {}", savedComment);
         return DtoConverter.courseCommentToCourseCommentDetailsDto(savedComment);

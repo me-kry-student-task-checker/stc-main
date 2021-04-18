@@ -156,14 +156,16 @@ public interface UserService {
      * @return the saved activity
      * @throws UserNotFoundException thrown when the user cannot be found
      */
-    ActivityDto saveLastActivity(String email, ActivitySaveDto newActivity) throws UserNotFoundException;
+    ActivityTransactionDto saveLastActivity(String email, ActivitySaveDto newActivity) throws UserNotFoundException;
 
+    // TODO docs
+    void rollBackActivity(ActivityTransactionDto dto);
 
     /**
      * Gets the global notification preferences.
      *
      * @return a map of notification preferences
      */
-    Map<Activity.ActivityType, Boolean> getNotificationPreferences();
     // TODO preferences of a user, and set preferences option
+    Map<Activity.ActivityType, Boolean> getNotificationPreferences();
 }

@@ -121,8 +121,13 @@ public class UserController {
     }
 
     @PostMapping("/saveLastActivity")
-    public @Valid ActivityDto saveLastActivity(@RequestBody @Valid ActivitySaveDto lastActivity, Principal principal) {
+    public ActivityTransactionDto saveLastActivity(@RequestBody @Valid ActivitySaveDto lastActivity, Principal principal) {
         return service.saveLastActivity(principal.getName(), lastActivity);
+    }
+
+    @PostMapping("/rollBackActivity")
+    public void rollBackActivity(@RequestBody ActivityTransactionDto dto) {
+        service.rollBackActivity(dto);
     }
 
     @GetMapping("/notificationPreferences")
