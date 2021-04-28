@@ -33,7 +33,7 @@ public class TaskController {
         return service.create(dto);
     }
 
-    @PostMapping("/edit")
+    @PutMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public @Valid BriefTaskDto editTask(@Valid @RequestBody EditTaskDto dto) {
         return service.edit(dto);
@@ -49,25 +49,19 @@ public class TaskController {
         return service.getAll(courseId);
     }
 
-    @PostMapping("/setDone/{taskId}")
+    @PatchMapping("/setDone/{taskId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public void changeTasksDoneStatus(@Min(1) @PathVariable Long taskId) throws TaskNotFoundException {
         service.changeDoneStatus(taskId);
     }
 
-    @PostMapping("/setComplete/{taskId}")
+    @PatchMapping("/setComplete/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
     public void changeTasksCompletion(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
         service.changeCompletion(taskId, principal.getName());
     }
 
-    @GetMapping("/checkHelps/{taskId}")
-    @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Set<String> checkIfHelpNeededOnTask(@Min(1) @PathVariable Long taskId) throws TaskNotFoundException {
-        return service.checkIfHelpNeeded(taskId);
-    }
-
-    @PostMapping("/toggleHelp/{taskId}")
+    @PatchMapping("/toggleHelp/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
     public void toggleHelpOnTask(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
         service.toggleHelp(taskId, principal.getName());

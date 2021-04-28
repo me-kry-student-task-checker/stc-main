@@ -114,7 +114,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public UserDto getMe(Principal principal) {
+    public @Valid UserDto getMe(Principal principal) {
         return service.getDtoFromAnyUser(service.getAnyUserByEmail(principal.getName()));
     }
 
