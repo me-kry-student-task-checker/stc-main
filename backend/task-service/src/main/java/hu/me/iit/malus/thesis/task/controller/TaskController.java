@@ -49,19 +49,19 @@ public class TaskController {
         return service.getAll(courseId);
     }
 
-    @PatchMapping("/setDone/{taskId}")
+    @PostMapping("/setDone/{taskId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public void changeTasksDoneStatus(@Min(1) @PathVariable Long taskId) throws TaskNotFoundException {
         service.changeDoneStatus(taskId);
     }
 
-    @PatchMapping("/setComplete/{taskId}")
+    @PostMapping("/setComplete/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
     public void changeTasksCompletion(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
         service.changeCompletion(taskId, principal.getName());
     }
 
-    @PatchMapping("/toggleHelp/{taskId}")
+    @PostMapping("/toggleHelp/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
     public void toggleHelpOnTask(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
         service.toggleHelp(taskId, principal.getName());
