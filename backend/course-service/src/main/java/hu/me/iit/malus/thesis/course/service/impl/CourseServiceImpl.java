@@ -12,6 +12,7 @@ import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Date;
@@ -38,6 +39,7 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public Course create(Course course, String creatorsEmail) {
         course.setCreationDate(Date.from(Instant.now()));
         Course newCourse = courseRepository.save(course);
