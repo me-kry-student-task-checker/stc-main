@@ -11,12 +11,12 @@ export default {
 		return axios.get('/api/task/get/' + taskId);
 	},
 	setDone(taskId) {
-		return axios.post('/api/task//setDone/' + taskId);
+		return axios.patch('/api/task/setDone/' + taskId);
 	},
 	setComplete(taskId) {
-		return axios.post('/api/task/setComplete/' + taskId);
+		return axios.patch('/api/task/setComplete/' + taskId);
 	},
 	setHelp(taskId) {
-		return axios.post('/api/task/toggleHelp/' + taskId);
+		return axios.patch('/api/task/toggleHelp/' + taskId);
 	}
 };
