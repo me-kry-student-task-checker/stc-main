@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.feedback.model;
 
 import com.google.common.base.Objects;
-import hu.me.iit.malus.thesis.feedback.client.dto.File;
+import hu.me.iit.malus.thesis.dto.File;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

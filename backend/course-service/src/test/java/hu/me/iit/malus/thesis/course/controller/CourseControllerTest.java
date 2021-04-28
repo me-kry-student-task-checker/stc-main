@@ -1,14 +1,14 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 import com.google.gson.Gson;
-import hu.me.iit.malus.thesis.course.client.dto.Teacher;
-import hu.me.iit.malus.thesis.course.client.dto.UserRole;
 import hu.me.iit.malus.thesis.course.controller.converters.DtoConverter;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.helper.JwtTestHelper;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.security.config.JwtAuthConfig;
 import hu.me.iit.malus.thesis.course.service.CourseService;
+import hu.me.iit.malus.thesis.dto.Teacher;
+import hu.me.iit.malus.thesis.dto.UserRole;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;

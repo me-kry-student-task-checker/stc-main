@@ -1,8 +1,8 @@
 package hu.me.iit.malus.thesis.task.model;
 
 import com.google.common.base.Objects;
-import hu.me.iit.malus.thesis.task.client.dto.File;
-import hu.me.iit.malus.thesis.task.client.dto.TaskComment;
+import hu.me.iit.malus.thesis.dto.File;
+import hu.me.iit.malus.thesis.dto.TaskComment;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

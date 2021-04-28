@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.course.repository;
 
-import hu.me.iit.malus.thesis.course.client.dto.Teacher;
 import hu.me.iit.malus.thesis.course.model.Course;
+import hu.me.iit.malus.thesis.dto.Teacher;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.Before;

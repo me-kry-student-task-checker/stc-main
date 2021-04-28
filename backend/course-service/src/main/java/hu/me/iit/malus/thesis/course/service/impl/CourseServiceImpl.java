@@ -80,7 +80,7 @@ public class CourseServiceImpl implements CourseService {
             course.setCreator(userClient.getTeacherByCreatedCourseId(courseId));
             course.setStudents(userClient.getStudentsByAssignedCourseId(courseId));
             course.setTasks(taskClient.getAllTasks(courseId));
-            course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.course.client.dto.Service.COURSE, courseId).getBody());
+            course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.COURSE, courseId));
             course.setComments(feedbackClient.getAllCourseComments(courseId));
             log.debug("Course found: {}", courseId);
             return course;

@@ -84,16 +84,20 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.passay</groupId>
-			<artifactId>passay</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        </dependency>
+        <dependency>
+            <groupId>org.passay</groupId>
+            <artifactId>passay</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>hu.me.iit.malus.thesis</groupId>
+            <artifactId>feign-client-dto-aggregator</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

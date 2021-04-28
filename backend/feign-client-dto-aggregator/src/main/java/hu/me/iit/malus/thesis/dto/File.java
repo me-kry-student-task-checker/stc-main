@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.feedback.client.dto;
+package hu.me.iit.malus.thesis.dto;
 
 import lombok.*;
 

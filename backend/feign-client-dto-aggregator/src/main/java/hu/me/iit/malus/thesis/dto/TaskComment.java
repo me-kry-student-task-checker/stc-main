@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.course.client.dto;
+package hu.me.iit.malus.thesis.dto;
 
 import lombok.*;
 
@@ -10,13 +10,12 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@EqualsAndHashCode
-public class CourseComment {
+public class TaskComment {
 
     private Long id;
     private String authorId;
     private String text;
     private Date createDate;
-    private Long courseId;
+    private Long taskId;
     private Set<File> files;
 }

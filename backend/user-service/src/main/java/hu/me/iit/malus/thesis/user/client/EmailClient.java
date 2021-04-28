@@ -1,6 +1,6 @@
 package hu.me.iit.malus.thesis.user.client;
 
-import hu.me.iit.malus.thesis.user.client.dto.Mail;
+import hu.me.iit.malus.thesis.dto.Mail;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,6 +1,6 @@
 package hu.me.iit.malus.thesis.task.client;
 
-import hu.me.iit.malus.thesis.task.client.dto.TaskComment;
+import hu.me.iit.malus.thesis.dto.TaskComment;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

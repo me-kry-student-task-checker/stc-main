@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.user.event.listener;
 
+import hu.me.iit.malus.thesis.dto.Mail;
 import hu.me.iit.malus.thesis.user.client.EmailClient;
-import hu.me.iit.malus.thesis.user.client.dto.Mail;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
 import hu.me.iit.malus.thesis.user.event.listener.config.ActivationConfig;
 import hu.me.iit.malus.thesis.user.model.User;

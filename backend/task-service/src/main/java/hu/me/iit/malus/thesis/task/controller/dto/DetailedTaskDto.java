@@ -1,8 +1,8 @@
 package hu.me.iit.malus.thesis.task.controller.dto;
 
-import hu.me.iit.malus.thesis.task.client.dto.File;
-import hu.me.iit.malus.thesis.task.client.dto.Student;
-import hu.me.iit.malus.thesis.task.client.dto.TaskComment;
+import hu.me.iit.malus.thesis.dto.File;
+import hu.me.iit.malus.thesis.dto.Student;
+import hu.me.iit.malus.thesis.dto.TaskComment;
 import hu.me.iit.malus.thesis.task.model.Task;
 import lombok.Data;
 
