@@ -1,9 +1,9 @@
 package hu.me.iit.malus.thesis.task.service.impl;
 
+import hu.me.iit.malus.thesis.dto.Student;
 import hu.me.iit.malus.thesis.task.client.FeedbackClient;
 import hu.me.iit.malus.thesis.task.client.FileManagementClient;
 import hu.me.iit.malus.thesis.task.client.UserClient;
-import hu.me.iit.malus.thesis.task.client.dto.Student;
 import hu.me.iit.malus.thesis.task.controller.dto.BriefTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
@@ -212,7 +212,7 @@ public class TaskServiceImpl implements TaskService {
         taskDto.setCompletedStudents(completed);
         taskDto.setHelpNeededStudents(helpNeeded);
         taskDto.setComments(feedbackClient.getAllTaskComments(task.getId()));
-        taskDto.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.task.client.dto.Service.TASK, task.getId()).getBody());
+        taskDto.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.TASK, task.getId()));
 
         return taskDto;
     }

@@ -1,6 +1,6 @@
 package hu.me.iit.malus.thesis.course.controller.dto;
 
-import hu.me.iit.malus.thesis.course.client.dto.Teacher;
+import hu.me.iit.malus.thesis.dto.Teacher;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

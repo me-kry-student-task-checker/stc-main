@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.course.client.dto;
+package hu.me.iit.malus.thesis.dto;
 
 import lombok.Getter;
 
@@ -14,7 +14,7 @@ public enum UserRole {
     TEACHER("ROLE_Teacher"),
     STUDENT("ROLE_Student");
 
-    private String roleString;
+    private final String roleString;
 
     UserRole(String roleString) {
         this.roleString = roleString;

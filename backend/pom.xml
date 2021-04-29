@@ -26,7 +26,8 @@
 		<module>course-service</module>
 		<module>task-service</module>
 		<module>feedback-service</module>
-    	<module>filemanagement-service</module>
+		<module>filemanagement-service</module>
 		<module>user-service</module>
+		<module>feign-client-dto-aggregator</module>
 	</modules>
 </project>

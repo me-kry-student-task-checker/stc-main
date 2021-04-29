@@ -10,7 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Default implementation of Feedback Service interface.
@@ -21,9 +24,9 @@ import java.util.*;
 @Slf4j
 public class FeedbackServiceImpl implements FeedbackService {
 
-    private CourseCommentRepository courseCommentRepository;
-    private TaskCommentRepository taskCommentRepository;
-    private FileManagementClient fileManagementClient;
+    private final CourseCommentRepository courseCommentRepository;
+    private final TaskCommentRepository taskCommentRepository;
+    private final FileManagementClient fileManagementClient;
 
     /**
      * Instantiates a new FeedbackServiceImpl
@@ -65,8 +68,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         Optional<List<CourseComment>> opt = courseCommentRepository.findAllByCourseId(courseId);
         List<CourseComment> results = opt.orElseGet(ArrayList::new);
         results.forEach(courseComment -> courseComment.setFiles(
-                fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK,
-                        courseComment.getId()).getBody()));
+                fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK,
+                        courseComment.getId())));
 
         return results;
     }
@@ -80,8 +83,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         Optional<List<TaskComment>> opt = taskCommentRepository.findAllByTaskId(taskId);
         List<TaskComment> results = opt.orElseGet(ArrayList::new);
         results.forEach(taskComment -> taskComment.setFiles(
-                fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.feedback.client.dto.Service.FEEDBACK,
-                        taskComment.getId()).getBody()));
+                fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK,
+                        taskComment.getId())));
 
         return results;
     }

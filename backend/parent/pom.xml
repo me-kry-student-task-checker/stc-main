@@ -157,6 +157,11 @@
                 <artifactId>h2</artifactId>
                 <version>${h2.version}</version>
             </dependency>
+            <dependency>
+                <groupId>hu.me.iit.malus.thesis</groupId>
+                <artifactId>feign-client-dto-aggregator</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

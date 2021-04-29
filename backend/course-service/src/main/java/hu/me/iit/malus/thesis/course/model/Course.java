@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.course.model;
 
 import com.google.common.base.Objects;
-import hu.me.iit.malus.thesis.course.client.dto.*;
+import hu.me.iit.malus.thesis.dto.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

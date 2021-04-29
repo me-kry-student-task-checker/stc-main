@@ -8,14 +8,14 @@
 
 ### Fontos parancsok
 
-1. `mvn clean package`
-    - összerakja a jar fájlokat amiket majd a konténerek futtatnak.
-    - kell az alábbiakhoz.
+1. `mvn clean install`
+   - összerakja a jar fájlokat amiket majd a konténerek futtatnak.
+   - kell az alábbiakhoz.
 
-2. `docker-compose up -d` 
-    - elindul az alkalmazás, a docker felépíti a konténereket és imageket ha még nem léteznek. 
-    - nem frissülnek a konténerek a hatására ha már léteznek, csak elindulnak. 
-    - -d => detached, nem tolja ki a konzolra az összes konténer logját.
+2. `docker-compose up -d`
+   - elindul az alkalmazás, a docker felépíti a konténereket és imageket ha még nem léteznek.
+   - nem frissülnek a konténerek a hatására ha már léteznek, csak elindulnak.
+   - -d => detached, nem tolja ki a konzolra az összes konténer logját.
     
 3. `docker-compose down` 
     - leállítja a konténereket

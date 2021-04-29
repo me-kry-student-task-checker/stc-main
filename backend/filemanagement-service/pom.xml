@@ -88,6 +88,10 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>hu.me.iit.malus.thesis</groupId>
+            <artifactId>feign-client-dto-aggregator</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

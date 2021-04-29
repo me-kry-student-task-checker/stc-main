@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.user.service.impl;
 
+import hu.me.iit.malus.thesis.dto.Mail;
 import hu.me.iit.malus.thesis.user.client.EmailClient;
-import hu.me.iit.malus.thesis.user.client.dto.Mail;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
 import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
 import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
