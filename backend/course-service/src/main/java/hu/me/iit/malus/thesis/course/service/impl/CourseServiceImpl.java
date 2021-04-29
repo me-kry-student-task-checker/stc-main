@@ -9,6 +9,7 @@ import hu.me.iit.malus.thesis.course.model.exception.ForbiddenCourseEdit;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
+import hu.me.iit.malus.thesis.dto.Teacher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,8 @@ public class CourseServiceImpl implements CourseService {
     public Course create(Course course, String creatorsEmail) {
         course.setCreationDate(Date.from(Instant.now()));
         Course newCourse = courseRepository.save(course);
-        userClient.saveCourseCreation(newCourse.getId());
+        Teacher teacher = userClient.saveCourseCreation(newCourse.getId());
+        newCourse.setCreator(teacher);
         log.debug("Created course: {}", newCourse.getId());
         return newCourse;
     }
@@ -52,16 +54,23 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Course edit(Course course, String editorsEmail) {
-        Course oldCourse = courseRepository.getOne(course.getId());
-
-        if (!oldCourse.getCreator().getEmail().equals(editorsEmail)) {
-            log.warn("Creator of this course {} is not the editor: {}!", course, editorsEmail);
+    public Course edit(Course newCourse, String editorsEmail) {
+        boolean isRelated = userClient.isRelated(newCourse.getId());
+        if (!isRelated) {
+            log.warn("Creator of this newCourse {} is not the editor: {}!", newCourse, editorsEmail);
             throw new ForbiddenCourseEdit();
         }
-
-        log.debug("Modified course: {}", course.getId());
-        return courseRepository.save(course);
+        Optional<Course> optCourse = courseRepository.findById(newCourse.getId());
+        if (optCourse.isPresent()) {
+            Course course = optCourse.get();
+            log.debug("Modified course: {} to: {}", course, newCourse);
+            course.setName(newCourse.getName());
+            course.setDescription(newCourse.getDescription());
+            return courseRepository.save(course);
+        } else {
+            log.warn("No course found with this id: {}", newCourse.getId());
+            throw new CourseNotFoundException();
+        }
     }
 
     /**

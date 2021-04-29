@@ -57,8 +57,8 @@ public class UserController {
 
     @PreAuthorize("hasRole('ROLE_Teacher')")
     @PostMapping("/saveCourseCreation")
-    public void saveCourseCreation(Principal principal, @RequestBody @Min(1) Long courseId) {
-        service.saveCourseCreation(principal.getName(), courseId);
+    public @Valid TeacherDto saveCourseCreation(Principal principal, @RequestBody @Min(1) Long courseId) {
+        return service.saveCourseCreation(principal.getName(), courseId);
     }
 
     @PreAuthorize("hasRole('ROLE_TEACHER')")

@@ -139,11 +139,11 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @Override
-    public void saveCourseCreation(String teacherEmail, Long courseId) {
+    public TeacherDto saveCourseCreation(String teacherEmail, Long courseId) {
         Teacher teacher = teacherRepository.findLockByEmail(teacherEmail).orElseThrow(UserNotFoundException::new);
         try {
             teacher.getCreatedCourseIds().add(courseId);
-            teacherRepository.save(teacher);
+            return Converter.createTeacherDtoFromTeacher(teacherRepository.save(teacher));
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }

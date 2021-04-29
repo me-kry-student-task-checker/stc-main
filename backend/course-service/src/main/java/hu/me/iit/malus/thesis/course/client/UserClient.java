@@ -22,7 +22,7 @@ public interface UserClient {
     void saveStudent(@RequestBody Student student);
 
     @PostMapping("/api/user/saveCourseCreation")
-    void saveCourseCreation(@RequestBody Long courseId);
+    Teacher saveCourseCreation(@RequestBody Long courseId);
 
     @GetMapping("/api/user/student/{email}/")
     Student getStudentByEmail(@PathVariable("email") String studentEmail);
@@ -34,7 +34,7 @@ public interface UserClient {
     Set<Student> getStudentsByAssignedCourseId(@PathVariable("courseId") Long courseId);
 
     @GetMapping("/api/user/isRelated/course/{courseId}")
-    Boolean isRelated(@PathVariable("courseId") Long courseId);
+    boolean isRelated(@PathVariable("courseId") Long courseId);
 
     @GetMapping("/api/user/related/course")
     Set<Long> getRelatedCourseIds();

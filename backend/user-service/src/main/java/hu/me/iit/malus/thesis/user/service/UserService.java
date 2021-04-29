@@ -49,7 +49,7 @@ public interface UserService {
      * @param teacherEmail the teacher email
      * @param courseId     the course id
      */
-    void saveCourseCreation(String teacherEmail, Long courseId);
+    TeacherDto saveCourseCreation(String teacherEmail, Long courseId);
 
     /**
      * Adds the id of a course to the assigned the students.
