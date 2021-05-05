@@ -21,34 +21,44 @@ import java.util.List;
 @RequestMapping("/api/feedback")
 public class FeedbackController {
 
-    private FeedbackService feedbackService;
+    private final FeedbackService service;
 
     @Autowired
-    public FeedbackController(FeedbackService feedbackService) {
-        this.feedbackService = feedbackService;
+    public FeedbackController(FeedbackService service) {
+        this.service = service;
     }
 
     @PostMapping("/createCourseComment")
     public CourseComment create(@RequestBody CourseCommentDto courseComment, Principal principal) {
         CourseComment cc = Converter.CourseCommentDtoToCourseComment(courseComment);
         cc.setAuthorId(principal.getName());
-        return feedbackService.createCourseComment(cc);
+        return service.createCourseComment(cc);
     }
 
     @PostMapping("/createTaskComment")
     public TaskComment create(@RequestBody TaskCommentDto taskComment, Principal principal) {
         TaskComment tc = Converter.TaskCommentDtoToTaskComment(taskComment);
         tc.setAuthorId(principal.getName());
-        return feedbackService.createTaskComment(tc);
+        return service.createTaskComment(tc);
     }
 
     @GetMapping("/getAllCourseComments/{courseId}")
     public List<CourseComment> getAllCourseComments(@PathVariable Long courseId) {
-        return feedbackService.getAllCourseComments(courseId);
+        return service.getAllCourseComments(courseId);
     }
 
     @GetMapping("/getAllTaskComments/{taskId}")
     public List<TaskComment> getAllTaskComments(@PathVariable Long taskId) {
-        return feedbackService.getAllTaskComments(taskId);
+        return service.getAllTaskComments(taskId);
+    }
+
+    @DeleteMapping("/removeCourseCommentsByCourseId/{courseId}")
+    public void removeCourseCommentsByCourseId(@PathVariable Long courseId) {
+        service.removeFeedbacksByCourseId(courseId);
+    }
+
+    @DeleteMapping("/removeTaskCommentsByTaskId/{taskId}")
+    public void removeTaskCommentsByTaskId(@PathVariable Long taskId) {
+        service.removeFeedbacksByTaskId(taskId);
     }
 }

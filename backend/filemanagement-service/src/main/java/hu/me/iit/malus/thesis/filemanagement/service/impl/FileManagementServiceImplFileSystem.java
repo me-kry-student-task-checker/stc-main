@@ -76,14 +76,14 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
+    public void deleteFile(Long id, Service service, String email, String userRole) throws UnsupportedOperationException, FileNotFoundException {
         FileDescription fileDescription = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
 
-        if (!fileDescription.getUploadedBy().equalsIgnoreCase(username)) {
-            log.warn("User does not have the privilege to delete file: {}", id);
+        if (!(userRole.equals("ROLE_Teacher") || fileDescription.getUploadedBy().equalsIgnoreCase(email))) {
+            log.warn("User: {} a {} does not have the privilege: to delete file {}", email, userRole, id);
             throw new UnsupportedOperationException();
         }
 

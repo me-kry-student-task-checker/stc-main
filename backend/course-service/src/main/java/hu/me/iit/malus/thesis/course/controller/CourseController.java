@@ -48,4 +48,9 @@ public class CourseController {
     public Set<CourseOverviewDto> getAll(Principal principal) {
         return DtoConverter.CourseToCourseOverviewSet(service.getAll(principal.getName()));
     }
+
+    @DeleteMapping("/delete/{courseId}")
+    public void deleteCourse(@PathVariable Long courseId) {
+        service.deleteCourse(courseId);
+    }
 }

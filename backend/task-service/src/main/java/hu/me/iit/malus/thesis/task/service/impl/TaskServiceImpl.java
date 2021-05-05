@@ -17,11 +17,9 @@ import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Default implementation of the Task Service interface
@@ -178,6 +176,17 @@ public class TaskServiceImpl implements TaskService {
             log.warn("Could not toggle help request for {} - No task found with id: {}", studentId, taskId);
             throw new TaskNotFoundException();
         }
+    }
+
+    @Override
+    @Transactional
+    public void deleteTasksByCourseId(Long courseId) {
+        List<Task> tasks = repository.deleteByCourseId(courseId);
+        tasks.forEach(task -> {
+            feedbackClient.removeTaskCommentsByTaskId(task.getId());
+            fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.TASK, task.getId()).forEach(
+                    file -> fileManagementClient.deleteFile(file.getId(), hu.me.iit.malus.thesis.dto.Service.TASK));
+        });
     }
 
     private DetailedTaskDto getDetailedTask(Task task) {

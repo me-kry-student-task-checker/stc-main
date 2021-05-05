@@ -70,4 +70,12 @@ public interface TaskService {
      * @param studentId id of the student
      */
     void toggleHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException;
+
+
+    /**
+     * Deletes tasks by course id.
+     *
+     * @param courseId the course id
+     */
+    void deleteTasksByCourseId(Long courseId);
 }

@@ -38,7 +38,7 @@ public interface FileManagementService {
      * @param id      The ID of the file
      * @param service The service that uploaded the file
      */
-    void deleteFile(Long id, Service service, String username) throws UnsupportedOperationException, FileNotFoundException;
+    void deleteFile(Long id, Service service, String email, String userRole) throws UnsupportedOperationException, FileNotFoundException;
 
     /**
      * Queries all uploaded files of a user.

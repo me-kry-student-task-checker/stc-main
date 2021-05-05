@@ -115,4 +115,17 @@ public class CourseServiceImpl implements CourseService {
         log.debug("Get all courses done, total number of courses is {}", relatedCourses.size());
         return relatedCourses;
     }
+
+    @Override
+    @Transactional
+    public void deleteCourse(Long courseId) {
+        if (courseRepository.existsById(courseId)) {
+            courseRepository.deleteById(courseId);
+            userClient.removeCourseIdFromRelatedUserLists(courseId);
+            taskClient.removeTasksByCourseId(courseId);
+            fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.COURSE, courseId).forEach(
+                    file -> fileManagementClient.deleteFile(file.getId(), hu.me.iit.malus.thesis.dto.Service.COURSE));
+            feedbackClient.removeCourseCommentsByCourseId(courseId);
+        }
+    }
 }

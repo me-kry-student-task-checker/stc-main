@@ -9,6 +9,7 @@ import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,5 +88,27 @@ public class FeedbackServiceImpl implements FeedbackService {
                         taskComment.getId())));
 
         return results;
+    }
+
+    @Override
+    @Transactional
+    public void removeFeedbacksByCourseId(Long courseId) {
+        List<CourseComment> courseComments = courseCommentRepository.deleteByCourseId(courseId);
+        courseComments.forEach(
+                courseComment -> fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId()).forEach(
+                        file -> fileManagementClient.deleteFile(file.getId(), hu.me.iit.malus.thesis.dto.Service.FEEDBACK)
+                )
+        );
+    }
+
+    @Override
+    @Transactional
+    public void removeFeedbacksByTaskId(Long taskId) {
+        List<TaskComment> taskComments = taskCommentRepository.deleteByTaskId(taskId);
+        taskComments.forEach(
+                taskComment -> fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId()).forEach(
+                        file -> fileManagementClient.deleteFile(file.getId(), hu.me.iit.malus.thesis.dto.Service.FEEDBACK)
+                )
+        );
     }
 }

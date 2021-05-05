@@ -36,8 +36,23 @@ public interface FeedbackService {
 
     /**
      * Returns all task comments filtered by their task ids
+     *
      * @param taskId the filtered task id
      * @return list of task comments
      */
     List<TaskComment> getAllTaskComments(Long taskId);
+
+    /**
+     * Deletes all feedbacks of a course.
+     *
+     * @param courseId the course dd
+     */
+    void removeFeedbacksByCourseId(Long courseId);
+
+    /**
+     * Deletes all feedbacks of a task.
+     *
+     * @param taskId the task id
+     */
+    void removeFeedbacksByTaskId(Long taskId);
 }

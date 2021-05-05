@@ -147,4 +147,11 @@ public interface UserService {
      * @return the dto
      */
     UserDto getDtoFromAnyUser(User user);
+
+    /**
+     * Removes course id from related course ids. Used in case of course deletion.
+     *
+     * @param courseId the course id
+     */
+    void removeCourseIdFromRelatedLists(Long courseId);
 }

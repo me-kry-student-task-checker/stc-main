@@ -118,4 +118,8 @@ public class UserController {
         return service.getDtoFromAnyUser(service.getAnyUserByEmail(principal.getName()));
     }
 
+    @DeleteMapping("/removeCourseIdFromRelatedUserLists/{courseId}")
+    public void removeCourseIdFromRelatedUserLists(@PathVariable Long courseId) {
+        service.removeCourseIdFromRelatedLists(courseId);
+    }
 }

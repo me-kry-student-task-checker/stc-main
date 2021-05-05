@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Part;
@@ -58,10 +59,10 @@ public class FileManagementController {
 
 
     @DeleteMapping("/delete/{id}/{service}")
-    public ResponseEntity<String> deleteFile(@PathVariable @Min(1) Long id, @PathVariable @NotNull Service service, Principal principal) {
+    public ResponseEntity<String> deleteFile(@PathVariable @Min(1) Long id, @PathVariable @NotNull Service service, Authentication authentication) {
         // TODO controller advice try catch helyett mindenhol a controllerben
         try {
-            fileManagementService.deleteFile(id, service, principal.getName());
+            fileManagementService.deleteFile(id, service, authentication.getName(), authentication.getAuthorities().stream().findFirst().get().getAuthority());
         } catch (UnsupportedOperationException e) {
             return ResponseEntity
                     .status(403)
