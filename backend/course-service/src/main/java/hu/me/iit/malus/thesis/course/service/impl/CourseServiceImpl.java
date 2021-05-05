@@ -118,7 +118,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void deleteCourse(Long courseId) {
+    public void deleteCourse(Long courseId) throws CourseNotFoundException {
         if (courseRepository.existsById(courseId)) {
             courseRepository.deleteById(courseId);
             userClient.removeCourseIdFromRelatedUserLists(courseId);
@@ -126,6 +126,8 @@ public class CourseServiceImpl implements CourseService {
             fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.COURSE, courseId).forEach(
                     file -> fileManagementClient.deleteFile(file.getId(), hu.me.iit.malus.thesis.dto.Service.COURSE));
             feedbackClient.removeCourseCommentsByCourseId(courseId);
+            return;
         }
+        throw new CourseNotFoundException();
     }
 }

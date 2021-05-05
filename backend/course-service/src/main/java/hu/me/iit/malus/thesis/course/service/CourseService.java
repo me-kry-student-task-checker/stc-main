@@ -55,6 +55,6 @@ public interface CourseService {
      *
      * @param courseId the course id
      */
-    void deleteCourse(Long courseId);
+    void deleteCourse(Long courseId) throws CourseNotFoundException;
 
 }
