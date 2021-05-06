@@ -184,8 +184,7 @@ public class TaskServiceImpl implements TaskService {
         List<Task> tasks = repository.deleteByCourseId(courseId);
         tasks.forEach(task -> {
             feedbackClient.removeTaskCommentsByTaskId(task.getId());
-            fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.TASK, task.getId()).forEach(
-                    file -> fileManagementClient.deleteFile(file.getId(), hu.me.iit.malus.thesis.dto.Service.TASK));
+            fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.TASK, task.getId());
         });
     }
 

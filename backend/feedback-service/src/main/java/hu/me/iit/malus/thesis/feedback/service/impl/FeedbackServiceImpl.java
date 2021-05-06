@@ -95,9 +95,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     public void removeFeedbacksByCourseId(Long courseId) {
         List<CourseComment> courseComments = courseCommentRepository.deleteByCourseId(courseId);
         courseComments.forEach(
-                courseComment -> fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId()).forEach(
-                        file -> fileManagementClient.deleteFile(file.getId(), hu.me.iit.malus.thesis.dto.Service.FEEDBACK)
-                )
+                courseComment -> fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId())
         );
     }
 
@@ -106,9 +104,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     public void removeFeedbacksByTaskId(Long taskId) {
         List<TaskComment> taskComments = taskCommentRepository.deleteByTaskId(taskId);
         taskComments.forEach(
-                taskComment -> fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId()).forEach(
-                        file -> fileManagementClient.deleteFile(file.getId(), hu.me.iit.malus.thesis.dto.Service.FEEDBACK)
-                )
+                taskComment -> fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId())
         );
     }
 }

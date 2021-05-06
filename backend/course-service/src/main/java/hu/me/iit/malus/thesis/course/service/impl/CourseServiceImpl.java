@@ -123,8 +123,7 @@ public class CourseServiceImpl implements CourseService {
             courseRepository.deleteById(courseId);
             userClient.removeCourseIdFromRelatedUserLists(courseId);
             taskClient.removeTasksByCourseId(courseId);
-            fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.COURSE, courseId).forEach(
-                    file -> fileManagementClient.deleteFile(file.getId(), hu.me.iit.malus.thesis.dto.Service.COURSE));
+            fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.COURSE, courseId);
             feedbackClient.removeCourseCommentsByCourseId(courseId);
             return;
         }

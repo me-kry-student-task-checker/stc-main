@@ -16,6 +16,6 @@ public interface FileManagementClient {
     @GetMapping("/api/filemanagement/download/getByTagId/{service}/{tagId}")
     Set<File> getAllFilesByTagId(@PathVariable Service service, @PathVariable Long tagId);
 
-    @DeleteMapping("/api/filemanagement/delete/{id}/{service}")
-    String deleteFile(@PathVariable Long id, @PathVariable Service service);
+    @DeleteMapping("/api/filemanagement/deleteAll/{service}/{tagId}")
+    void removeFilesByServiceAndTagId(@PathVariable Service service, @PathVariable Long tagId);
 }
