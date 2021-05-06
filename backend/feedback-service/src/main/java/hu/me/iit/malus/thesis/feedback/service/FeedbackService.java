@@ -3,6 +3,7 @@ package hu.me.iit.malus.thesis.feedback.service;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
+import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 
 import java.util.List;
 
@@ -52,7 +53,7 @@ public interface FeedbackService {
      * @param commentId the comment id
      * @throws CommentNotFoundException the comment not found exception
      */
-    void removeCourseComment(Long commentId) throws CommentNotFoundException;
+    void removeCourseComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException;
 
     /**
      * Removes a task comment.
@@ -60,7 +61,7 @@ public interface FeedbackService {
      * @param commentId the comment id
      * @throws CommentNotFoundException the comment not found exception
      */
-    void removeTaskComment(Long commentId) throws CommentNotFoundException;
+    void removeTaskComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException;
 
     /**
      * Deletes all feedbacks of a course.

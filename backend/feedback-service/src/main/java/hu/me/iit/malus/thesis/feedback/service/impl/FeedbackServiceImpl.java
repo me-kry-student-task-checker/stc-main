@@ -7,6 +7,7 @@ import hu.me.iit.malus.thesis.feedback.repository.CourseCommentRepository;
 import hu.me.iit.malus.thesis.feedback.repository.TaskCommentRepository;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
 import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
+import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,16 +94,22 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     @Transactional
-    public void removeCourseComment(Long commentId) throws CommentNotFoundException {
+    public void removeCourseComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
         CourseComment courseComment = courseCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        if (!courseComment.getAuthorId().equals(authorId)) {
+            throw new ForbiddenCommentEditException();
+        }
         courseCommentRepository.delete(courseComment);
         fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId());
     }
 
     @Override
     @Transactional
-    public void removeTaskComment(Long commentId) throws CommentNotFoundException {
+    public void removeTaskComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
         TaskComment taskComment = taskCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        if (!taskComment.getAuthorId().equals(authorId)) {
+            throw new ForbiddenCommentEditException();
+        }
         taskCommentRepository.delete(taskComment);
         fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId());
     }

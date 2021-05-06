@@ -50,6 +50,7 @@ public class CourseController {
     }
 
     @DeleteMapping("/delete/{courseId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public void deleteCourse(@PathVariable Long courseId) {
         service.deleteCourse(courseId);
     }

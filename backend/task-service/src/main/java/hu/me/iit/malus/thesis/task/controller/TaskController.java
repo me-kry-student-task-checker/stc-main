@@ -68,11 +68,13 @@ public class TaskController {
     }
 
     @DeleteMapping("/delete/{taskId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public void removeTask(@PathVariable Long taskId) throws TaskNotFoundException {
         service.deleteTask(taskId);
     }
 
     @DeleteMapping("/deleteTasksByCourseId/{courseId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public void removeTasksByCourseId(@PathVariable Long courseId) {
         service.deleteTasksByCourseId(courseId);
     }

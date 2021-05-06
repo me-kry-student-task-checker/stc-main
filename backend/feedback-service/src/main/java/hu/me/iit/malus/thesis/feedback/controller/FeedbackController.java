@@ -7,7 +7,10 @@ import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
 import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
+import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -54,21 +57,23 @@ public class FeedbackController {
     }
 
     @DeleteMapping("/delete/course/{commentId}")
-    public void deleteCourseComment(@PathVariable Long commentId) throws CommentNotFoundException {
-        service.removeCourseComment(commentId);
+    public void deleteCourseComment(@PathVariable Long commentId, Authentication authentication) throws CommentNotFoundException, ForbiddenCommentEditException {
+        service.removeCourseComment(commentId, authentication.getName());
     }
 
     @DeleteMapping("/delete/task/{commentId}")
-    public void deleteTaskComment(@PathVariable Long commentId) throws CommentNotFoundException {
-        service.removeTaskComment(commentId);
+    public void deleteTaskComment(@PathVariable Long commentId, Authentication authentication) throws CommentNotFoundException, ForbiddenCommentEditException {
+        service.removeTaskComment(commentId, authentication.getName());
     }
 
     @DeleteMapping("/removeCourseCommentsByCourseId/{courseId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public void removeCourseCommentsByCourseId(@PathVariable Long courseId) {
         service.removeFeedbacksByCourseId(courseId);
     }
 
     @DeleteMapping("/removeTaskCommentsByTaskId/{taskId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public void removeTaskCommentsByTaskId(@PathVariable Long taskId) {
         service.removeFeedbacksByTaskId(taskId);
     }

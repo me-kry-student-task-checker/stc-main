@@ -119,6 +119,7 @@ public class UserController {
     }
 
     @DeleteMapping("/removeCourseIdFromRelatedUserLists/{courseId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
     public void removeCourseIdFromRelatedUserLists(@PathVariable Long courseId) {
         service.removeCourseIdFromRelatedLists(courseId);
     }

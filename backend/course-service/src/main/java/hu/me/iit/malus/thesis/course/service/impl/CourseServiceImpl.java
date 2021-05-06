@@ -119,6 +119,11 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public void deleteCourse(Long courseId) throws CourseNotFoundException {
+        boolean isRelated = userClient.isRelated(courseId);
+        if (!isRelated) {
+            log.warn("Only the creator can delete a course!");
+            throw new ForbiddenCourseEdit();
+        }
         if (courseRepository.existsById(courseId)) {
             courseRepository.deleteById(courseId);
             userClient.removeCourseIdFromRelatedUserLists(courseId);
