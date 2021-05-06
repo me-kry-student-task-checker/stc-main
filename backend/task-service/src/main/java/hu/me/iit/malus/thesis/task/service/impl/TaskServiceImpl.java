@@ -180,12 +180,17 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    public void deleteTask(Long taskId) throws TaskNotFoundException {
+        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        repository.delete(task);
+        removeCommentsAndFiles(task.getId());
+    }
+
+    @Override
+    @Transactional
     public void deleteTasksByCourseId(Long courseId) {
         List<Task> tasks = repository.deleteByCourseId(courseId);
-        tasks.forEach(task -> {
-            feedbackClient.removeTaskCommentsByTaskId(task.getId());
-            fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.TASK, task.getId());
-        });
+        tasks.forEach(task -> removeCommentsAndFiles(task.getId()));
     }
 
     private DetailedTaskDto getDetailedTask(Task task) {
@@ -206,5 +211,10 @@ public class TaskServiceImpl implements TaskService {
         taskDto.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.TASK, task.getId()));
 
         return taskDto;
+    }
+
+    private void removeCommentsAndFiles(Long taskId) {
+        feedbackClient.removeTaskCommentsByTaskId(taskId);
+        fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.TASK, taskId);
     }
 }

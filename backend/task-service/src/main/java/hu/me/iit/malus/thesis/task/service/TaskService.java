@@ -73,6 +73,14 @@ public interface TaskService {
 
 
     /**
+     * Deletes a task.
+     *
+     * @param taskId the task id
+     * @throws TaskNotFoundException the task not found exception
+     */
+    void deleteTask(Long taskId) throws TaskNotFoundException;
+
+    /**
      * Deletes tasks by course id.
      *
      * @param courseId the course id

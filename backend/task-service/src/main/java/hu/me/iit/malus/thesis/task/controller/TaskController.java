@@ -67,6 +67,11 @@ public class TaskController {
         service.toggleHelp(taskId, principal.getName());
     }
 
+    @DeleteMapping("/delete/{taskId}")
+    public void removeTask(@PathVariable Long taskId) throws TaskNotFoundException {
+        service.deleteTask(taskId);
+    }
+
     @DeleteMapping("/deleteTasksByCourseId/{courseId}")
     public void removeTasksByCourseId(@PathVariable Long courseId) {
         service.deleteTasksByCourseId(courseId);

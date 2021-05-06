@@ -6,6 +6,7 @@ import hu.me.iit.malus.thesis.feedback.controller.dto.TaskCommentDto;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
+import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +51,16 @@ public class FeedbackController {
     @GetMapping("/getAllTaskComments/{taskId}")
     public List<TaskComment> getAllTaskComments(@PathVariable Long taskId) {
         return service.getAllTaskComments(taskId);
+    }
+
+    @DeleteMapping("/delete/course/{commentId}")
+    public void deleteCourseComment(@PathVariable Long commentId) throws CommentNotFoundException {
+        service.removeCourseComment(commentId);
+    }
+
+    @DeleteMapping("/delete/task/{commentId}")
+    public void deleteTaskComment(@PathVariable Long commentId) throws CommentNotFoundException {
+        service.removeTaskComment(commentId);
     }
 
     @DeleteMapping("/removeCourseCommentsByCourseId/{courseId}")

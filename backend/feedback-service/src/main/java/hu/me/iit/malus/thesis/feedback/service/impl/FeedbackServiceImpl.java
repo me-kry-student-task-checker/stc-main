@@ -6,6 +6,7 @@ import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.repository.CourseCommentRepository;
 import hu.me.iit.malus.thesis.feedback.repository.TaskCommentRepository;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
+import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -88,6 +89,22 @@ public class FeedbackServiceImpl implements FeedbackService {
                         taskComment.getId())));
 
         return results;
+    }
+
+    @Override
+    @Transactional
+    public void removeCourseComment(Long commentId) throws CommentNotFoundException {
+        CourseComment courseComment = courseCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        courseCommentRepository.delete(courseComment);
+        fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId());
+    }
+
+    @Override
+    @Transactional
+    public void removeTaskComment(Long commentId) throws CommentNotFoundException {
+        TaskComment taskComment = taskCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        taskCommentRepository.delete(taskComment);
+        fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId());
     }
 
     @Override
