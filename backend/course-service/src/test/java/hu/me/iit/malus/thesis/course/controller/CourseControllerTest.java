@@ -11,6 +11,7 @@ import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.security.config.JwtAuthConfig;
 import hu.me.iit.malus.thesis.course.service.CourseService;
+import hu.me.iit.malus.thesis.course.service.converters.Converter;
 import hu.me.iit.malus.thesis.course.service.impl.CourseServiceImpl;
 import hu.me.iit.malus.thesis.dto.Teacher;
 import hu.me.iit.malus.thesis.dto.UserRole;
@@ -45,9 +46,23 @@ public class CourseControllerTest {
     @MockBean
     private CourseService courseService;
 
-    @Autowired private MockMvc mvc;
-    @Autowired private Gson gson;
-    @Autowired private JwtTestHelper jwtHelper;
+    private final String courseOwnersEmail = "teacher@test.test";
+    @Autowired
+    private MockMvc mvc;
+    @Autowired
+    private Gson gson;
+    @Autowired
+    private JwtTestHelper jwtHelper;
+
+    private Course getCourseForTeacher() {
+        Teacher courseOwner = new Teacher(
+                courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
+        return new Course("Meant To Be Created", "Creation tester", courseOwner);
+    }
+
+    private String getTeacherJWT() {
+        return jwtHelper.createValidJWT(courseOwnersEmail, UserRole.TEACHER.getRoleString());
+    }
 
     @Test
     public void whenCreateCourse_WithValidToken_returnOkAndTheSameCourse()
@@ -61,7 +76,7 @@ public class CourseControllerTest {
                 .build();
 
         // When
-        when(courseService.create(any(), any())).thenReturn(course);
+        when(courseService.create(any(), any())).thenReturn(Converter.createCourseOverviewDtoFromCourse(course));
         MvcResult response = mvc.perform(post("/api/course/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(gson.toJson(courseDto))
@@ -77,23 +92,11 @@ public class CourseControllerTest {
 
     }
 
-    private final String courseOwnersEmail = "teacher@test.test";
-
-    private Course getCourseForTeacher() {
-        Teacher courseOwner = new Teacher(
-                courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
-        return new Course("Meant To Be Created", "Creation tester", courseOwner);
-    }
-
-    private String getTeacherJWT() {
-        return jwtHelper.createValidJWT(courseOwnersEmail, UserRole.TEACHER.getRoleString());
-    }
-
     @TestConfiguration
     static class CourseControllerTestContextConfiguration {
+
         // Default config cannot be instantiated as properties (from config-service) are missing.
         // We defined those properties as test properties, so this bean can be created now.
-
         @Bean
         public JwtAuthConfig jwtAuthConfig() {
             return new JwtAuthConfig();
@@ -114,6 +117,7 @@ public class CourseControllerTest {
         ) {
             return new CourseServiceImpl(courseRepository, taskClient, feedbackClient, userClient, fileManagementClient);
         }
+
     }
 
     @Test

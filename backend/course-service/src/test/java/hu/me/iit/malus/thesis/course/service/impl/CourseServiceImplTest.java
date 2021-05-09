@@ -4,8 +4,11 @@ import hu.me.iit.malus.thesis.course.client.FeedbackClient;
 import hu.me.iit.malus.thesis.course.client.FileManagementClient;
 import hu.me.iit.malus.thesis.course.client.TaskClient;
 import hu.me.iit.malus.thesis.course.client.UserClient;
+import hu.me.iit.malus.thesis.course.controller.dto.CourseCreateDto;
+import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
+import hu.me.iit.malus.thesis.course.service.converters.Converter;
 import hu.me.iit.malus.thesis.dto.Teacher;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
@@ -47,17 +50,21 @@ public class CourseServiceImplTest {
         String courseOwnersEmail = "teacher@test.teacher";
         Teacher courseOwner = new Teacher(
                 courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
+        CourseCreateDto courseCreateDto = new CourseCreateDto();
+        courseCreateDto.setName("Meant To Be Created");
+        courseCreateDto.setDescription("Creation tester");
         Course course = new Course("Meant To Be Created", "Creation tester", courseOwner);
 
-        Mockito.when(courseRepository.save(course)).thenReturn(course);
+        Mockito.when(courseRepository.save(Converter.createCourseFromCourseCreateDto(courseCreateDto))).thenReturn(course);
         Mockito.when(userClient.getTeacherByEmail(courseOwnersEmail)).thenReturn(courseOwner);
 
         // When
-        Course createdCourse = courseService.create(course, courseOwnersEmail);
+        CourseOverviewDto createdCourse = courseService.create(courseCreateDto, courseOwnersEmail);
 
         // Then
         Mockito.verify(courseRepository, Mockito.times(1)).save(course);
         Mockito.verify(userClient, Mockito.times(1)).saveCourseCreation(null);
-        Assertions.assertThat(createdCourse).isEqualTo(course);
+        Assertions.assertThat(createdCourse.getName()).isEqualTo(course.getName());
+        Assertions.assertThat(createdCourse.getDescription()).isEqualTo(course.getDescription());
     }
 }
