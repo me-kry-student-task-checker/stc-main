@@ -1,17 +1,16 @@
 package hu.me.iit.malus.thesis.course.service.impl;
 
-import hu.me.iit.malus.thesis.course.client.*;
-import hu.me.iit.malus.thesis.course.client.dto.Mail;
+import hu.me.iit.malus.thesis.course.client.FeedbackClient;
+import hu.me.iit.malus.thesis.course.client.FileManagementClient;
+import hu.me.iit.malus.thesis.course.client.TaskClient;
+import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.model.Course;
-import hu.me.iit.malus.thesis.course.model.Invitation;
 import hu.me.iit.malus.thesis.course.model.exception.ForbiddenCourseEdit;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
-import hu.me.iit.malus.thesis.course.repository.InvitationRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

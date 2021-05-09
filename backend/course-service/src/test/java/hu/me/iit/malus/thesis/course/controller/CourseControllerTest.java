@@ -1,12 +1,17 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 import com.google.gson.Gson;
-import hu.me.iit.malus.thesis.course.controller.converters.DtoConverter;
+import hu.me.iit.malus.thesis.course.client.FeedbackClient;
+import hu.me.iit.malus.thesis.course.client.FileManagementClient;
+import hu.me.iit.malus.thesis.course.client.TaskClient;
+import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.helper.JwtTestHelper;
 import hu.me.iit.malus.thesis.course.model.Course;
+import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.security.config.JwtAuthConfig;
 import hu.me.iit.malus.thesis.course.service.CourseService;
+import hu.me.iit.malus.thesis.course.service.impl.CourseServiceImpl;
 import hu.me.iit.malus.thesis.dto.Teacher;
 import hu.me.iit.malus.thesis.dto.UserRole;
 import org.assertj.core.api.Assertions;
@@ -25,7 +30,8 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 
-import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,52 +42,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(CourseController.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 public class CourseControllerTest {
-    @TestConfiguration
-    static class CourseControllerTestContextConfiguration {
-        // Default config cannot be instantiated as properties (from config-service) are missing.
-        // We defined those properties as test properties, so this bean can be created now.
-        @Bean
-        public JwtAuthConfig jwtAuthConfig() {
-            return new JwtAuthConfig();
-        }
-
-        @Bean
-        public JwtTestHelper jwtTestHelper() {
-            return new JwtTestHelper();
-        }
-
-        @Bean
-        CourseService courseService(
-                 CourseRepository courseRepository,
-                 InvitationRepository invitationRepository,
-                 TaskClient taskClient,
-                 FeedbackClient feedbackClient,
-                 UserClient userClient,
-                 FileManagementClient fileManagementClient,
-                 EmailClient emailClient,
-                 InvitationConfig invitationConfig
-        ) { return new CourseServiceImpl(courseRepository, invitationRepository, taskClient, feedbackClient,userClient, fileManagementClient, emailClient, invitationConfig);
-        }
-    }
+    @MockBean
+    private CourseService courseService;
 
     @Autowired private MockMvc mvc;
     @Autowired private Gson gson;
     @Autowired private JwtTestHelper jwtHelper;
-    @Autowired private CourseRepository courseRepository;
-
- //   @MockBean private CourseService courseService;
-
-    private final String courseOwnersEmail = "teacher@test.test";
-
-    private Course getCourseForTeacher() {
-        Teacher courseOwner = new Teacher(
-                courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
-        return new Course("Meant To Be Created", "Creation tester", courseOwner);
-    }
-
-    private String getTeacherJWT(){
-        return jwtHelper.createValidJWT(courseOwnersEmail, UserRole.TEACHER.getRoleString());
-    }
 
     @Test
     public void whenCreateCourse_WithValidToken_returnOkAndTheSameCourse()
@@ -95,6 +61,7 @@ public class CourseControllerTest {
                 .build();
 
         // When
+        when(courseService.create(any(), any())).thenReturn(course);
         MvcResult response = mvc.perform(post("/api/course/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(gson.toJson(courseDto))
@@ -105,12 +72,48 @@ public class CourseControllerTest {
 
         // Then
         Assertions.assertThat(course).isEqualTo(responseCourse);
-        Optional<Course> byId = courseRepository.findById(course.getId());
-        Course course1 = byId.get();
-        assertThat(course1, notNullValue());
         // assertThat(course1.getId(), greaterThan(0));
 
 
+    }
+
+    private final String courseOwnersEmail = "teacher@test.test";
+
+    private Course getCourseForTeacher() {
+        Teacher courseOwner = new Teacher(
+                courseOwnersEmail, "Teacher", "Test", new ArrayList<>(), true);
+        return new Course("Meant To Be Created", "Creation tester", courseOwner);
+    }
+
+    private String getTeacherJWT() {
+        return jwtHelper.createValidJWT(courseOwnersEmail, UserRole.TEACHER.getRoleString());
+    }
+
+    @TestConfiguration
+    static class CourseControllerTestContextConfiguration {
+        // Default config cannot be instantiated as properties (from config-service) are missing.
+        // We defined those properties as test properties, so this bean can be created now.
+
+        @Bean
+        public JwtAuthConfig jwtAuthConfig() {
+            return new JwtAuthConfig();
+        }
+
+        @Bean
+        public JwtTestHelper jwtTestHelper() {
+            return new JwtTestHelper();
+        }
+
+        @Bean
+        CourseService courseService(
+                CourseRepository courseRepository,
+                TaskClient taskClient,
+                FeedbackClient feedbackClient,
+                UserClient userClient,
+                FileManagementClient fileManagementClient
+        ) {
+            return new CourseServiceImpl(courseRepository, taskClient, feedbackClient, userClient, fileManagementClient);
+        }
     }
 
     @Test
@@ -120,7 +123,7 @@ public class CourseControllerTest {
         Course course = getCourseForTeacher();
 
 
-      //  given(courseService.create(course, courseOwnersEmail)).willReturn(course);
+        //  given(courseService.create(course, courseOwnersEmail)).willReturn(course);
 
         // When
         mvc.perform(post("/api/course/create")
