@@ -6,7 +6,7 @@ import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
-import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,7 +78,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
+    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String username) throws ForbiddenFileDeleteException, FileNotFoundException {
         FileDescription fileToBeRemoved = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
@@ -86,7 +86,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
 
         if (!fileToBeRemoved.getUploadedBy().equalsIgnoreCase(username)) {
             log.warn("User does not have the privilege to delete file: {}", id);
-            throw new UnsupportedOperationException();
+            throw new ForbiddenFileDeleteException();
         }
 
         BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileToBeRemoved.getName());

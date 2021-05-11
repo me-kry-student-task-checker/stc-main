@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
-import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEdit;
+import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,8 +19,8 @@ public class CourseControllerAdvice {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(MSG, e.getMessage()));
     }
 
-    @ExceptionHandler(ForbiddenCourseEdit.class)
-    public ResponseEntity<Map<String, String>> handle(ForbiddenCourseEdit e) {
+    @ExceptionHandler(ForbiddenCourseEditException.class)
+    public ResponseEntity<Map<String, String>> handle(ForbiddenCourseEditException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(MSG, e.getMessage()));
     }
 }

@@ -6,11 +6,11 @@ package hu.me.iit.malus.thesis.course.service.exception;
  * @author Javorek Dénes
  * @author Attila Szőke
  */
-public class ForbiddenCourseEdit extends Exception {
+public class ForbiddenCourseEditException extends Exception {
 
     private static final String ERROR_MSG = "Course edit is not permitted for this user!";
 
-    public ForbiddenCourseEdit() {
+    public ForbiddenCourseEditException() {
         super(ERROR_MSG);
     }
 }

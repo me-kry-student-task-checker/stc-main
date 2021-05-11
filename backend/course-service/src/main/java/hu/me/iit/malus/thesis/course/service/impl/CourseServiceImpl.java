@@ -8,7 +8,7 @@ import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
-import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEdit;
+import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,12 +52,12 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public Course edit(Course course, String editorsEmail) throws ForbiddenCourseEdit {
+    public Course edit(Course course, String editorsEmail) throws ForbiddenCourseEditException {
         Course oldCourse = courseRepository.getOne(course.getId());
 
         if (!oldCourse.getCreator().getEmail().equals(editorsEmail)) {
             log.warn("Creator of this course {} is not the editor: {}!", course, editorsEmail);
-            throw new ForbiddenCourseEdit();
+            throw new ForbiddenCourseEditException();
         }
 
         log.debug("Modified course: {}", course.getId());

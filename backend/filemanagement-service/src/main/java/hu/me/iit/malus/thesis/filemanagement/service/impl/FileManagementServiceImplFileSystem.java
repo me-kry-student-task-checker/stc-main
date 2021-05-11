@@ -5,7 +5,7 @@ import hu.me.iit.malus.thesis.filemanagement.model.Service;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
-import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -76,7 +76,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
+    public void deleteFile(Long id, Service service, String username) throws ForbiddenFileDeleteException, FileNotFoundException {
         FileDescription fileDescription = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
@@ -84,7 +84,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
         if (!fileDescription.getUploadedBy().equalsIgnoreCase(username)) {
             log.warn("User does not have the privilege to delete file: {}", id);
-            throw new UnsupportedOperationException();
+            throw new ForbiddenFileDeleteException();
         }
 
         String uploadDir = env.getProperty(FILE_DIR_PROP);
