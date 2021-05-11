@@ -1,9 +1,7 @@
 package hu.me.iit.malus.thesis.filemanagement.controller;
 
 
-import hu.me.iit.malus.thesis.filemanagement.controller.converters.Converter;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
-import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
 import hu.me.iit.malus.thesis.filemanagement.model.Service;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
@@ -49,8 +47,8 @@ public class FileManagementController {
     ) throws IOException {
         Set<FileDescriptorDto> result = new HashSet<>();
         for (Part f : file) {
-            FileDescription fd = fileManagementService.uploadFile(f, service, principal.getName(), tagId);
-            result.add(Converter.FileDescriptionToFile(fd));
+            FileDescriptorDto fd = fileManagementService.uploadFile(f, service, principal.getName(), tagId);
+            result.add(fd);
         }
         return ResponseEntity.ok(result);
     }
@@ -65,19 +63,14 @@ public class FileManagementController {
 
     @GetMapping("/download/getByUser")
     public ResponseEntity<Set<@Valid FileDescriptorDto>> getFilesByUser(Principal principal) {
-        Set<FileDescriptorDto> fileDescriptorDtoList = new HashSet<>();
-        fileManagementService.getAllFilesByUser(principal.getName()).forEach(fd -> fileDescriptorDtoList.add(Converter.FileDescriptionToFile(fd)));
-        return ResponseEntity.ok(fileDescriptorDtoList);
+        return ResponseEntity.ok(fileManagementService.getAllFilesByUser(principal.getName()));
     }
 
     @GetMapping("/download/getByTagId/{service}/{tagId}")
     public ResponseEntity<Set<@Valid FileDescriptorDto>> getFilesByTagIdAndService(
             @PathVariable @NotNull Service service,
             @PathVariable @Min(1) Long tagId) {
-        Set<FileDescriptorDto> results = new HashSet<>();
-        fileManagementService.getAllFilesByServiceAndTagId(tagId, service).forEach(
-                fileDescription -> results.add(Converter.FileDescriptionToFile(fileDescription)));
-        return ResponseEntity.ok(results);
+        return ResponseEntity.ok(fileManagementService.getAllFilesByServiceAndTagId(tagId, service));
     }
 
     @GetMapping("/download/link/{name}")

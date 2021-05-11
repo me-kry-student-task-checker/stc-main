@@ -1,9 +1,11 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
-import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
+import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
+import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 import hu.me.iit.malus.thesis.filemanagement.model.Service;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
+import hu.me.iit.malus.thesis.filemanagement.service.converters.Converter;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
 import lombok.RequiredArgsConstructor;
@@ -38,25 +40,27 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public FileDescription uploadFile(Part file, Service service, String user, Long tagId) throws IOException {
+    public FileDescriptorDto uploadFile(Part file, Service service, String user, Long tagId) throws IOException {
         String fileName = user.hashCode() + "_" + service.hashCode() + "_" + tagId.hashCode() + "_" + file.getSubmittedFileName();
-        FileDescription fileDescription = new FileDescription();
-        fileDescription.setUploadDate(new Date());
-        fileDescription.setName(fileName);
-        fileDescription.setDownloadLink("/api/filemanagement/download/link/" + fileName);
-        fileDescription.setSize(file.getSize());
-        fileDescription.setContentType(file.getContentType());
-        fileDescription.setUploadedBy(user);
-        fileDescription.setServices(new HashSet<>());
-        fileDescription.getServices().add(service);
-        fileDescription.setTagId(tagId);
+        FileDescriptor fileDescriptor = new FileDescriptor();
+        fileDescriptor.setUploadDate(new Date());
+        fileDescriptor.setName(fileName);
+        fileDescriptor.setDownloadLink("/api/filemanagement/download/link/" + fileName);
+        fileDescriptor.setSize(file.getSize());
+        fileDescriptor.setContentType(file.getContentType());
+        fileDescriptor.setUploadedBy(user);
+        fileDescriptor.setServices(new HashSet<>());
+        fileDescriptor.getServices().add(service);
+        fileDescriptor.setTagId(tagId);
 
-        for (FileDescription fd : fileDescriptionRepository.findAll()) {
-            if (fd.getName().equalsIgnoreCase(fileDescription.getName())) {
-                fileDescription.setId(fd.getId());
-                fileDescription.getServices().addAll(fd.getServices());
+        for (FileDescriptor fd : fileDescriptionRepository.findAll()) {
+            if (fd.getName().equalsIgnoreCase(fileDescriptor.getName())) {
+                fileDescriptor.setId(fd.getId());
+                fileDescriptor.getServices().addAll(fd.getServices());
                 break;
             }
         }
@@ -66,10 +70,10 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
         FileUtils.copyInputStreamToFile(file.getInputStream(), targetFile);
         log.debug("File successfully uploaded: {}", file.getSubmittedFileName());
 
-        fileDescriptionRepository.save(fileDescription);
-        log.debug("File description successfully saved to database: {}", fileDescription);
+        fileDescriptionRepository.save(fileDescriptor);
+        log.debug("File description successfully saved to database: {}", fileDescriptor);
 
-        return fileDescription;
+        return Converter.createFileDescriptorDtoFromFileDescriptor(fileDescriptor);
     }
 
     /**
@@ -77,26 +81,26 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      */
     @Override
     public void deleteFile(Long id, Service service, String username) throws ForbiddenFileDeleteException, FileNotFoundException {
-        FileDescription fileDescription = fileDescriptionRepository.findById(id).orElseThrow(() -> {
+        FileDescriptor fileDescriptor = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
 
-        if (!fileDescription.getUploadedBy().equalsIgnoreCase(username)) {
+        if (!fileDescriptor.getUploadedBy().equalsIgnoreCase(username)) {
             log.warn("User does not have the privilege to delete file: {}", id);
             throw new ForbiddenFileDeleteException();
         }
 
         String uploadDir = env.getProperty(FILE_DIR_PROP);
-        File targetFile = new File(uploadDir + File.separator + fileDescription.getName());
+        File targetFile = new File(uploadDir + File.separator + fileDescriptor.getName());
 
         boolean deleteSuccessful = targetFile.delete();
         if (deleteSuccessful) {
-            fileDescription.getServices().remove(service);
-            if (fileDescription.getServices().isEmpty()) {
-                fileDescriptionRepository.delete(fileDescription);
+            fileDescriptor.getServices().remove(service);
+            if (fileDescriptor.getServices().isEmpty()) {
+                fileDescriptionRepository.delete(fileDescriptor);
             } else {
-                fileDescriptionRepository.save(fileDescription);
+                fileDescriptionRepository.save(fileDescriptor);
             }
             log.debug("File successfully deleted: {}, {}", id, service);
         } else {
@@ -108,29 +112,33 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public Set<FileDescription> getAllFilesByUser(String userEmail) {
-        List<FileDescription> fileDescriptionList = fileDescriptionRepository.findAllByUploadedBy(userEmail);
-        Set<FileDescription> results = new HashSet<>(fileDescriptionList);
+    public Set<FileDescriptorDto> getAllFilesByUser(String userEmail) {
+        List<FileDescriptor> fileDescriptorList = fileDescriptionRepository.findAllByUploadedBy(userEmail);
+        Set<FileDescriptor> results = new HashSet<>(fileDescriptorList);
         log.debug("Files found by user {}: {}", userEmail, results);
-        return results;
+        return Converter.createFileDescriptorDtosFromFileDescriptors(results);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public Set<FileDescription> getAllFilesByServiceAndTagId(Long tagId, Service service) {
-        List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByTagId(tagId);
-        Set<FileDescription> results = new HashSet<>();
-        for (FileDescription fd : fileDescriptions) {
+    public Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, Service service) {
+        List<FileDescriptor> fileDescriptors = fileDescriptionRepository.findAllByTagId(tagId);
+        Set<FileDescriptor> results = new HashSet<>();
+        for (FileDescriptor fd : fileDescriptors) {
             if (fd.getServices().contains(service)) {
                 results.add(fd);
             }
         }
         log.debug("Files found by file service {} and tagId {}: {}", service, tagId, results);
-        return results;
+        return Converter.createFileDescriptorDtosFromFileDescriptors(results);
     }
 
     /**

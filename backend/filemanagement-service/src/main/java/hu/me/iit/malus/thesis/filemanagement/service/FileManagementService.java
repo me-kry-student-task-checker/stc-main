@@ -1,6 +1,6 @@
 package hu.me.iit.malus.thesis.filemanagement.service;
 
-import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
+import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.Service;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
@@ -29,7 +29,7 @@ public interface FileManagementService {
      * @return The object that represents the file which was uploaded and saved to database.
      * @throws IOException thrown when the file saving fails
      */
-    FileDescription uploadFile(Part file, Service service, String user, Long tagId) throws IOException;
+    FileDescriptorDto uploadFile(Part file, Service service, String user, Long tagId) throws IOException;
 
     /**
      * Deletes a file from the storage. If the file is uploaded by multiple services, than it just removes the entry from the services field.
@@ -46,7 +46,7 @@ public interface FileManagementService {
      * @param userEmail The parameter that filters the files
      * @return If it founds by the parameter than returns the value, else return empty Set
      */
-    Set<FileDescription> getAllFilesByUser(String userEmail);
+    Set<FileDescriptorDto> getAllFilesByUser(String userEmail);
 
     /**
      * Queries all files based on the Id and the Service it belongs to.
@@ -55,7 +55,7 @@ public interface FileManagementService {
      * @param service - The service which sent the file in
      * @return Filtered Set of files based on the given parameters
      */
-    Set<FileDescription> getAllFilesByServiceAndTagId(Long tagId, Service service);
+    Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, Service service);
 
     /**
      * Returns a file;
