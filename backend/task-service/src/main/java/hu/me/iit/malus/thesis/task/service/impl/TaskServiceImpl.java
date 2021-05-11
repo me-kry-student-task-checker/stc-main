@@ -67,7 +67,7 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public DetailedTaskDto get(Long taskId) {
+    public DetailedTaskDto get(Long taskId) throws TaskNotFoundException {
         Optional<Task> optTask = repository.findById(taskId);
         if (optTask.isPresent()) {
             DetailedTaskDto taskDto = getDetailedTask(optTask.get());
@@ -170,7 +170,7 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public void toggleHelp(Long taskId, String studentId) throws StudentIdNotFoundException {
+    public void toggleHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
         Optional<Task> optTask = repository.findById(taskId);
         if (optTask.isPresent()) {
             Task task = optTask.get();
