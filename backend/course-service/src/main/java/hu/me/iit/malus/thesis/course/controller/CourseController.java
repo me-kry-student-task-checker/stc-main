@@ -7,6 +7,7 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,7 @@ import java.util.Set;
 
 /**
  * Controller endpoint of this service
+ *
  * @author Javorek Dénes
  * @author Attila Szőke
  */
@@ -29,23 +31,23 @@ public class CourseController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public CourseOverviewDto createCourse(@Valid @RequestBody CourseCreateDto dto, Principal principal) {
-        return service.create(dto, principal.getName());
+    public ResponseEntity<CourseOverviewDto> createCourse(@Valid @RequestBody CourseCreateDto dto, Principal principal) {
+        return ResponseEntity.ok(service.create(dto, principal.getName()));
     }
 
     @PostMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public CourseOverviewDto editCourse(@Valid @RequestBody CourseModificationDto dto, Principal principal) {
-        return service.edit(dto, principal.getName());
+    public ResponseEntity<CourseOverviewDto> editCourse(@Valid @RequestBody CourseModificationDto dto, Principal principal) {
+        return ResponseEntity.ok(service.edit(dto, principal.getName()));
     }
 
     @GetMapping("/get/{courseId}")
-    public CourseFullDetailsDto get(@PathVariable @Min(1) Long courseId, Principal principal) {
-        return service.get(courseId, principal.getName());
+    public ResponseEntity<CourseFullDetailsDto> get(@PathVariable @Min(1) Long courseId, Principal principal) {
+        return ResponseEntity.ok(service.get(courseId, principal.getName()));
     }
 
     @GetMapping("/getAll")
-    public Set<CourseOverviewDto> getAll(Principal principal) {
-        return service.getAll(principal.getName());
+    public ResponseEntity<Set<CourseOverviewDto>> getAll(Principal principal) {
+        return ResponseEntity.ok(service.getAll(principal.getName()));
     }
 }
