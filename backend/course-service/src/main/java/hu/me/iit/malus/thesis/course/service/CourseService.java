@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.course.service;
 
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
+import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEdit;
 
 import java.util.Set;
 
@@ -26,11 +27,11 @@ public interface CourseService {
     /**
      * Saves an existing course with new parameters
      *
-     * @param course the modified course which will be saved
+     * @param course       the modified course which will be saved
      * @param editorsEmail the email address of the editor
      * @return the saved course
      */
-    Course edit(Course course, String editorsEmail);
+    Course edit(Course course, String editorsEmail) throws ForbiddenCourseEdit;
 
     /**
      * Gets a course by it's id

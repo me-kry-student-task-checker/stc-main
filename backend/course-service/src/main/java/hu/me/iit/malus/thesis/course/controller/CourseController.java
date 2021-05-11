@@ -6,14 +6,14 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
+import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
+import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEdit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
 import java.security.Principal;
 import java.util.Set;
 
@@ -37,12 +37,12 @@ public class CourseController {
 
     @PostMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Course editCourse(@Valid @RequestBody CourseModificationDto courseModificationDto, Principal principal) {
+    public Course editCourse(@Valid @RequestBody CourseModificationDto courseModificationDto, Principal principal) throws ForbiddenCourseEdit {
         return service.edit(DtoConverter.CourseDtoToCourse(courseModificationDto), principal.getName());
     }
 
     @GetMapping("/get/{courseId}")
-    public Course get(@PathVariable @Min(1) Long courseId, Principal principal) {
+    public Course get(@PathVariable @Min(1) Long courseId, Principal principal) throws CourseNotFoundException {
         return service.get(courseId, principal.getName());
     }
 
