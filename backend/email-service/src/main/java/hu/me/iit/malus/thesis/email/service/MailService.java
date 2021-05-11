@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.email.service;
 
 import hu.me.iit.malus.thesis.email.model.Mail;
-import hu.me.iit.malus.thesis.email.model.exception.MailCouldNotBeSentException;
+import hu.me.iit.malus.thesis.email.service.exception.MailCouldNotBeSentException;
 
 /**
  * The interface Mail service.
@@ -9,6 +9,7 @@ import hu.me.iit.malus.thesis.email.model.exception.MailCouldNotBeSentException;
  * @author Ilku Krisztián
  */
 public interface MailService {
+
     /**
      * Sends a email.
      *
