@@ -28,6 +28,11 @@
         <javax.servlet.version>2.5</javax.servlet.version>
         <passay.version>1.0</passay.version>
         <h2.version>1.4.199</h2.version>
+        <jaxb.runtime.version>2.3.3</jaxb.runtime.version>
+        <spring.cloud.dependencies.version>Greenwich.RELEASE</spring.cloud.dependencies.version>
+        <spring.retry.version>1.2.4.RELEASE</spring.retry.version>
+        <lombok.version>1.18.8</lombok.version>
+        <mysql.connector.version>8.0.11</mysql.connector.version>
     </properties>
 
     <!--Basic dependencies for every service-->
@@ -43,25 +48,22 @@
     <!--Dependencies for child modules to choose from-->
     <dependencyManagement>
         <dependencies>
-            <!--TODO try remove on jdk16 -->
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>2.3.3</version>
+                <version>${jaxb.runtime.version}</version>
             </dependency>
-            <!--TODO up the version -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>Greenwich.RELEASE</version>
+                <version>${spring.cloud.dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.springframework.retry</groupId>
                 <artifactId>spring-retry</artifactId>
-                <version>1.2.4.RELEASE</version>
+                <version>${spring.retry.version}</version>
             </dependency>
             <!--TODO spring doc -->
             <dependency>
@@ -77,13 +79,13 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.8</version>
+                <version>${lombok.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
-                <version>8.0.11</version>
+                <version>${mysql.connector.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
