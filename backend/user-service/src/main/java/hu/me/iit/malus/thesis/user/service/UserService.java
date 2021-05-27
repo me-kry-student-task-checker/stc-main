@@ -130,7 +130,7 @@ public interface UserService {
      * @param courseId Course id of the course where the connection should be tested
      * @return True if the user is connected to the course, false otherwise
      */
-    Boolean isRelatedToCourse(String email, Long courseId);
+    boolean isRelatedToCourse(String email, Long courseId);
 
     /**
      * Return a complete User object, queried by its email (identifier)
@@ -143,10 +143,10 @@ public interface UserService {
     /**
      * Gets a dto from user, for the controller to use.
      *
-     * @param user the user
+     * @param email the user email
      * @return the dto
      */
-    UserDto getDtoFromAnyUser(User user);
+    UserDto getAnyUserDtoByEmail(String email);
 
     /**
      * Removes course id from related course ids. Used in case of course deletion.

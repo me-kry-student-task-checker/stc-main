@@ -10,23 +10,29 @@ import hu.me.iit.malus.thesis.user.model.*;
 import hu.me.iit.malus.thesis.user.model.exception.DatabaseOperationFailedException;
 import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
 import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
-import hu.me.iit.malus.thesis.user.repository.*;
+import hu.me.iit.malus.thesis.user.model.factory.UserFactory;
+import hu.me.iit.malus.thesis.user.repository.ActivationTokenRepository;
+import hu.me.iit.malus.thesis.user.repository.AdminRepository;
+import hu.me.iit.malus.thesis.user.repository.StudentRepository;
+import hu.me.iit.malus.thesis.user.repository.TeacherRepository;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import hu.me.iit.malus.thesis.user.service.converter.Converter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.Stream;
 
 /**
- * Default implementation of UserService
+ * Default implementation of UserService.
  *
  * @author Javorek Dénes
+ * @author Attila Szőke
  */
 @Service
 @Slf4j
@@ -37,8 +43,8 @@ public class UserServiceImpl implements UserService {
     private final TeacherRepository teacherRepository;
     private final AdminRepository adminRepository;
     private final ActivationTokenRepository tokenRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
     private final EmailClient emailClient;
+    private final UserFactory userFactory;
 
     /**
      * {@inheritDoc}
@@ -49,27 +55,8 @@ public class UserServiceImpl implements UserService {
             throw new EmailExistsException(
                     "There is already an account with that email address: " + registrationRequest.getEmail());
         }
-
-        UserRole userRole = UserRole.fromString(registrationRequest.getRole());
-        switch (userRole) {
-            case ADMIN: {
-                Admin newAdmin = new Admin(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName());
-                return adminRepository.save(newAdmin);
-            }
-            case TEACHER: {
-                Teacher newTeacher = new Teacher(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
-                return teacherRepository.save(newTeacher);
-            }
-            case STUDENT: {
-                Student newStudent = new Student(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
-                return studentRepository.save(newStudent);
-            }
-            default:
-                throw new IllegalStateException("User type cannot be recognized");
-        }
+        var newUser = userFactory.create(registrationRequest);
+        return saveUser(newUser);
     }
 
     /**
@@ -77,7 +64,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void createActivationToken(User user, String token) {
-        final ActivationToken userToken = ActivationToken.of(token, user);
+        final var userToken = ActivationToken.of(token, user);
         tokenRepository.save(userToken);
     }
 
@@ -85,50 +72,21 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public boolean activateUser(String token) {
-        final ActivationToken activationToken = tokenRepository.findByToken(token);
-        if (activationToken == null) {
+        var activationTokenOpt = tokenRepository.findByToken(token);
+        if (activationTokenOpt.isEmpty()) {
             return false;
         }
-
-        final User user = activationToken.getUser();
-        final Calendar cal = Calendar.getInstance();
-        if ((activationToken.getExpiryDate()
-                .getTime()
-                - cal.getTime()
-                .getTime()) <= 0) {
+        var activationToken = activationTokenOpt.get();
+        final var user = activationToken.getUser();
+        final var cal = Calendar.getInstance();
+        if ((activationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
             tokenRepository.delete(activationToken);
             return false;
         }
-
-        UserBaseRepository userRepository = null;
-
-        switch (user.getRole()) {
-            case STUDENT: {
-                userRepository = studentRepository;
-                break;
-            }
-            case TEACHER: {
-                userRepository = teacherRepository;
-                break;
-            }
-            case ADMIN: {
-                userRepository = adminRepository;
-                break;
-            }
-            default: {
-                log.warn("User corresponding to token {}, does not have a valid role, cannot activate it.", token);
-                return false;
-            }
-        }
-
-        Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
-        if (optionalUser.isPresent()) {
-            User userToActivate = optionalUser.get();
-            userToActivate.setEnabled(true);
-            userRepository.save(userToActivate);
-        }
-
+        user.setEnabled(true);
+        saveUser(user);
         tokenRepository.delete(activationToken);
         return true;
     }
@@ -136,10 +94,11 @@ public class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
+    @Override
     @Transactional
     @Override
     public TeacherDto saveCourseCreation(String teacherEmail, Long courseId) {
-        Teacher teacher = teacherRepository.findLockByEmail(teacherEmail).orElseThrow(UserNotFoundException::new);
+        var teacher = teacherRepository.findLockByEmail(teacherEmail).orElseThrow(UserNotFoundException::new);
         try {
             teacher.getCreatedCourseIds().add(courseId);
             return Converter.createTeacherDtoFromTeacher(teacherRepository.save(teacher));
@@ -151,8 +110,8 @@ public class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
-    @Transactional
     @Override
+    @Transactional
     public void assignStudentsToCourse(Long courseId, List<String> studentEmails) {
         studentRepository.findAllLockByEmailIn(studentEmails).forEach(student -> {
             try {
@@ -202,7 +161,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public StudentDto getStudentByEmail(String studentEmail) {
-        Student student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
+        var student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
         try {
             return Converter.createStudentDtoFromStudent(student);
         } catch (DataAccessException dataExc) {
@@ -245,7 +204,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public TeacherDto getTeacherByEmail(String teacherEmail) {
-        Teacher teacher = teacherRepository.findByEmail(teacherEmail).orElseThrow(() -> new UserNotFoundException(teacherEmail));
+        var teacher = teacherRepository.findByEmail(teacherEmail).orElseThrow(() -> new UserNotFoundException(teacherEmail));
         try {
             return Converter.createTeacherDtoFromTeacher(teacher);
         } catch (DataAccessException e) {
@@ -258,7 +217,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public TeacherDto getTeacherByCreatedCourseId(Long courseId) {
-        Teacher teacher = teacherRepository.findByCreatedCourseId(courseId).orElseThrow(UserNotFoundException::new);
+        var teacher = teacherRepository.findByCreatedCourseId(courseId).orElseThrow(UserNotFoundException::new);
         try {
             return Converter.createTeacherDtoFromTeacher(teacher);
         } catch (DataAccessException e) {
@@ -272,11 +231,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<Long> getRelatedCourseIds(String userEmail) {
         Set<Long> relatedCourseIds = new HashSet<>();
-        User user = getAnyUserByEmail(userEmail);
-
+        var user = getAnyUserByEmail(userEmail);
         if (user instanceof Student) {
             relatedCourseIds.addAll(((Student) user).getAssignedCourseIds());
-        } else if (user instanceof Teacher) {
+        }
+        if (user instanceof Teacher) {
             relatedCourseIds.addAll(((Teacher) user).getCreatedCourseIds());
         }
         return relatedCourseIds;
@@ -286,43 +245,47 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public User getAnyUserByEmail(String email) {
-        // TODO: Looks ugly, there are better options for Optional chaining, maybe try those later
-        Optional<? extends User> userToLoad = studentRepository.findByEmail(email);
-        if (userToLoad.isEmpty()) {
-            userToLoad = teacherRepository.findByEmail(email);
+    public boolean isRelatedToCourse(String email, Long courseId) {
+        var user = getAnyUserByEmail(email);
+        if (user instanceof Student) {
+            return ((Student) user).getAssignedCourseIds().contains(courseId);
         }
-        if (userToLoad.isEmpty()) {
-            userToLoad = adminRepository.findByEmail(email);
+        if (user instanceof Teacher) {
+            return ((Teacher) user).getCreatedCourseIds().contains(courseId);
         }
-
-        if (userToLoad.isEmpty()) {
-            throw new UserNotFoundException(email);
-        }
-        return userToLoad.get();
+        return false;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Boolean isRelatedToCourse(String email, Long courseId) {
-        Optional<? extends User> optionalUser = studentRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            if (((Student) optionalUser.get()).getAssignedCourseIds().contains(courseId)) {
-                return Boolean.TRUE;
-            }
-            return Boolean.FALSE;
-        }
+    public User getAnyUserByEmail(String email) {
+        return Stream.of(studentRepository.findByEmail(email), teacherRepository.findByEmail(email), adminRepository.findByEmail(email))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .orElseThrow(() -> {
+                    throw new UserNotFoundException(email);
+                });
+    }
 
-        optionalUser = teacherRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            if (((Teacher) optionalUser.get()).getCreatedCourseIds().contains(courseId)) {
-                return Boolean.TRUE;
-            }
-            return Boolean.FALSE;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserDto getAnyUserDtoByEmail(String email) {
+        var user = getAnyUserByEmail(email);
+        if (user instanceof Student) {
+            return Converter.createStudentDtoFromStudent((Student) user);
         }
-        return Boolean.FALSE;
+        if (user instanceof Teacher) {
+            return Converter.createTeacherDtoFromTeacher((Teacher) user);
+        }
+        if (user instanceof Admin) {
+            return Converter.createAdminDtoFromStudent((Admin) user);
+        }
+        throw new IllegalStateException("User type cannot be recognized");
     }
 
     /**
@@ -332,19 +295,27 @@ public class UserServiceImpl implements UserService {
      * @return True if email already exists, false otherwise
      */
     private boolean emailExists(String email) {
-        return studentRepository.findByEmail(email).isPresent() || teacherRepository.findByEmail(email).isPresent() ||
-                adminRepository.findByEmail(email).isPresent();
+        return studentRepository.findByEmail(email).isPresent()
+                || teacherRepository.findByEmail(email).isPresent()
+                || adminRepository.findByEmail(email).isPresent();
     }
 
     /**
-     * {@inheritDoc}
+     * Saves a user with the respective repository.
+     *
+     * @param user the user
+     * @return the saved user
      */
-    public UserDto getDtoFromAnyUser(User user) {
-        if (user instanceof Student) {
-            return Converter.createStudentDtoFromStudent((Student) user);
-        } else {
-            return Converter.createTeacherDtoFromTeacher((Teacher) user);
+    private User saveUser(User user) {
+        switch (user.getRole()) {
+            case ADMIN:
+                return adminRepository.save((Admin) user);
+            case TEACHER:
+                return teacherRepository.save((Teacher) user);
+            case STUDENT:
+                return studentRepository.save((Student) user);
         }
+        throw new IllegalStateException("User type cannot be recognized");
     }
 
     @Override

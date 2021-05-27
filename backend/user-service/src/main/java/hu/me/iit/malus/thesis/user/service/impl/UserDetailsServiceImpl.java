@@ -30,19 +30,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     /**
      * Functional interface implementation, loads the user objects by email.
      * In our case the email equals to the user's email, because we dont use separate email field.
-     * @param email
+     *
+     * @param email email of the user
      * @return The corresponding UserDetails object, which holds the data of the give user
      * @throws UsernameNotFoundException If the user cannot be found
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         // These flags are not defined in our system, but should be used for userdetails.User
-        final boolean accountNonExpired = true;
-        final boolean credentialsNonExpired = true;
-        final boolean accountNonLocked = true;
+        final var accountNonExpired = true;
+        final var credentialsNonExpired = true;
+        final var accountNonLocked = true;
 
         final User user;
-
         try {
             user = userService.getAnyUserByEmail(email);
         } catch (UserNotFoundException notFoundExc) {

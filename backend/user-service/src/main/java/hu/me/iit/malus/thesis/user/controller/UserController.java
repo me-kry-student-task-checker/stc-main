@@ -115,7 +115,7 @@ public class UserController {
 
     @GetMapping("/me")
     public @Valid UserDto getMe(Principal principal) {
-        return service.getDtoFromAnyUser(service.getAnyUserByEmail(principal.getName()));
+        return service.getAnyUserDtoByEmail(principal.getName());
     }
 
     @DeleteMapping("/removeCourseIdFromRelatedUserLists/{courseId}")
