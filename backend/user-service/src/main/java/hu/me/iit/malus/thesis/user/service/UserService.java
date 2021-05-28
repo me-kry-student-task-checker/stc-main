@@ -60,20 +60,6 @@ public interface UserService {
     void assignStudentsToCourse(Long courseId, List<String> studentEmails);
 
     /**
-     * Returns all the saved Students
-     *
-     * @return the students
-     */
-    Set<StudentDto> getAllStudents();
-
-    /**
-     * Returns all the saved Teachers
-     *
-     * @return the teachers
-     */
-    Set<TeacherDto> getAllTeachers();
-
-    /**
      * Returns a single Student by its email (identifier)
      *
      * @param studentEmail Student's email

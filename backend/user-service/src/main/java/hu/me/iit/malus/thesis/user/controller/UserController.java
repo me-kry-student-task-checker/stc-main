@@ -67,16 +67,6 @@ public class UserController {
         service.assignStudentsToCourse(dto.getCourseId(), dto.getStudentEmails());
     }
 
-    @GetMapping("/students")
-    public Set<@Valid StudentDto> getAllStudents() {
-        return service.getAllStudents();
-    }
-
-    @GetMapping("/teachers")
-    public Set<@Valid TeacherDto> getAllTeachers() {
-        return service.getAllTeachers();
-    }
-
     @GetMapping("/student/{email:.+}")
     public @Valid StudentDto getStudentByEmail(@PathVariable("email") @NotBlank String studentEmail) {
         return service.getStudentByEmail(studentEmail);

@@ -128,38 +128,6 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<StudentDto> getAllStudents() {
-        try {
-            return studentRepository
-                    .findAll()
-                    .stream()
-                    .map(Converter::createStudentDtoFromStudent)
-                    .collect(Collectors.toSet());
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationFailedException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<TeacherDto> getAllTeachers() {
-        try {
-            return teacherRepository
-                    .findAll()
-                    .stream()
-                    .map(Converter::createTeacherDtoFromTeacher)
-                    .collect(Collectors.toSet());
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationFailedException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public StudentDto getStudentByEmail(String studentEmail) {
         var student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
         try {
@@ -276,16 +244,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getAnyUserDtoByEmail(String email) {
         var user = getAnyUserByEmail(email);
-        if (user instanceof Student) {
-            return Converter.createStudentDtoFromStudent((Student) user);
-        }
-        if (user instanceof Teacher) {
-            return Converter.createTeacherDtoFromTeacher((Teacher) user);
-        }
-        if (user instanceof Admin) {
-            return Converter.createAdminDtoFromStudent((Admin) user);
-        }
-        throw new IllegalStateException("User type cannot be recognized");
+        return Converter.createUserDtoFromUser(user);
     }
 
     /**

@@ -3,11 +3,29 @@ package hu.me.iit.malus.thesis.user.service.converter;
 import hu.me.iit.malus.thesis.user.controller.dto.AdminDto;
 import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
 import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
+import hu.me.iit.malus.thesis.user.controller.dto.UserDto;
 import hu.me.iit.malus.thesis.user.model.Admin;
 import hu.me.iit.malus.thesis.user.model.Student;
 import hu.me.iit.malus.thesis.user.model.Teacher;
+import hu.me.iit.malus.thesis.user.model.User;
 
 public class Converter {
+
+    private Converter() {
+    }
+
+    public static UserDto createUserDtoFromUser(User user) {
+        if (user instanceof Student) {
+            return createStudentDtoFromStudent((Student) user);
+        }
+        if (user instanceof Teacher) {
+            return createTeacherDtoFromTeacher((Teacher) user);
+        }
+        if (user instanceof Admin) {
+            return createAdminDtoFromStudent((Admin) user);
+        }
+        throw new IllegalStateException("User type cannot be recognized");
+    }
 
     public static StudentDto createStudentDtoFromStudent(Student student) {
         var dto = new StudentDto();
