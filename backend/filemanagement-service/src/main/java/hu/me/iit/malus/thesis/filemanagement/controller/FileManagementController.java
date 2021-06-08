@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Part;
@@ -53,7 +54,6 @@ public class FileManagementController {
         return ResponseEntity.ok(result);
     }
 
-
     @DeleteMapping("/delete/{id}/{service}")
     public ResponseEntity<Void> deleteFile(@PathVariable @Min(1) Long id, @PathVariable @NotNull Service service, Principal principal)
             throws ForbiddenFileDeleteException, FileNotFoundException {
@@ -77,4 +77,31 @@ public class FileManagementController {
     public ResponseEntity<FileSystemResource> getFileByName(@PathVariable @NotBlank String name) {
         return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFileByName(name)));
     }
+
+    @DeleteMapping("/delete/{id}/{service}")
+    public ResponseEntity<String> deleteFile(@PathVariable @Min(1) Long id, @PathVariable @NotNull Service service, Authentication authentication) {
+        // TODO controller advice try catch helyett mindenhol a controllerben
+        try {
+            fileManagementService.deleteFile(id, service, authentication.getName(), authentication.getAuthorities().stream().findFirst().get().getAuthority());
+        } catch (UnsupportedOperationException e) {
+            return ResponseEntity
+                    .status(403)
+                    .body("User does not have the privilege to delete this file!");
+        } catch (FileNotFoundException ex) {
+            return ResponseEntity
+                    .status(404)
+                    .body("File not found!");
+        }
+        return ResponseEntity
+                .status(200)
+                .body("Successful delete!");
+    }
+
+    @DeleteMapping("/deleteAll/{service}/{tagId}")
+    public void removeFilesByServiceAndTagId(@PathVariable Service service, @PathVariable Long tagId, Authentication authentication)
+            throws FileNotFoundException, UnsupportedOperationException {
+        fileManagementService.deleteFilesByServiceAndTagId(
+                service, tagId, authentication.getName(), authentication.getAuthorities().stream().findFirst().get().getAuthority());
+    }
+
 }

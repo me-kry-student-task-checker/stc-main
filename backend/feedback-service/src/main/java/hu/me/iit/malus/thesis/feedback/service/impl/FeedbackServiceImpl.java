@@ -6,9 +6,12 @@ import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.repository.CourseCommentRepository;
 import hu.me.iit.malus.thesis.feedback.repository.TaskCommentRepository;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
+import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
+import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,5 +90,45 @@ public class FeedbackServiceImpl implements FeedbackService {
                         taskComment.getId())));
 
         return results;
+    }
+
+    @Override
+    @Transactional
+    public void removeCourseComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
+        CourseComment courseComment = courseCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        if (!courseComment.getAuthorId().equals(authorId)) {
+            throw new ForbiddenCommentEditException();
+        }
+        courseCommentRepository.delete(courseComment);
+        fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId());
+    }
+
+    @Override
+    @Transactional
+    public void removeTaskComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
+        TaskComment taskComment = taskCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        if (!taskComment.getAuthorId().equals(authorId)) {
+            throw new ForbiddenCommentEditException();
+        }
+        taskCommentRepository.delete(taskComment);
+        fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId());
+    }
+
+    @Override
+    @Transactional
+    public void removeFeedbacksByCourseId(Long courseId) {
+        List<CourseComment> courseComments = courseCommentRepository.deleteByCourseId(courseId);
+        courseComments.forEach(
+                courseComment -> fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId())
+        );
+    }
+
+    @Override
+    @Transactional
+    public void removeFeedbacksByTaskId(Long taskId) {
+        List<TaskComment> taskComments = taskCommentRepository.deleteByTaskId(taskId);
+        taskComments.forEach(
+                taskComment -> fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId())
+        );
     }
 }

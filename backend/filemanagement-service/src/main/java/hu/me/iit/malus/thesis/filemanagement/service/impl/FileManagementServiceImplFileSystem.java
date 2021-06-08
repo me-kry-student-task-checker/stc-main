@@ -85,7 +85,6 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
-
         if (!fileDescriptor.getUploadedBy().equalsIgnoreCase(username)) {
             log.warn("User does not have the privilege to delete file: {}", id);
             throw new ForbiddenFileDeleteException();
@@ -144,9 +143,18 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
     /**
      * {@inheritDoc}
      */
+    @Override
     public File getFileByName(String name) {
         String uploadDir = env.getProperty(FILE_DIR_PROP);
         return new File(uploadDir + File.separator + name);
     }
 
+    @Override
+    public void deleteFilesByServiceAndTagId(Service service, Long tagId, String email, String userRole)
+            throws FileNotFoundException, UnsupportedOperationException {
+        List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(service, tagId);
+        for (FileDescription fileDescription : fileDescriptions) {
+            deleteFile(fileDescription.getId(), service, email, userRole);
+        }
+    }
 }

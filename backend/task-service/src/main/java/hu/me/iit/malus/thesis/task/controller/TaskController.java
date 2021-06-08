@@ -34,7 +34,7 @@ public class TaskController {
         return service.create(dto);
     }
 
-    @PostMapping("/edit")
+    @PutMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public @Valid BriefTaskDto editTask(@Valid @RequestBody EditTaskDto dto) {
         return service.edit(dto);
@@ -62,15 +62,21 @@ public class TaskController {
         service.changeCompletion(taskId, principal.getName());
     }
 
-    @GetMapping("/checkHelps/{taskId}")
-    @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Set<String> checkIfHelpNeededOnTask(@Min(1) @PathVariable Long taskId) throws TaskNotFoundException {
-        return service.checkIfHelpNeeded(taskId);
-    }
-
     @PostMapping("/toggleHelp/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
     public void toggleHelpOnTask(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException, StudentIdNotFoundException {
         service.toggleHelp(taskId, principal.getName());
+    }
+
+    @DeleteMapping("/delete/{taskId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
+    public void removeTask(@PathVariable Long taskId) throws TaskNotFoundException {
+        service.deleteTask(taskId);
+    }
+
+    @DeleteMapping("/deleteTasksByCourseId/{courseId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
+    public void removeTasksByCourseId(@PathVariable Long courseId) {
+        service.deleteTasksByCourseId(courseId);
     }
 }

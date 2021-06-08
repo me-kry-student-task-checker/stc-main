@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Google bucket based implementation for File management service.
- *
+ * Default implementation for FileDescription management service.
  * @author Ilku Krisztian
  **/
 @Service
@@ -88,20 +87,18 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             return new FileNotFoundException();
         });
 
-        if (!fileToBeRemoved.getUploadedBy().equalsIgnoreCase(username)) {
+        if (!(userRole.equals("ROLE_Teacher") || fileDescription.getUploadedBy().equalsIgnoreCase(email))) {
             log.warn("User does not have the privilege to delete file: {}", id);
             throw new ForbiddenFileDeleteException();
         }
-
-        BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileToBeRemoved.getName());
-        
+        BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileDescription.getName());
         boolean deleteSuccessful = storage.delete(blobId);
         if (deleteSuccessful) {
-            fileToBeRemoved.getServices().remove(service);
-            if (fileToBeRemoved.getServices().isEmpty()) {
-                fileDescriptionRepository.delete(fileToBeRemoved);
+            fileDescription.getServices().remove(service);
+            if (fileDescription.getServices().isEmpty()) {
+                fileDescriptionRepository.delete(fileDescription);
             } else {
-                fileDescriptionRepository.save(fileToBeRemoved);
+                fileDescriptionRepository.save(fileDescription);
             }
             log.debug("File successfully deleted: {}, {}", id, service);
         } else {
@@ -169,5 +166,14 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             stringBuilder.append(String.format("%02X", b));
         }
         return stringBuilder.toString();
+    }
+
+    @Override
+    public void deleteFilesByServiceAndTagId(hu.me.iit.malus.thesis.filemanagement.model.Service service, Long tagId, String email, String userRole)
+            throws FileNotFoundException, UnsupportedOperationException {
+        List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(service, tagId);
+        for (FileDescription fileDescription : fileDescriptions) {
+            deleteFile(fileDescription.getId(), service, email, userRole);
+        }
     }
 }
