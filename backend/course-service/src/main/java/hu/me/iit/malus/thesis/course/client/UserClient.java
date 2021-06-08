@@ -4,10 +4,7 @@ import hu.me.iit.malus.thesis.dto.Student;
 import hu.me.iit.malus.thesis.dto.Teacher;
 import hu.me.iit.malus.thesis.dto.User;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -22,7 +19,7 @@ public interface UserClient {
     void saveStudent(@RequestBody Student student);
 
     @PostMapping("/api/user/saveCourseCreation")
-    void saveCourseCreation(@RequestBody Long courseId);
+    Teacher saveCourseCreation(@RequestBody Long courseId);
 
     @GetMapping("/api/user/student/{email}/")
     Student getStudentByEmail(@PathVariable("email") String studentEmail);
@@ -34,7 +31,7 @@ public interface UserClient {
     Set<Student> getStudentsByAssignedCourseId(@PathVariable("courseId") Long courseId);
 
     @GetMapping("/api/user/isRelated/course/{courseId}")
-    Boolean isRelated(@PathVariable("courseId") Long courseId);
+    boolean isRelated(@PathVariable("courseId") Long courseId);
 
     @GetMapping("/api/user/related/course")
     Set<Long> getRelatedCourseIds();
@@ -44,4 +41,7 @@ public interface UserClient {
 
     @GetMapping("/api/user/me")
     User getMe();
+
+    @DeleteMapping("/api/user/removeCourseIdFromRelatedUserLists/{courseId}")
+    void removeCourseIdFromRelatedUserLists(@PathVariable Long courseId);
 }

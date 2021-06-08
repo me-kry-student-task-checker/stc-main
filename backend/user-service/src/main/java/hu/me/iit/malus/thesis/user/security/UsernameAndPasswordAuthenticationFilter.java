@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
  */
 public class UsernameAndPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private AuthenticationManager authManager;
-    private JwtAuthConfig jwtConfig;
+    private final AuthenticationManager authManager;
+    private final JwtAuthConfig jwtConfig;
 
     @Autowired
     public UsernameAndPasswordAuthenticationFilter(AuthenticationManager authManager, JwtAuthConfig jwtAuthConfig) {
@@ -83,7 +83,7 @@ public class UsernameAndPasswordAuthenticationFilter extends UsernamePasswordAut
                 .setExpiration(new Date(now + jwtConfig.getExpiration() * 1000))  // in milliseconds
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())
                 .compact();
-
+        response.getWriter().printf("{\"id_token\": \"%s\"}%n", token);
         response.addHeader(HttpHeaders.AUTHORIZATION, token);
     }
 }

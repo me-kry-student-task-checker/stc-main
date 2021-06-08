@@ -35,10 +35,11 @@ public interface TaskService {
 
     /**
      * Returns a single Task by its id
+     *
      * @param taskId id of the Task
      * @return the corresponding Task
      */
-    DetailedTaskDto get(Long taskId);
+    DetailedTaskDto get(Long taskId) throws TaskNotFoundException;
 
     /**
      * Gets every task based on it's course id
@@ -64,18 +65,26 @@ public interface TaskService {
     void changeCompletion(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException;
 
     /**
-     * Checks out the list of the 'help needed' student ids
-     *
-     * @param taskId the task id
-     * @return the list of student ids, who need help
-     */
-    Set<String> checkIfHelpNeeded(Long taskId) throws TaskNotFoundException;
-
-    /**
      * Toggles (adds-removes) a student id from a task's 'help needed' list
      *
      * @param taskId    id of the task
      * @param studentId id of the student
      */
     void toggleHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException;
+
+
+    /**
+     * Deletes a task.
+     *
+     * @param taskId the task id
+     * @throws TaskNotFoundException the task not found exception
+     */
+    void deleteTask(Long taskId) throws TaskNotFoundException;
+
+    /**
+     * Deletes tasks by course id.
+     *
+     * @param courseId the course id
+     */
+    void deleteTasksByCourseId(Long courseId);
 }

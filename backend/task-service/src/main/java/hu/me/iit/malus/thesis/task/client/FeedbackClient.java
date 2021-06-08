@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.task.client;
 
 import hu.me.iit.malus.thesis.dto.TaskComment;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -18,4 +19,6 @@ public interface FeedbackClient {
     @GetMapping("/api/feedback/getAllTaskComments/{taskId}")
     List<TaskComment> getAllTaskComments(@PathVariable Long taskId);
 
+    @DeleteMapping("/api/feedback/removeTaskCommentsByTaskId/{taskId}")
+    void removeTaskCommentsByTaskId(@PathVariable Long taskId);
 }

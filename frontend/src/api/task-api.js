@@ -11,7 +11,7 @@ export default {
 		return axios.get('/api/task/get/' + taskId);
 	},
 	setDone(taskId) {
-		return axios.post('/api/task//setDone/' + taskId);
+		return axios.post('/api/task/setDone/' + taskId);
 	},
 	setComplete(taskId) {
 		return axios.post('/api/task/setComplete/' + taskId);

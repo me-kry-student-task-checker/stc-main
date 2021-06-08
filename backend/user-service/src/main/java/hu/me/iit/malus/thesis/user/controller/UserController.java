@@ -57,8 +57,8 @@ public class UserController {
 
     @PreAuthorize("hasRole('ROLE_Teacher')")
     @PostMapping("/saveCourseCreation")
-    public void saveCourseCreation(Principal principal, @RequestBody @Min(1) Long courseId) {
-        service.saveCourseCreation(principal.getName(), courseId);
+    public @Valid TeacherDto saveCourseCreation(Principal principal, @RequestBody @Min(1) Long courseId) {
+        return service.saveCourseCreation(principal.getName(), courseId);
     }
 
     @PreAuthorize("hasRole('ROLE_TEACHER')")
@@ -114,8 +114,13 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public UserDto getMe(Principal principal) {
+    public @Valid UserDto getMe(Principal principal) {
         return service.getDtoFromAnyUser(service.getAnyUserByEmail(principal.getName()));
     }
 
+    @DeleteMapping("/removeCourseIdFromRelatedUserLists/{courseId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
+    public void removeCourseIdFromRelatedUserLists(@PathVariable Long courseId) {
+        service.removeCourseIdFromRelatedLists(courseId);
+    }
 }

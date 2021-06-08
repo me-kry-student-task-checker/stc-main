@@ -13,16 +13,19 @@ import java.util.Set;
 
 /**
  * Defines a File's Description
+ *
  * @author Ilku Krisztian
  */
 @Entity
-@Getter @Setter
-@NoArgsConstructor @ToString
-public class FileDescription {
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
+public class FileDescriptor {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO, generator="native")
-    @GenericGenerator(name="native", strategy="native")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(name = "native", strategy = "native")
     Long id;
     @Column(length = 2000)
     String name;
@@ -44,7 +47,7 @@ public class FileDescription {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FileDescription that = (FileDescription) o;
+        FileDescriptor that = (FileDescriptor) o;
         return Objects.equal(id, that.id);
     }
 

@@ -1,24 +1,26 @@
 package hu.me.iit.malus.thesis.course.controller;
 
 
-import hu.me.iit.malus.thesis.course.controller.converters.DtoConverter;
+import hu.me.iit.malus.thesis.course.controller.dto.CourseCreateDto;
+import hu.me.iit.malus.thesis.course.controller.dto.CourseFullDetailsDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
-import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
+import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
+import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
 import java.security.Principal;
 import java.util.Set;
 
 /**
  * Controller endpoint of this service
+ *
  * @author Javorek Dénes
  * @author Attila Szőke
  */
@@ -31,23 +33,30 @@ public class CourseController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Course createCourse(@Valid @RequestBody CourseModificationDto courseModificationDto, Principal principal) {
-        return service.create(DtoConverter.CourseDtoToCourse(courseModificationDto), principal.getName());
+    public ResponseEntity<CourseOverviewDto> createCourse(@Valid @RequestBody CourseCreateDto dto, Principal principal) {
+        return ResponseEntity.ok(service.create(dto, principal.getName()));
     }
 
-    @PostMapping("/edit")
+    @PutMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public Course editCourse(@Valid @RequestBody CourseModificationDto courseModificationDto, Principal principal) {
-        return service.edit(DtoConverter.CourseDtoToCourse(courseModificationDto), principal.getName());
+    public ResponseEntity<CourseOverviewDto> editCourse(@Valid @RequestBody CourseModificationDto dto, Principal principal)
+            throws ForbiddenCourseEditException, CourseNotFoundException {
+        return ResponseEntity.ok(service.edit(dto, principal.getName()));
     }
 
     @GetMapping("/get/{courseId}")
-    public Course get(@PathVariable @Min(1) Long courseId, Principal principal) {
-        return service.get(courseId, principal.getName());
+    public ResponseEntity<CourseFullDetailsDto> get(@PathVariable @Min(1) Long courseId, Principal principal) throws CourseNotFoundException {
+        return ResponseEntity.ok(service.get(courseId, principal.getName()));
     }
 
     @GetMapping("/getAll")
-    public Set<CourseOverviewDto> getAll(Principal principal) {
-        return DtoConverter.CourseToCourseOverviewSet(service.getAll(principal.getName()));
+    public ResponseEntity<Set<CourseOverviewDto>> getAll(Principal principal) {
+        return ResponseEntity.ok(service.getAll(principal.getName()));
+    }
+
+    @DeleteMapping("/delete/{courseId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
+    public void deleteCourse(@PathVariable Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException {
+        service.deleteCourse(courseId);
     }
 }

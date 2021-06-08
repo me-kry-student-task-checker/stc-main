@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.filemanagement.repository;
 
-import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
+import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
+import hu.me.iit.malus.thesis.filemanagement.model.Service;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,7 +12,11 @@ import java.util.List;
  * @author Ilku Krisztián
  * @author Attila Szőke
  */
-public interface FileDescriptionRepository extends JpaRepository<FileDescription, Long> {
-    List<FileDescription> findAllByUploadedBy(String uploadedBy);
-    List<FileDescription> findAllByTagId(Long tagId);
+public interface FileDescriptionRepository extends JpaRepository<FileDescriptor, Long> {
+
+    List<FileDescriptor> findAllByUploadedBy(String uploadedBy);
+
+    List<FileDescriptor> findAllByTagId(Long tagId);
+
+    List<FileDescriptor> findAllByServicesContainingAndTagId(Service service, Long tagId);
 }

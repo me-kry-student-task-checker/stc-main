@@ -123,8 +123,7 @@ public class UserServiceImpl implements UserService {
         }
 
         Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
-        if (optionalUser.isPresent())
-        {
+        if (optionalUser.isPresent()) {
             User userToActivate = optionalUser.get();
             userToActivate.setEnabled(true);
             userRepository.save(userToActivate);
@@ -139,11 +138,11 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @Override
-    public void saveCourseCreation(String teacherEmail, Long courseId) {
+    public TeacherDto saveCourseCreation(String teacherEmail, Long courseId) {
         Teacher teacher = teacherRepository.findLockByEmail(teacherEmail).orElseThrow(UserNotFoundException::new);
         try {
             teacher.getCreatedCourseIds().add(courseId);
-            teacherRepository.save(teacher);
+            return Converter.createTeacherDtoFromTeacher(teacherRepository.save(teacher));
         } catch (DataAccessException e) {
             throw new DatabaseOperationFailedException(e);
         }
@@ -318,7 +317,7 @@ public class UserServiceImpl implements UserService {
 
         optionalUser = teacherRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
-            if(((Teacher) optionalUser.get()).getCreatedCourseIds().contains(courseId)) {
+            if (((Teacher) optionalUser.get()).getCreatedCourseIds().contains(courseId)) {
                 return Boolean.TRUE;
             }
             return Boolean.FALSE;
@@ -348,4 +347,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    @Transactional
+    public void removeCourseIdFromRelatedLists(Long courseId) {
+        List<Student> students = studentRepository.findAllAssignedForCourseId(courseId);
+        students.forEach(student -> student.getAssignedCourseIds().remove(courseId));
+        studentRepository.saveAll(students);
+        Optional<Teacher> opt = teacherRepository.findByCreatedCourseId(courseId);
+        if (opt.isPresent()) {
+            Teacher teacher = opt.get();
+            teacher.getCreatedCourseIds().remove(courseId);
+            teacherRepository.save(teacher);
+        }
+    }
 }
