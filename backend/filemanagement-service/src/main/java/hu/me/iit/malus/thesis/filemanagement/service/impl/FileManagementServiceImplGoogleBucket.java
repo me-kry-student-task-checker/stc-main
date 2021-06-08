@@ -87,7 +87,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             log.warn("User does not have the privilege to delete file: {}", id);
             throw new UnsupportedOperationException();
         }
-        BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileToBeRemoved.getName());
+        BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileDescription.getName());
         boolean deleteSuccessful = storage.delete(blobId);
         if (deleteSuccessful) {
             fileDescription.getServices().remove(service);
