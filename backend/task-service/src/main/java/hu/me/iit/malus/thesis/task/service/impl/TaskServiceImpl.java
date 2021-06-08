@@ -151,23 +151,6 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public Set<String> checkIfHelpNeeded(Long taskId) throws TaskNotFoundException {
-        Optional<Task> opt = repository.findById(taskId);
-        if (opt.isPresent()) {
-            Task task = opt.get();
-            Set<String> helpNeededList = task.getHelpNeededStudentIds();
-            log.debug("Task's ({}) help needed list returned: {}", task, helpNeededList);
-            return helpNeededList;
-        } else {
-            log.warn("No task found with this task id: {}", taskId);
-            throw new TaskNotFoundException();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void toggleHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
         Optional<Task> optTask = repository.findById(taskId);
         if (optTask.isPresent()) {

@@ -80,13 +80,13 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, Service service, String username) throws ForbiddenFileDeleteException, FileNotFoundException {
+    public void deleteFile(Long id, Service service, String email, String userRole) throws ForbiddenFileDeleteException, FileNotFoundException {
         FileDescriptor fileDescriptor = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
-        if (!fileDescriptor.getUploadedBy().equalsIgnoreCase(username)) {
-            log.warn("User does not have the privilege to delete file: {}", id);
+        if (!(userRole.equals("ROLE_Teacher") || !fileDescriptor.getUploadedBy().equalsIgnoreCase(email))) {
+            log.warn("User: {} a {} does not have the privilege: to delete file {}", email, userRole, id);
             throw new ForbiddenFileDeleteException();
         }
 
@@ -151,9 +151,9 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
     @Override
     public void deleteFilesByServiceAndTagId(Service service, Long tagId, String email, String userRole)
-            throws FileNotFoundException, UnsupportedOperationException {
-        List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(service, tagId);
-        for (FileDescription fileDescription : fileDescriptions) {
+            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
+        List<FileDescriptor> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(service, tagId);
+        for (FileDescriptor fileDescription : fileDescriptions) {
             deleteFile(fileDescription.getId(), service, email, userRole);
         }
     }

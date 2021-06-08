@@ -39,7 +39,8 @@ public class CourseController {
 
     @PutMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public ResponseEntity<CourseOverviewDto> editCourse(@Valid @RequestBody CourseModificationDto dto, Principal principal) throws ForbiddenCourseEditException {
+    public ResponseEntity<CourseOverviewDto> editCourse(@Valid @RequestBody CourseModificationDto dto, Principal principal)
+            throws ForbiddenCourseEditException, CourseNotFoundException {
         return ResponseEntity.ok(service.edit(dto, principal.getName()));
     }
 
@@ -55,7 +56,7 @@ public class CourseController {
 
     @DeleteMapping("/delete/{courseId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public void deleteCourse(@PathVariable Long courseId) {
+    public void deleteCourse(@PathVariable Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException {
         service.deleteCourse(courseId);
     }
 }

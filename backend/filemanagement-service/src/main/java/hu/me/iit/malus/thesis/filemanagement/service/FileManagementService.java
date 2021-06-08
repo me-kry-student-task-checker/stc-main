@@ -38,7 +38,7 @@ public interface FileManagementService {
      * @param id      The ID of the file
      * @param service The service that uploaded the file
      */
-    void deleteFile(Long id, Service service, String username) throws ForbiddenFileDeleteException, FileNotFoundException;
+    void deleteFile(Long id, Service service, String username, String userRole) throws ForbiddenFileDeleteException, FileNotFoundException;
 
     /**
      * Queries all uploaded files of a user.
@@ -71,5 +71,5 @@ public interface FileManagementService {
      * @param service the service type
      * @param tagId   the tag id
      */
-    void deleteFilesByServiceAndTagId(Service service, Long tagId, String email, String userRole) throws FileNotFoundException, UnsupportedOperationException;
+    void deleteFilesByServiceAndTagId(Service service, Long tagId, String email, String userRole) throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException;
 }

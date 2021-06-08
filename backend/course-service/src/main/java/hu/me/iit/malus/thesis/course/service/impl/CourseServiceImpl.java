@@ -14,7 +14,6 @@ import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.converters.Converter;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
-import hu.me.iit.malus.thesis.dto.Teacher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -62,7 +61,7 @@ public class CourseServiceImpl implements CourseService {
      * @return
      */
     @Override
-    public CourseOverviewDto edit(CourseModificationDto dto, String editorsEmail) throws ForbiddenCourseEditException {
+    public CourseOverviewDto edit(CourseModificationDto dto, String editorsEmail) throws ForbiddenCourseEditException, CourseNotFoundException {
         Course course = courseRepository.findById(dto.getId()).orElseThrow(CourseNotFoundException::new);
         if (!course.getCreator().getEmail().equals(editorsEmail)) {
             log.warn("Creator of this course {} is not the editor: {}!", course, editorsEmail);
@@ -115,11 +114,11 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void deleteCourse(Long courseId) throws CourseNotFoundException {
+    public void deleteCourse(Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException {
         boolean isRelated = userClient.isRelated(courseId);
         if (!isRelated) {
             log.warn("Only the creator can delete a course!");
-            throw new ForbiddenCourseEdit();
+            throw new ForbiddenCourseEditException();
         }
         if (courseRepository.existsById(courseId)) {
             courseRepository.deleteById(courseId);

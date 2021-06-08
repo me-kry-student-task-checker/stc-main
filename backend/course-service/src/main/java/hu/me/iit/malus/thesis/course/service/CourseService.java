@@ -34,7 +34,7 @@ public interface CourseService {
      * @param editorsEmail the email address of the editor
      * @return the saved course
      */
-    CourseOverviewDto edit(CourseModificationDto dto, String editorsEmail) throws ForbiddenCourseEditException;
+    CourseOverviewDto edit(CourseModificationDto dto, String editorsEmail) throws ForbiddenCourseEditException, CourseNotFoundException;
 
     /**
      * Gets a course by it's id
@@ -52,11 +52,11 @@ public interface CourseService {
      * @return set of courses that relates to the user
      */
     Set<CourseOverviewDto> getAll(String userEmail);
-    
+
     /**
      * Deletes a course.
      *
      * @param courseId the course id
      */
-    void deleteCourse(Long courseId) throws CourseNotFoundException;
+    void deleteCourse(Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException;
 }

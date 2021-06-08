@@ -55,9 +55,9 @@ public class FileManagementController {
     }
 
     @DeleteMapping("/delete/{id}/{service}")
-    public ResponseEntity<Void> deleteFile(@PathVariable @Min(1) Long id, @PathVariable @NotNull Service service, Principal principal)
+    public ResponseEntity<Void> deleteFile(@PathVariable @Min(1) Long id, @PathVariable @NotNull Service service, Authentication auth)
             throws ForbiddenFileDeleteException, FileNotFoundException {
-        fileManagementService.deleteFile(id, service, principal.getName());
+        fileManagementService.deleteFile(id, service, auth.getName(), auth.getAuthorities().stream().findFirst().get().getAuthority());
         return ResponseEntity.ok().build();
     }
 
@@ -78,28 +78,9 @@ public class FileManagementController {
         return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFileByName(name)));
     }
 
-    @DeleteMapping("/delete/{id}/{service}")
-    public ResponseEntity<String> deleteFile(@PathVariable @Min(1) Long id, @PathVariable @NotNull Service service, Authentication authentication) {
-        // TODO controller advice try catch helyett mindenhol a controllerben
-        try {
-            fileManagementService.deleteFile(id, service, authentication.getName(), authentication.getAuthorities().stream().findFirst().get().getAuthority());
-        } catch (UnsupportedOperationException e) {
-            return ResponseEntity
-                    .status(403)
-                    .body("User does not have the privilege to delete this file!");
-        } catch (FileNotFoundException ex) {
-            return ResponseEntity
-                    .status(404)
-                    .body("File not found!");
-        }
-        return ResponseEntity
-                .status(200)
-                .body("Successful delete!");
-    }
-
     @DeleteMapping("/deleteAll/{service}/{tagId}")
     public void removeFilesByServiceAndTagId(@PathVariable Service service, @PathVariable Long tagId, Authentication authentication)
-            throws FileNotFoundException, UnsupportedOperationException {
+            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
         fileManagementService.deleteFilesByServiceAndTagId(
                 service, tagId, authentication.getName(), authentication.getAuthorities().stream().findFirst().get().getAuthority());
     }
