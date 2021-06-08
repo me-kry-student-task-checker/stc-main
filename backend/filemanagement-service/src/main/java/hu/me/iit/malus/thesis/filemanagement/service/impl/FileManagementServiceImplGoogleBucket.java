@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Google bucket based implementation for File management service.
- *
+ * Default implementation for FileDescription management service.
  * @author Ilku Krisztian
  **/
 @Service
@@ -88,9 +87,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             log.warn("User does not have the privilege to delete file: {}", id);
             throw new UnsupportedOperationException();
         }
-
         BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileDescription.getName());
-        
         boolean deleteSuccessful = storage.delete(blobId);
         if (deleteSuccessful) {
             fileDescription.getServices().remove(service);
