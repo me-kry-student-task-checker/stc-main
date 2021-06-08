@@ -35,7 +35,7 @@ public class CourseController {
         return ResponseEntity.ok(service.create(dto, principal.getName()));
     }
 
-    @PostMapping("/edit")
+    @PutMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public ResponseEntity<CourseOverviewDto> editCourse(@Valid @RequestBody CourseModificationDto dto, Principal principal) {
         return ResponseEntity.ok(service.edit(dto, principal.getName()));
@@ -49,5 +49,11 @@ public class CourseController {
     @GetMapping("/getAll")
     public ResponseEntity<Set<CourseOverviewDto>> getAll(Principal principal) {
         return ResponseEntity.ok(service.getAll(principal.getName()));
+    }
+
+    @DeleteMapping("/delete/{courseId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
+    public void deleteCourse(@PathVariable Long courseId) {
+        service.deleteCourse(courseId);
     }
 }

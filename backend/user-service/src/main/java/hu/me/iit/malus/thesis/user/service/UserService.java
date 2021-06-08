@@ -49,7 +49,7 @@ public interface UserService {
      * @param teacherEmail the teacher email
      * @param courseId     the course id
      */
-    void saveCourseCreation(String teacherEmail, Long courseId);
+    TeacherDto saveCourseCreation(String teacherEmail, Long courseId);
 
     /**
      * Adds the id of a course to the assigned the students.
@@ -147,4 +147,11 @@ public interface UserService {
      * @return the dto
      */
     UserDto getDtoFromAnyUser(User user);
+
+    /**
+     * Removes course id from related course ids. Used in case of course deletion.
+     *
+     * @param courseId the course id
+     */
+    void removeCourseIdFromRelatedLists(Long courseId);
 }

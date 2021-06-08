@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface TaskCommentRepository extends CommentBaseRepository<TaskComment> {
 
     Optional<List<TaskComment>> findAllByTaskId(Long courseId);
+
+    List<TaskComment> deleteByTaskId(Long taskId);
 }

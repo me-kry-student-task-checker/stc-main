@@ -2,6 +2,8 @@ package hu.me.iit.malus.thesis.feedback.service;
 
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
+import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
+import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 
 import java.util.List;
 
@@ -15,6 +17,7 @@ public interface FeedbackService {
 
     /**
      * Creates a new course comment.
+     *
      * @param courseComment the new course comment
      * @return the created course comment
      */
@@ -22,6 +25,7 @@ public interface FeedbackService {
 
     /**
      * Creates a new task comment.
+     *
      * @param taskComment the new task comment
      * @return the created task comment
      */
@@ -29,6 +33,7 @@ public interface FeedbackService {
 
     /**
      * Returns all course comments filtered by their course ids
+     *
      * @param courseId the filtered course id
      * @return list of course comments
      */
@@ -36,8 +41,39 @@ public interface FeedbackService {
 
     /**
      * Returns all task comments filtered by their task ids
+     *
      * @param taskId the filtered task id
      * @return list of task comments
      */
     List<TaskComment> getAllTaskComments(Long taskId);
+
+    /**
+     * Removes a course comment.
+     *
+     * @param commentId the comment id
+     * @throws CommentNotFoundException the comment not found exception
+     */
+    void removeCourseComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException;
+
+    /**
+     * Removes a task comment.
+     *
+     * @param commentId the comment id
+     * @throws CommentNotFoundException the comment not found exception
+     */
+    void removeTaskComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException;
+
+    /**
+     * Deletes all feedbacks of a course.
+     *
+     * @param courseId the course dd
+     */
+    void removeFeedbacksByCourseId(Long courseId);
+
+    /**
+     * Deletes all feedbacks of a task.
+     *
+     * @param taskId the task id
+     */
+    void removeFeedbacksByTaskId(Long taskId);
 }

@@ -17,11 +17,9 @@ import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Default implementation of the Task Service interface
@@ -153,23 +151,6 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public Set<String> checkIfHelpNeeded(Long taskId) throws TaskNotFoundException {
-        Optional<Task> opt = repository.findById(taskId);
-        if (opt.isPresent()) {
-            Task task = opt.get();
-            Set<String> helpNeededList = task.getHelpNeededStudentIds();
-            log.debug("Task's ({}) help needed list returned: {}", task, helpNeededList);
-            return helpNeededList;
-        } else {
-            log.warn("No task found with this task id: {}", taskId);
-            throw new TaskNotFoundException();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void toggleHelp(Long taskId, String studentId) throws StudentIdNotFoundException {
         Optional<Task> optTask = repository.findById(taskId);
         if (optTask.isPresent()) {
@@ -197,6 +178,21 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
+    @Override
+    @Transactional
+    public void deleteTask(Long taskId) throws TaskNotFoundException {
+        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        repository.delete(task);
+        removeCommentsAndFiles(task.getId());
+    }
+
+    @Override
+    @Transactional
+    public void deleteTasksByCourseId(Long courseId) {
+        List<Task> tasks = repository.deleteByCourseId(courseId);
+        tasks.forEach(task -> removeCommentsAndFiles(task.getId()));
+    }
+
     private DetailedTaskDto getDetailedTask(Task task) {
         DetailedTaskDto taskDto = new DetailedTaskDto(task);
 
@@ -215,5 +211,10 @@ public class TaskServiceImpl implements TaskService {
         taskDto.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.TASK, task.getId()));
 
         return taskDto;
+    }
+
+    private void removeCommentsAndFiles(Long taskId) {
+        feedbackClient.removeTaskCommentsByTaskId(taskId);
+        fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.TASK, taskId);
     }
 }

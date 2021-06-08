@@ -77,26 +77,24 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String username) throws UnsupportedOperationException, FileNotFoundException {
-        FileDescription fileToBeRemoved = fileDescriptionRepository.findById(id).orElseThrow(() -> {
+    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String email, String userRole) throws UnsupportedOperationException, FileNotFoundException {
+        FileDescription fileDescription = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
 
-        if (!fileToBeRemoved.getUploadedBy().equalsIgnoreCase(username)) {
+        if (!(userRole.equals("ROLE_Teacher") || fileDescription.getUploadedBy().equalsIgnoreCase(email))) {
             log.warn("User does not have the privilege to delete file: {}", id);
             throw new UnsupportedOperationException();
         }
-
         BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileToBeRemoved.getName());
-
         boolean deleteSuccessful = storage.delete(blobId);
         if (deleteSuccessful) {
-            fileToBeRemoved.getServices().remove(service);
-            if (fileToBeRemoved.getServices().isEmpty()) {
-                fileDescriptionRepository.delete(fileToBeRemoved);
+            fileDescription.getServices().remove(service);
+            if (fileDescription.getServices().isEmpty()) {
+                fileDescriptionRepository.delete(fileDescription);
             } else {
-                fileDescriptionRepository.save(fileToBeRemoved);
+                fileDescriptionRepository.save(fileDescription);
             }
             log.debug("File successfully deleted: {}, {}", id, service);
         } else {
@@ -177,5 +175,14 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             stringBuilder.append(String.format("%02X", b));
         }
         return stringBuilder.toString();
+    }
+
+    @Override
+    public void deleteFilesByServiceAndTagId(hu.me.iit.malus.thesis.filemanagement.model.Service service, Long tagId, String email, String userRole)
+            throws FileNotFoundException, UnsupportedOperationException {
+        List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(service, tagId);
+        for (FileDescription fileDescription : fileDescriptions) {
+            deleteFile(fileDescription.getId(), service, email, userRole);
+        }
     }
 }

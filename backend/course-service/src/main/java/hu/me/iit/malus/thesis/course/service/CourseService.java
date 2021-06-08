@@ -52,4 +52,10 @@ public interface CourseService {
      */
     Set<CourseOverviewDto> getAll(String userEmail);
     
+    /**
+     * Deletes a course.
+     *
+     * @param courseId the course id
+     */
+    void deleteCourse(Long courseId) throws CourseNotFoundException;
 }

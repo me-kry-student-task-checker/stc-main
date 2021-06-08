@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.course.client;
 
 import hu.me.iit.malus.thesis.dto.Task;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -17,5 +18,8 @@ public interface TaskClient {
 
     @GetMapping("/api/task/getAll/{courseId}")
     Set<Task> getAllTasks(@PathVariable Long courseId);
+
+    @DeleteMapping("/api/task/deleteTasksByCourseId/{courseId}")
+    void removeTasksByCourseId(@PathVariable Long courseId);
 
 }

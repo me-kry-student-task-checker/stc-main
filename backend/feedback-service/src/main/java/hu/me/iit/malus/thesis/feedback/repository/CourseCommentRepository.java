@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface CourseCommentRepository extends CommentBaseRepository<CourseComment> {
 
     Optional<List<CourseComment>> findAllByCourseId(Long courseId);
+
+    List<CourseComment> deleteByCourseId(Long courseId);
 }

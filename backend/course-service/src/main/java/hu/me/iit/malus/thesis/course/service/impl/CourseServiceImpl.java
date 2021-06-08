@@ -14,6 +14,7 @@ import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.converters.Converter;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
+import hu.me.iit.malus.thesis.dto.Teacher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -110,5 +111,24 @@ public class CourseServiceImpl implements CourseService {
         }
         log.debug("Get all courses done, total number of courses is {}", relatedCourses.size());
         return relatedCourses.stream().map(Converter::createCourseOverviewDtoFromCourse).collect(Collectors.toSet());
+    }
+
+    @Override
+    @Transactional
+    public void deleteCourse(Long courseId) throws CourseNotFoundException {
+        boolean isRelated = userClient.isRelated(courseId);
+        if (!isRelated) {
+            log.warn("Only the creator can delete a course!");
+            throw new ForbiddenCourseEdit();
+        }
+        if (courseRepository.existsById(courseId)) {
+            courseRepository.deleteById(courseId);
+            userClient.removeCourseIdFromRelatedUserLists(courseId);
+            taskClient.removeTasksByCourseId(courseId);
+            fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.COURSE, courseId);
+            feedbackClient.removeCourseCommentsByCourseId(courseId);
+            return;
+        }
+        throw new CourseNotFoundException();
     }
 }
