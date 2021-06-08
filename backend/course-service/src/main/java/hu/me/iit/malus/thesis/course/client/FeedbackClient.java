@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.course.client;
 
 import hu.me.iit.malus.thesis.dto.CourseComment;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -17,5 +18,8 @@ public interface FeedbackClient {
 
     @GetMapping("/api/feedback/getAllCourseComments/{courseId}")
     List<CourseComment> getAllCourseComments(@PathVariable Long courseId);
+
+    @DeleteMapping("/api/feedback/removeCourseCommentsByCourseId/{courseId}")
+    void removeCourseCommentsByCourseId(@PathVariable Long courseId);
 
 }

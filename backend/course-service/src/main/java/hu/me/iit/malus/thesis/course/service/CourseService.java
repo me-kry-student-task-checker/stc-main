@@ -48,5 +48,13 @@ public interface CourseService {
      * @return set of courses that relates to the user
      */
     Set<Course> getAll(String userEmail);
-    
+
+
+    /**
+     * Deletes a course.
+     *
+     * @param courseId the course id
+     */
+    void deleteCourse(Long courseId) throws CourseNotFoundException;
+
 }

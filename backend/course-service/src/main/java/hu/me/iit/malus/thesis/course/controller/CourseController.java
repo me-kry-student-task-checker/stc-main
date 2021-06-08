@@ -7,13 +7,11 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
 import java.security.Principal;
 import java.util.Set;
 
@@ -35,7 +33,7 @@ public class CourseController {
         return service.create(DtoConverter.CourseDtoToCourse(courseModificationDto), principal.getName());
     }
 
-    @PostMapping("/edit")
+    @PutMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public Course editCourse(@Valid @RequestBody CourseModificationDto courseModificationDto, Principal principal) {
         return service.edit(DtoConverter.CourseDtoToCourse(courseModificationDto), principal.getName());
@@ -49,5 +47,11 @@ public class CourseController {
     @GetMapping("/getAll")
     public Set<CourseOverviewDto> getAll(Principal principal) {
         return DtoConverter.CourseToCourseOverviewSet(service.getAll(principal.getName()));
+    }
+
+    @DeleteMapping("/delete/{courseId}")
+    @PreAuthorize("hasRole('ROLE_Teacher')")
+    public void deleteCourse(@PathVariable Long courseId) {
+        service.deleteCourse(courseId);
     }
 }
