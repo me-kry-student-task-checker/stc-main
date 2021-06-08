@@ -35,10 +35,11 @@ public interface TaskService {
 
     /**
      * Returns a single Task by its id
+     *
      * @param taskId id of the Task
      * @return the corresponding Task
      */
-    DetailedTaskDto get(Long taskId);
+    DetailedTaskDto get(Long taskId) throws TaskNotFoundException;
 
     /**
      * Gets every task based on it's course id

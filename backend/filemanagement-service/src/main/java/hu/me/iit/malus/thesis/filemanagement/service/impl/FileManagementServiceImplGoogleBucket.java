@@ -2,11 +2,13 @@ package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 
 import com.google.cloud.storage.*;
-import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
+import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
+import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
+import hu.me.iit.malus.thesis.filemanagement.service.converters.Converter;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
-import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,59 +44,62 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public FileDescription uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.model.Service service, String user, Long tagId) throws IOException {
+    public FileDescriptorDto uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.model.Service service, String user, Long tagId) throws IOException {
         String userHash = hashIt(user);
         String fileName = userHash + "_" + file.getSubmittedFileName();
         Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(), file.getInputStream());
         log.debug("File successfully uploaded: {}", file.getSubmittedFileName());
-        FileDescription fileDescription = new FileDescription();
-        fileDescription.setUploadDate(new Date());
-        fileDescription.setName(fileName);
-        fileDescription.setDownloadLink(blob.getMediaLink());
-        fileDescription.setSize(file.getSize());
-        fileDescription.setContentType(file.getContentType());
-        fileDescription.setUploadedBy(user);
-        fileDescription.setServices(new HashSet<>());
-        fileDescription.getServices().add(service);
-        fileDescription.setTagId(tagId);
+        FileDescriptor fileDescriptor = new FileDescriptor();
+        fileDescriptor.setUploadDate(new Date());
+        fileDescriptor.setName(fileName);
+        fileDescriptor.setDownloadLink(blob.getMediaLink());
+        fileDescriptor.setSize(file.getSize());
+        fileDescriptor.setContentType(file.getContentType());
+        fileDescriptor.setUploadedBy(user);
+        fileDescriptor.setServices(new HashSet<>());
+        fileDescriptor.getServices().add(service);
+        fileDescriptor.setTagId(tagId);
 
-        for (FileDescription fd : fileDescriptionRepository.findAll()) {
-            if (fd.getName().equalsIgnoreCase(fileDescription.getName())) {
-                fileDescription.setId(fd.getId());
-                fileDescription.getServices().addAll(fd.getServices());
+        for (FileDescriptor fd : fileDescriptionRepository.findAll()) {
+            if (fd.getName().equalsIgnoreCase(fileDescriptor.getName())) {
+                fileDescriptor.setId(fd.getId());
+                fileDescriptor.getServices().addAll(fd.getServices());
                 break;
             }
         }
-        fileDescriptionRepository.save(fileDescription);
-        log.debug("File description successfully saved to database: {}", fileDescription);
-        fileDescription.setName(file.getSubmittedFileName());
-        return fileDescription;
+        fileDescriptionRepository.save(fileDescriptor);
+        log.debug("File description successfully saved to database: {}", fileDescriptor);
+        fileDescriptor.setName(file.getSubmittedFileName());
+        return Converter.createFileDescriptorDtoFromFileDescriptor(fileDescriptor);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String email, String userRole) throws UnsupportedOperationException, FileNotFoundException {
-        FileDescription fileDescription = fileDescriptionRepository.findById(id).orElseThrow(() -> {
+    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String email, String userRole)
+            throws ForbiddenFileDeleteException, FileNotFoundException {
+        FileDescriptor fileDescriptor = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
 
-        if (!(userRole.equals("ROLE_Teacher") || fileDescription.getUploadedBy().equalsIgnoreCase(email))) {
-            log.warn("User does not have the privilege to delete file: {}", id);
-            throw new UnsupportedOperationException();
+        if (!(userRole.equals("ROLE_Teacher") || fileDescriptor.getUploadedBy().equalsIgnoreCase(email))) {
+            log.warn("User: {} a {} does not have the privilege: to delete file {}", email, userRole, id);
+            throw new ForbiddenFileDeleteException();
         }
-        BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileDescription.getName());
+        BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileDescriptor.getName());
         boolean deleteSuccessful = storage.delete(blobId);
         if (deleteSuccessful) {
-            fileDescription.getServices().remove(service);
-            if (fileDescription.getServices().isEmpty()) {
-                fileDescriptionRepository.delete(fileDescription);
+            fileDescriptor.getServices().remove(service);
+            if (fileDescriptor.getServices().isEmpty()) {
+                fileDescriptionRepository.delete(fileDescriptor);
             } else {
-                fileDescriptionRepository.save(fileDescription);
+                fileDescriptionRepository.save(fileDescriptor);
             }
             log.debug("File successfully deleted: {}, {}", id, service);
         } else {
@@ -105,54 +110,41 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public Set<FileDescription> getAllFilesByUser(String userEmail) {
-        Iterable<FileDescription> fileDescriptionList = fileDescriptionRepository.findAllByUploadedBy(userEmail);
-        Set<FileDescription> results = new HashSet<>();
-        for (FileDescription fd : fileDescriptionList) {
+    public Set<FileDescriptorDto> getAllFilesByUser(String userEmail) {
+        Iterable<FileDescriptor> fileDescriptionList = fileDescriptionRepository.findAllByUploadedBy(userEmail);
+        Set<FileDescriptor> results = new HashSet<>();
+        for (FileDescriptor fd : fileDescriptionList) {
             results.add(fd);
         }
         log.debug("Files found by file name: {}", userEmail);
-        return results;
+        return Converter.createFileDescriptorDtosFromFileDescriptors(results);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public Set<FileDescription> getAllFilesByServiceAndTagId(Long tagId, hu.me.iit.malus.thesis.filemanagement.model.Service service) {
-        List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByTagId(tagId);
-        Set<FileDescription> results = new HashSet<>();
-        for (FileDescription fd : fileDescriptions) {
+    public Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, hu.me.iit.malus.thesis.filemanagement.model.Service service) {
+        List<FileDescriptor> fileDescriptors = fileDescriptionRepository.findAllByTagId(tagId);
+        Set<FileDescriptor> results = new HashSet<>();
+        for (FileDescriptor fd : fileDescriptors) {
             if (fd.getServices().contains(service)) {
                 results.add(fd);
             }
         }
-        return results;
+        return Converter.createFileDescriptorDtosFromFileDescriptors(results);
     }
 
     @Override
     public File getFileByName(String name) {
         // no implementation as it is not needed when google buckets are used
         return null;
-    }
-
-    /**
-     * Removes the generated hash from the file name
-     *
-     * @param fileName  The file name that contains the hash
-     * @param userEmail The user that uploaded the file, and also hash is generated from this
-     * @return The original file name that the user uploaded in the first place
-     */
-    private String removeHash(String fileName, String userEmail) {
-        String hashedUser = hashIt(userEmail);
-        if (hashedUser != null) {
-            fileName = fileName.replace(hashedUser, "");
-            return fileName.substring(1);
-        }
-
-        return fileName;
     }
 
     /**
@@ -179,9 +171,9 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
 
     @Override
     public void deleteFilesByServiceAndTagId(hu.me.iit.malus.thesis.filemanagement.model.Service service, Long tagId, String email, String userRole)
-            throws FileNotFoundException, UnsupportedOperationException {
-        List<FileDescription> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(service, tagId);
-        for (FileDescription fileDescription : fileDescriptions) {
+            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
+        List<FileDescriptor> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(service, tagId);
+        for (FileDescriptor fileDescription : fileDescriptions) {
             deleteFile(fileDescription.getId(), service, email, userRole);
         }
     }

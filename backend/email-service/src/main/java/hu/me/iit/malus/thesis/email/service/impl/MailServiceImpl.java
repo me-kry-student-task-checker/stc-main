@@ -1,10 +1,10 @@
 package hu.me.iit.malus.thesis.email.service.impl;
 
 import hu.me.iit.malus.thesis.email.model.Mail;
-import hu.me.iit.malus.thesis.email.model.exception.MailCouldNotBeSentException;
 import hu.me.iit.malus.thesis.email.service.MailService;
+import hu.me.iit.malus.thesis.email.service.exception.MailCouldNotBeSentException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,21 +17,14 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
 
 
-    private JavaMailSender javaMailSender;
-
-
-    @Autowired
-    public MailServiceImpl(JavaMailSender javaMailSender) {
-        this.javaMailSender = javaMailSender;
-    }
+    private final JavaMailSender javaMailSender;
 
     /**
-     * Sends an email.
-     *
-     * @param mail The email to be sent.
+     * {@inheritDoc}
      */
     @Override
     public void sendEmail(Mail mail) throws MailCouldNotBeSentException {

@@ -6,6 +6,8 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseFullDetailsDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.service.CourseService;
+import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
+import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,12 +39,13 @@ public class CourseController {
 
     @PutMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public ResponseEntity<CourseOverviewDto> editCourse(@Valid @RequestBody CourseModificationDto dto, Principal principal) {
+    public ResponseEntity<CourseOverviewDto> editCourse(@Valid @RequestBody CourseModificationDto dto, Principal principal)
+            throws ForbiddenCourseEditException, CourseNotFoundException {
         return ResponseEntity.ok(service.edit(dto, principal.getName()));
     }
 
     @GetMapping("/get/{courseId}")
-    public ResponseEntity<CourseFullDetailsDto> get(@PathVariable @Min(1) Long courseId, Principal principal) {
+    public ResponseEntity<CourseFullDetailsDto> get(@PathVariable @Min(1) Long courseId, Principal principal) throws CourseNotFoundException {
         return ResponseEntity.ok(service.get(courseId, principal.getName()));
     }
 
@@ -53,7 +56,7 @@ public class CourseController {
 
     @DeleteMapping("/delete/{courseId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public void deleteCourse(@PathVariable Long courseId) {
+    public void deleteCourse(@PathVariable Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException {
         service.deleteCourse(courseId);
     }
 }

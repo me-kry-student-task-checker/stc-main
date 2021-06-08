@@ -1,9 +1,9 @@
 package hu.me.iit.malus.thesis.filemanagement.service;
 
-import hu.me.iit.malus.thesis.filemanagement.model.FileDescription;
+import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.Service;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
-import hu.me.iit.malus.thesis.filemanagement.service.exceptions.UnsupportedOperationException;
+import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
 
 import javax.servlet.http.Part;
 import java.io.File;
@@ -29,7 +29,7 @@ public interface FileManagementService {
      * @return The object that represents the file which was uploaded and saved to database.
      * @throws IOException thrown when the file saving fails
      */
-    FileDescription uploadFile(Part file, Service service, String user, Long tagId) throws IOException;
+    FileDescriptorDto uploadFile(Part file, Service service, String user, Long tagId) throws IOException;
 
     /**
      * Deletes a file from the storage. If the file is uploaded by multiple services, than it just removes the entry from the services field.
@@ -38,7 +38,7 @@ public interface FileManagementService {
      * @param id      The ID of the file
      * @param service The service that uploaded the file
      */
-    void deleteFile(Long id, Service service, String email, String userRole) throws UnsupportedOperationException, FileNotFoundException;
+    void deleteFile(Long id, Service service, String username, String userRole) throws ForbiddenFileDeleteException, FileNotFoundException;
 
     /**
      * Queries all uploaded files of a user.
@@ -46,7 +46,7 @@ public interface FileManagementService {
      * @param userEmail The parameter that filters the files
      * @return If it founds by the parameter than returns the value, else return empty Set
      */
-    Set<FileDescription> getAllFilesByUser(String userEmail);
+    Set<FileDescriptorDto> getAllFilesByUser(String userEmail);
 
     /**
      * Queries all files based on the Id and the Service it belongs to.
@@ -55,7 +55,7 @@ public interface FileManagementService {
      * @param service - The service which sent the file in
      * @return Filtered Set of files based on the given parameters
      */
-    Set<FileDescription> getAllFilesByServiceAndTagId(Long tagId, Service service);
+    Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, Service service);
 
     /**
      * Returns a file;
@@ -71,5 +71,5 @@ public interface FileManagementService {
      * @param service the service type
      * @param tagId   the tag id
      */
-    void deleteFilesByServiceAndTagId(Service service, Long tagId, String email, String userRole) throws FileNotFoundException, UnsupportedOperationException;
+    void deleteFilesByServiceAndTagId(Service service, Long tagId, String email, String userRole) throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException;
 }

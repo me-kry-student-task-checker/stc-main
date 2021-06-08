@@ -5,6 +5,7 @@ import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.service.TaskService;
+import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,7 +41,7 @@ public class TaskController {
     }
 
     @GetMapping("/get/{taskId}")
-    public @Valid DetailedTaskDto getTask(@Min(1) @PathVariable Long taskId) {
+    public @Valid DetailedTaskDto getTask(@Min(1) @PathVariable Long taskId) throws TaskNotFoundException {
         return service.get(taskId);
     }
 
@@ -57,13 +58,13 @@ public class TaskController {
 
     @PostMapping("/setComplete/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
-    public void changeTasksCompletion(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
+    public void changeTasksCompletion(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException, StudentIdNotFoundException {
         service.changeCompletion(taskId, principal.getName());
     }
 
     @PostMapping("/toggleHelp/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
-    public void toggleHelpOnTask(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
+    public void toggleHelpOnTask(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException, StudentIdNotFoundException {
         service.toggleHelp(taskId, principal.getName());
     }
 

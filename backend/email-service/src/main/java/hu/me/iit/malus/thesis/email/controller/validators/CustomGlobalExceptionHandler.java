@@ -1,6 +1,6 @@
 package hu.me.iit.malus.thesis.email.controller.validators;
 
-import hu.me.iit.malus.thesis.email.model.exception.MailCouldNotBeSentException;
+import hu.me.iit.malus.thesis.email.service.exception.MailCouldNotBeSentException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
