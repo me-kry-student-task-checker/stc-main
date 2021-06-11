@@ -7,9 +7,6 @@ import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
 import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
 import hu.me.iit.malus.thesis.user.controller.dto.UserDto;
 import hu.me.iit.malus.thesis.user.model.*;
-import hu.me.iit.malus.thesis.user.model.exception.DatabaseOperationFailedException;
-import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
-import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
 import hu.me.iit.malus.thesis.user.model.factory.UserFactory;
 import hu.me.iit.malus.thesis.user.repository.ActivationTokenRepository;
 import hu.me.iit.malus.thesis.user.repository.AdminRepository;
@@ -17,6 +14,9 @@ import hu.me.iit.malus.thesis.user.repository.StudentRepository;
 import hu.me.iit.malus.thesis.user.repository.TeacherRepository;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import hu.me.iit.malus.thesis.user.service.converter.Converter;
+import hu.me.iit.malus.thesis.user.service.exception.DatabaseOperationFailedException;
+import hu.me.iit.malus.thesis.user.service.exception.EmailExistsException;
+import hu.me.iit.malus.thesis.user.service.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    public TeacherDto saveCourseCreation(String teacherEmail, Long courseId) {
+    public TeacherDto saveCourseCreation(String teacherEmail, Long courseId) throws UserNotFoundException, DatabaseOperationFailedException {
         var teacher = teacherRepository.findLockByEmail(teacherEmail).orElseThrow(UserNotFoundException::new);
         try {
             teacher.getCreatedCourseIds().add(courseId);
@@ -110,15 +110,15 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    public void assignStudentsToCourse(Long courseId, List<String> studentEmails) {
-        studentRepository.findAllLockByEmailIn(studentEmails).forEach(student -> {
+    public void assignStudentsToCourse(Long courseId, List<String> studentEmails) throws DatabaseOperationFailedException {
+        for (Student student : studentRepository.findAllLockByEmailIn(studentEmails)) {
             try {
                 student.getAssignedCourseIds().add(courseId);
                 studentRepository.save(student);
             } catch (DataAccessException e) {
                 throw new DatabaseOperationFailedException(e);
             }
-        });
+        }
         emailClient.sendMail(new Mail(studentEmails, "Course assignment notification", "You have been assigned to a course."));
     }
 
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public StudentDto getStudentByEmail(String studentEmail) {
+    public StudentDto getStudentByEmail(String studentEmail) throws DatabaseOperationFailedException, UserNotFoundException {
         var student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
         try {
             return Converter.createStudentDtoFromStudent(student);
@@ -139,7 +139,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<StudentDto> getStudentsByAssignedCourseId(Long courseId) {
+    public Set<StudentDto> getStudentsByAssignedCourseId(Long courseId) throws DatabaseOperationFailedException {
         try {
             return studentRepository.findAllAssignedForCourseId(courseId)
                     .stream()
@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<StudentDto> getStudentsByNotAssignedCourseId(Long courseId) {
+    public Set<StudentDto> getStudentsByNotAssignedCourseId(Long courseId) throws DatabaseOperationFailedException {
         try {
             return studentRepository.findAllNotAssignedForCourseId(courseId)
                     .stream()
@@ -169,7 +169,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public TeacherDto getTeacherByEmail(String teacherEmail) {
+    public TeacherDto getTeacherByEmail(String teacherEmail) throws UserNotFoundException, DatabaseOperationFailedException {
         var teacher = teacherRepository.findByEmail(teacherEmail).orElseThrow(() -> new UserNotFoundException(teacherEmail));
         try {
             return Converter.createTeacherDtoFromTeacher(teacher);
@@ -182,7 +182,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public TeacherDto getTeacherByCreatedCourseId(Long courseId) {
+    public TeacherDto getTeacherByCreatedCourseId(Long courseId) throws UserNotFoundException, DatabaseOperationFailedException {
         var teacher = teacherRepository.findByCreatedCourseId(courseId).orElseThrow(UserNotFoundException::new);
         try {
             return Converter.createTeacherDtoFromTeacher(teacher);
@@ -195,7 +195,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<Long> getRelatedCourseIds(String userEmail) {
+    public Set<Long> getRelatedCourseIds(String userEmail) throws UserNotFoundException {
         Set<Long> relatedCourseIds = new HashSet<>();
         var user = getAnyUserByEmail(userEmail);
         if (user instanceof Student) {
@@ -211,7 +211,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public boolean isRelatedToCourse(String email, Long courseId) {
+    public boolean isRelatedToCourse(String email, Long courseId) throws UserNotFoundException {
         var user = getAnyUserByEmail(email);
         if (user instanceof Student) {
             return ((Student) user).getAssignedCourseIds().contains(courseId);
@@ -226,21 +226,20 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public User getAnyUserByEmail(String email) {
-        return Stream.of(studentRepository.findByEmail(email), teacherRepository.findByEmail(email), adminRepository.findByEmail(email))
+    public User getAnyUserByEmail(String email) throws UserNotFoundException {
+        var opt = Stream.of(studentRepository.findByEmail(email), teacherRepository.findByEmail(email), adminRepository.findByEmail(email))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .findFirst()
-                .orElseThrow(() -> {
-                    throw new UserNotFoundException(email);
-                });
+                .findFirst();
+        if (opt.isEmpty()) throw new UserNotFoundException(email);
+        return opt.get();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public UserDto getAnyUserDtoByEmail(String email) {
+    public UserDto getAnyUserDtoByEmail(String email) throws UserNotFoundException {
         var user = getAnyUserByEmail(email);
         return Converter.createUserDtoFromUser(user);
     }

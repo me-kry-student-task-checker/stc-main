@@ -1,8 +1,8 @@
 package hu.me.iit.malus.thesis.user.service.impl;
 
 import hu.me.iit.malus.thesis.user.model.User;
-import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
 import hu.me.iit.malus.thesis.user.service.UserService;
+import hu.me.iit.malus.thesis.user.service.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
