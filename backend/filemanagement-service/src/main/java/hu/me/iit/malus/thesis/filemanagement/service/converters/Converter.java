@@ -3,13 +3,16 @@ package hu.me.iit.malus.thesis.filemanagement.service.converters;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Converter {
 
+    private Converter() {
+    }
+
     public static FileDescriptorDto createFileDescriptorDtoFromFileDescriptor(FileDescriptor fileDescriptor) {
-        FileDescriptorDto fileDescriptorDto = new FileDescriptorDto();
+        var fileDescriptorDto = new FileDescriptorDto();
         fileDescriptorDto.setId(fileDescriptor.getId());
         fileDescriptorDto.setName(fileDescriptor.getName());
         fileDescriptorDto.setDownloadLink(fileDescriptor.getDownloadLink());
@@ -20,13 +23,7 @@ public class Converter {
         return fileDescriptorDto;
     }
 
-    public static Set<FileDescriptorDto> createFileDescriptorDtosFromFileDescriptors(Set<FileDescriptor> fileDescriptors) {
-        Set<FileDescriptorDto> result = new HashSet<>();
-        for (FileDescriptor fd : fileDescriptors) {
-            result.add(createFileDescriptorDtoFromFileDescriptor(fd));
-        }
-        return result;
+    public static List<FileDescriptorDto> createFileDescriptorDtoListFromFileDescriptorList(List<FileDescriptor> fileDescriptors) {
+        return fileDescriptors.stream().map(Converter::createFileDescriptorDtoFromFileDescriptor).collect(Collectors.toList());
     }
-
-
 }

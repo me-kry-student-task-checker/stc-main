@@ -1,11 +1,14 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 
-import com.google.cloud.storage.*;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
-import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
+import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptorRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.converters.Converter;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
@@ -17,18 +20,17 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.Part;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Default implementation for FileDescription management service.
+ *
  * @author Ilku Krisztian
  **/
 @Service
@@ -41,7 +43,8 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     private static final Storage storage = StorageOptions.getDefaultInstance().getService();
     @Value("${google-cloud-bucket-name}")
     private String BUCKET_NAME;
-    private final FileDescriptionRepository fileDescriptionRepository;
+
+    private final FileDescriptorRepository fileDescriptorRepository;
 
     /**
      * {@inheritDoc}
@@ -49,30 +52,17 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * @return
      */
     @Override
-    public FileDescriptorDto uploadFile(Part file, ServiceType serviceType, String user, Long tagId) throws IOException {
-        String userHash = hashIt(user);
-        String fileName = userHash + "_" + file.getSubmittedFileName();
-        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(), file.getInputStream());
-        log.debug("File successfully uploaded: {}", file.getSubmittedFileName());
-        FileDescriptor fileDescriptor = new FileDescriptor();
-        fileDescriptor.setUploadDate(new Date());
-        fileDescriptor.setName(fileName);
-        fileDescriptor.setDownloadLink(blob.getMediaLink());
-        fileDescriptor.setSize(file.getSize());
-        fileDescriptor.setContentType(file.getContentType());
-        fileDescriptor.setUploadedBy(user);
-        fileDescriptor.setServiceTypes(new HashSet<>());
-        fileDescriptor.getServiceTypes().add(serviceType);
-        fileDescriptor.setTagId(tagId);
-
-        for (FileDescriptor fd : fileDescriptionRepository.findAll()) {
-            if (fd.getName().equalsIgnoreCase(fileDescriptor.getName())) {
-                fileDescriptor.setId(fd.getId());
-                fileDescriptor.getServiceTypes().addAll(fd.getServiceTypes());
-                break;
-            }
-        }
-        fileDescriptionRepository.save(fileDescriptor);
+    public FileDescriptorDto uploadFile(Part file, ServiceType serviceType, String userEmail, Long tagId) throws IOException {
+        String userHash = hashIt(userEmail);
+        var fileName = String.format("%s_%s", userHash, file.getSubmittedFileName());
+        var blob = storage.create(
+                BlobInfo.newBuilder(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(),
+                file.getInputStream().readAllBytes()
+        );
+        log.debug("File successfully uploaded to google bucket: {}", file.getSubmittedFileName());
+        var fileDescriptor = new FileDescriptor(
+                null, fileName, blob.getMediaLink(), file.getSize(), new Date(), userEmail, file.getContentType(), serviceType, tagId);
+        fileDescriptorRepository.save(fileDescriptor);
         log.debug("File description successfully saved to database: {}", fileDescriptor);
         fileDescriptor.setName(file.getSubmittedFileName());
         return Converter.createFileDescriptorDtoFromFileDescriptor(fileDescriptor);
@@ -84,25 +74,19 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     @Override
     public void deleteFile(Long id, ServiceType serviceType, String email, String userRole)
             throws ForbiddenFileDeleteException, FileNotFoundException {
-        FileDescriptor fileDescriptor = fileDescriptionRepository.findById(id).orElseThrow(() -> {
+        var fileDescriptor = fileDescriptorRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
-
-        if (!(userRole.equals("ROLE_Teacher") || fileDescriptor.getUploadedBy().equalsIgnoreCase(email))) {
+        if (!(userRole.equals("ROLE_Teacher") || fileDescriptor.getUploadedBy().equals(email))) {
             log.warn("User: {} a {} does not have the privilege: to delete file {}", email, userRole, id);
             throw new ForbiddenFileDeleteException();
         }
-        BlobId blobId = BlobId.of(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileDescriptor.getName());
+        var blobId = BlobId.of(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileDescriptor.getName());
         boolean deleteSuccessful = storage.delete(blobId);
         if (deleteSuccessful) {
-            fileDescriptor.getServiceTypes().remove(serviceType);
-            if (fileDescriptor.getServiceTypes().isEmpty()) {
-                fileDescriptionRepository.delete(fileDescriptor);
-            } else {
-                fileDescriptionRepository.save(fileDescriptor);
-            }
-            log.debug("File successfully deleted: {}, {}", id, serviceType);
+            fileDescriptorRepository.delete(fileDescriptor);
+            log.debug("File successfully deleted: {}", id);
         } else {
             log.error("File could not be deleted: {}", id);
             throw new FileNotFoundException();
@@ -115,14 +99,10 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * @return
      */
     @Override
-    public Set<FileDescriptorDto> getAllFilesByUser(String userEmail) {
-        Iterable<FileDescriptor> fileDescriptionList = fileDescriptionRepository.findAllByUploadedBy(userEmail);
-        Set<FileDescriptor> results = new HashSet<>();
-        for (FileDescriptor fd : fileDescriptionList) {
-            results.add(fd);
-        }
-        log.debug("Files found by file name: {}", userEmail);
-        return Converter.createFileDescriptorDtosFromFileDescriptors(results);
+    public List<FileDescriptorDto> getAllFilesByUser(String userEmail) {
+        List<FileDescriptor> results = fileDescriptorRepository.findAllByUploadedBy(userEmail);
+        log.debug("Files found by user {}: {}", userEmail, results);
+        return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
     }
 
     /**
@@ -131,25 +111,21 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * @return
      */
     @Override
-    public Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, ServiceType serviceType) {
-        List<FileDescriptor> fileDescriptors = fileDescriptionRepository.findAllByTagId(tagId);
-        Set<FileDescriptor> results = new HashSet<>();
-        for (FileDescriptor fd : fileDescriptors) {
-            if (fd.getServiceTypes().contains(serviceType)) {
-                results.add(fd);
-            }
-        }
-        return Converter.createFileDescriptorDtosFromFileDescriptors(results);
+    public List<FileDescriptorDto> getAllFilesByServiceTypeAndTagId(Long tagId, ServiceType serviceType) {
+        List<FileDescriptor> results = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
+        log.debug("Files found by file service {} and tagId {}: {}", serviceType, tagId, results);
+        return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
     }
 
     @Override
-    public File getFileByName(String name) {
-        // no implementation as it is not needed when google buckets are used
+    public Path getFileByName(String name) {
+        // no implementation as it is not needed nor called when google buckets are used
         return null;
     }
 
     /**
      * Hashes the given parameter
+     *
      * @param userEmail The string to be hashed
      * @return The hashed value of the given parameter
      */
@@ -163,7 +139,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         }
 
         byte[] bytes = mDigest.digest(userEmail.getBytes(StandardCharsets.UTF_8));
-        StringBuilder stringBuilder = new StringBuilder();
+        var stringBuilder = new StringBuilder();
         for (byte b : bytes) {
             stringBuilder.append(String.format("%02X", b));
         }
@@ -173,7 +149,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     @Override
     public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
             throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        List<FileDescriptor> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(serviceType, tagId);
+        List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
         for (FileDescriptor fileDescription : fileDescriptions) {
             deleteFile(fileDescription.getId(), serviceType, email, userRole);
         }

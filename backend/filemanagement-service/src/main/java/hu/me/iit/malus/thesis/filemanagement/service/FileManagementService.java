@@ -6,9 +6,9 @@ import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundExce
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
 
 import javax.servlet.http.Part;
-import java.io.File;
 import java.io.IOException;
-import java.util.Set;
+import java.nio.file.Path;
+import java.util.List;
 
 
 /**
@@ -25,11 +25,11 @@ public interface FileManagementService {
      *
      * @param file        The file to be uploaded
      * @param serviceType It defines the service, which the file has been uploaded from
-     * @param user        The email address of the user, who uploaded the file
+     * @param userEmail   The email address of the userEmail, who uploaded the file
      * @return The object that represents the file which was uploaded and saved to database.
      * @throws IOException thrown when the file saving fails
      */
-    FileDescriptorDto uploadFile(Part file, ServiceType serviceType, String user, Long tagId) throws IOException;
+    FileDescriptorDto uploadFile(Part file, ServiceType serviceType, String userEmail, Long tagId) throws IOException;
 
     /**
      * Deletes a file from the storage. If the file is uploaded by multiple services, than it just removes the entry from the services field.
@@ -46,7 +46,7 @@ public interface FileManagementService {
      * @param userEmail The parameter that filters the files
      * @return If it founds by the parameter than returns the value, else return empty Set
      */
-    Set<FileDescriptorDto> getAllFilesByUser(String userEmail);
+    List<FileDescriptorDto> getAllFilesByUser(String userEmail);
 
     /**
      * Queries all files based on the Id and the Service it belongs to.
@@ -55,7 +55,7 @@ public interface FileManagementService {
      * @param serviceType - The service which sent the file in
      * @return Filtered Set of files based on the given parameters
      */
-    Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, ServiceType serviceType);
+    List<FileDescriptorDto> getAllFilesByServiceTypeAndTagId(Long tagId, ServiceType serviceType);
 
     /**
      * Returns a file;
@@ -63,7 +63,7 @@ public interface FileManagementService {
      * @param name name of the file
      * @return the file
      */
-    File getFileByName(String name);
+    Path getFileByName(String name);
 
     /**
      * Deletes files based on service and tag id.

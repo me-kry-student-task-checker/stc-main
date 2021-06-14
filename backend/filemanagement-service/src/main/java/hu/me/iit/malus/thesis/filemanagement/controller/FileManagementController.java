@@ -42,7 +42,7 @@ public class FileManagementController {
     @PostMapping("/uploadFiles")
     public ResponseEntity<@Size(min = 1) Set<@Valid FileDescriptorDto>> uploadFiles(
             @FormDataParam("file") @Size(min = 1) List<Part> file,
-            @FormParam("service") @NotNull ServiceType serviceType,
+            @FormParam("serviceType") @NotNull ServiceType serviceType,
             @FormParam("tagId") @Min(1) Long tagId,
             Principal principal
     ) throws IOException {
@@ -62,15 +62,15 @@ public class FileManagementController {
     }
 
     @GetMapping("/download/getByUser")
-    public ResponseEntity<Set<@Valid FileDescriptorDto>> getFilesByUser(Principal principal) {
+    public ResponseEntity<List<@Valid FileDescriptorDto>> getFilesByUser(Principal principal) {
         return ResponseEntity.ok(fileManagementService.getAllFilesByUser(principal.getName()));
     }
 
     @GetMapping("/download/getByTagId/{serviceType}/{tagId}")
-    public ResponseEntity<Set<@Valid FileDescriptorDto>> getFilesByTagIdAndService(
+    public ResponseEntity<List<@Valid FileDescriptorDto>> getFilesByTagIdAndService(
             @PathVariable @NotNull ServiceType serviceType,
             @PathVariable @Min(1) Long tagId) {
-        return ResponseEntity.ok(fileManagementService.getAllFilesByServiceAndTagId(tagId, serviceType));
+        return ResponseEntity.ok(fileManagementService.getAllFilesByServiceTypeAndTagId(tagId, serviceType));
     }
 
     @GetMapping("/download/link/{name}")

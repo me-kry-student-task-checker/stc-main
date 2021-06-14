@@ -12,11 +12,11 @@ import java.util.List;
  * @author Ilku Krisztián
  * @author Attila Szőke
  */
-public interface FileDescriptionRepository extends JpaRepository<FileDescriptor, Long> {
+public interface FileDescriptorRepository extends JpaRepository<FileDescriptor, Long> {
 
     List<FileDescriptor> findAllByUploadedBy(String uploadedBy);
 
     List<FileDescriptor> findAllByTagId(Long tagId);
 
-    List<FileDescriptor> findAllByServicesContainingAndTagId(ServiceType serviceType, Long tagId);
+    List<FileDescriptor> findAllByServiceTypeAndTagId(ServiceType serviceType, Long tagId);
 }
