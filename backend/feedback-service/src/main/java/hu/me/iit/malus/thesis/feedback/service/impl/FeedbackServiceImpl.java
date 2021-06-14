@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.feedback.service.impl;
 
+import hu.me.iit.malus.thesis.dto.ServiceType;
 import hu.me.iit.malus.thesis.feedback.client.FileManagementClient;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
@@ -71,7 +72,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         Optional<List<CourseComment>> opt = courseCommentRepository.findAllByCourseId(courseId);
         List<CourseComment> results = opt.orElseGet(ArrayList::new);
         results.forEach(courseComment -> courseComment.setFiles(
-                fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK,
+                fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK,
                         courseComment.getId())));
 
         return results;
@@ -86,7 +87,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         Optional<List<TaskComment>> opt = taskCommentRepository.findAllByTaskId(taskId);
         List<TaskComment> results = opt.orElseGet(ArrayList::new);
         results.forEach(taskComment -> taskComment.setFiles(
-                fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK,
+                fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK,
                         taskComment.getId())));
 
         return results;
@@ -100,7 +101,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw new ForbiddenCommentEditException();
         }
         courseCommentRepository.delete(courseComment);
-        fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId());
+        fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
     }
 
     @Override
@@ -111,7 +112,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw new ForbiddenCommentEditException();
         }
         taskCommentRepository.delete(taskComment);
-        fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId());
+        fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
     }
 
     @Override
@@ -119,7 +120,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     public void removeFeedbacksByCourseId(Long courseId) {
         List<CourseComment> courseComments = courseCommentRepository.deleteByCourseId(courseId);
         courseComments.forEach(
-                courseComment -> fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId())
+                courseComment -> fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId())
         );
     }
 
@@ -128,7 +129,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     public void removeFeedbacksByTaskId(Long taskId) {
         List<TaskComment> taskComments = taskCommentRepository.deleteByTaskId(taskId);
         taskComments.forEach(
-                taskComment -> fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId())
+                taskComment -> fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId())
         );
     }
 }

@@ -4,6 +4,7 @@ package hu.me.iit.malus.thesis.filemanagement.service.impl;
 import com.google.cloud.storage.*;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
+import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.converters.Converter;
@@ -48,10 +49,10 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * @return
      */
     @Override
-    public FileDescriptorDto uploadFile(Part file, hu.me.iit.malus.thesis.filemanagement.model.Service service, String user, Long tagId) throws IOException {
+    public FileDescriptorDto uploadFile(Part file, ServiceType serviceType, String user, Long tagId) throws IOException {
         String userHash = hashIt(user);
         String fileName = userHash + "_" + file.getSubmittedFileName();
-        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(), file.getInputStream());
+        Blob blob = storage.create(BlobInfo.newBuilder(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(), file.getInputStream());
         log.debug("File successfully uploaded: {}", file.getSubmittedFileName());
         FileDescriptor fileDescriptor = new FileDescriptor();
         fileDescriptor.setUploadDate(new Date());
@@ -60,14 +61,14 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         fileDescriptor.setSize(file.getSize());
         fileDescriptor.setContentType(file.getContentType());
         fileDescriptor.setUploadedBy(user);
-        fileDescriptor.setServices(new HashSet<>());
-        fileDescriptor.getServices().add(service);
+        fileDescriptor.setServiceTypes(new HashSet<>());
+        fileDescriptor.getServiceTypes().add(serviceType);
         fileDescriptor.setTagId(tagId);
 
         for (FileDescriptor fd : fileDescriptionRepository.findAll()) {
             if (fd.getName().equalsIgnoreCase(fileDescriptor.getName())) {
                 fileDescriptor.setId(fd.getId());
-                fileDescriptor.getServices().addAll(fd.getServices());
+                fileDescriptor.getServiceTypes().addAll(fd.getServiceTypes());
                 break;
             }
         }
@@ -81,7 +82,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, hu.me.iit.malus.thesis.filemanagement.model.Service service, String email, String userRole)
+    public void deleteFile(Long id, ServiceType serviceType, String email, String userRole)
             throws ForbiddenFileDeleteException, FileNotFoundException {
         FileDescriptor fileDescriptor = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
@@ -92,16 +93,16 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             log.warn("User: {} a {} does not have the privilege: to delete file {}", email, userRole, id);
             throw new ForbiddenFileDeleteException();
         }
-        BlobId blobId = BlobId.of(BUCKET_NAME, service.toString().toLowerCase() + "/" + fileDescriptor.getName());
+        BlobId blobId = BlobId.of(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileDescriptor.getName());
         boolean deleteSuccessful = storage.delete(blobId);
         if (deleteSuccessful) {
-            fileDescriptor.getServices().remove(service);
-            if (fileDescriptor.getServices().isEmpty()) {
+            fileDescriptor.getServiceTypes().remove(serviceType);
+            if (fileDescriptor.getServiceTypes().isEmpty()) {
                 fileDescriptionRepository.delete(fileDescriptor);
             } else {
                 fileDescriptionRepository.save(fileDescriptor);
             }
-            log.debug("File successfully deleted: {}, {}", id, service);
+            log.debug("File successfully deleted: {}, {}", id, serviceType);
         } else {
             log.error("File could not be deleted: {}", id);
             throw new FileNotFoundException();
@@ -130,11 +131,11 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * @return
      */
     @Override
-    public Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, hu.me.iit.malus.thesis.filemanagement.model.Service service) {
+    public Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, ServiceType serviceType) {
         List<FileDescriptor> fileDescriptors = fileDescriptionRepository.findAllByTagId(tagId);
         Set<FileDescriptor> results = new HashSet<>();
         for (FileDescriptor fd : fileDescriptors) {
-            if (fd.getServices().contains(service)) {
+            if (fd.getServiceTypes().contains(serviceType)) {
                 results.add(fd);
             }
         }
@@ -170,11 +171,11 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     }
 
     @Override
-    public void deleteFilesByServiceAndTagId(hu.me.iit.malus.thesis.filemanagement.model.Service service, Long tagId, String email, String userRole)
+    public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
             throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        List<FileDescriptor> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(service, tagId);
+        List<FileDescriptor> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(serviceType, tagId);
         for (FileDescriptor fileDescription : fileDescriptions) {
-            deleteFile(fileDescription.getId(), service, email, userRole);
+            deleteFile(fileDescription.getId(), serviceType, email, userRole);
         }
     }
 }

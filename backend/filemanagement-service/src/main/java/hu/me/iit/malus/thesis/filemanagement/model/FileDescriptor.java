@@ -40,7 +40,7 @@ public class FileDescriptor {
     @OrderColumn(name = "index_no")
     @CollectionTable(name = "services",
             joinColumns = @JoinColumn(name = "file_description_id"))
-    Set<Service> services;
+    Set<ServiceType> serviceTypes;
     Long tagId;
 
     @Override

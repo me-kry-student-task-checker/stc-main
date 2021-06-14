@@ -2,7 +2,7 @@ package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
-import hu.me.iit.malus.thesis.filemanagement.model.Service;
+import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptionRepository;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.converters.Converter;
@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.Part;
 import java.io.File;
@@ -27,7 +28,7 @@ import java.util.Set;
  *
  * @author Attila Szőke
  **/
-@org.springframework.stereotype.Service
+@Service
 @Slf4j
 @RequiredArgsConstructor
 @Profile("!google")
@@ -44,8 +45,8 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * @return
      */
     @Override
-    public FileDescriptorDto uploadFile(Part file, Service service, String user, Long tagId) throws IOException {
-        String fileName = user.hashCode() + "_" + service.hashCode() + "_" + tagId.hashCode() + "_" + file.getSubmittedFileName();
+    public FileDescriptorDto uploadFile(Part file, ServiceType serviceType, String user, Long tagId) throws IOException {
+        String fileName = user.hashCode() + "_" + serviceType.hashCode() + "_" + tagId.hashCode() + "_" + file.getSubmittedFileName();
         FileDescriptor fileDescriptor = new FileDescriptor();
         fileDescriptor.setUploadDate(new Date());
         fileDescriptor.setName(fileName);
@@ -53,14 +54,14 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
         fileDescriptor.setSize(file.getSize());
         fileDescriptor.setContentType(file.getContentType());
         fileDescriptor.setUploadedBy(user);
-        fileDescriptor.setServices(new HashSet<>());
-        fileDescriptor.getServices().add(service);
+        fileDescriptor.setServiceTypes(new HashSet<>());
+        fileDescriptor.getServiceTypes().add(serviceType);
         fileDescriptor.setTagId(tagId);
 
         for (FileDescriptor fd : fileDescriptionRepository.findAll()) {
             if (fd.getName().equalsIgnoreCase(fileDescriptor.getName())) {
                 fileDescriptor.setId(fd.getId());
-                fileDescriptor.getServices().addAll(fd.getServices());
+                fileDescriptor.getServiceTypes().addAll(fd.getServiceTypes());
                 break;
             }
         }
@@ -80,7 +81,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * {@inheritDoc}
      */
     @Override
-    public void deleteFile(Long id, Service service, String email, String userRole) throws ForbiddenFileDeleteException, FileNotFoundException {
+    public void deleteFile(Long id, ServiceType serviceType, String email, String userRole) throws ForbiddenFileDeleteException, FileNotFoundException {
         FileDescriptor fileDescriptor = fileDescriptionRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
@@ -95,13 +96,13 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
         boolean deleteSuccessful = targetFile.delete();
         if (deleteSuccessful) {
-            fileDescriptor.getServices().remove(service);
-            if (fileDescriptor.getServices().isEmpty()) {
+            fileDescriptor.getServiceTypes().remove(serviceType);
+            if (fileDescriptor.getServiceTypes().isEmpty()) {
                 fileDescriptionRepository.delete(fileDescriptor);
             } else {
                 fileDescriptionRepository.save(fileDescriptor);
             }
-            log.debug("File successfully deleted: {}, {}", id, service);
+            log.debug("File successfully deleted: {}, {}", id, serviceType);
         } else {
             log.error("File could not be deleted: {}", id);
             throw new FileNotFoundException();
@@ -128,15 +129,15 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * @return
      */
     @Override
-    public Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, Service service) {
+    public Set<FileDescriptorDto> getAllFilesByServiceAndTagId(Long tagId, ServiceType serviceType) {
         List<FileDescriptor> fileDescriptors = fileDescriptionRepository.findAllByTagId(tagId);
         Set<FileDescriptor> results = new HashSet<>();
         for (FileDescriptor fd : fileDescriptors) {
-            if (fd.getServices().contains(service)) {
+            if (fd.getServiceTypes().contains(serviceType)) {
                 results.add(fd);
             }
         }
-        log.debug("Files found by file service {} and tagId {}: {}", service, tagId, results);
+        log.debug("Files found by file service {} and tagId {}: {}", serviceType, tagId, results);
         return Converter.createFileDescriptorDtosFromFileDescriptors(results);
     }
 
@@ -150,11 +151,11 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
     }
 
     @Override
-    public void deleteFilesByServiceAndTagId(Service service, Long tagId, String email, String userRole)
+    public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
             throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        List<FileDescriptor> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(service, tagId);
+        List<FileDescriptor> fileDescriptions = fileDescriptionRepository.findAllByServicesContainingAndTagId(serviceType, tagId);
         for (FileDescriptor fileDescription : fileDescriptions) {
-            deleteFile(fileDescription.getId(), service, email, userRole);
+            deleteFile(fileDescription.getId(), serviceType, email, userRole);
         }
     }
 }

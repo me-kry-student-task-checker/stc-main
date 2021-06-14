@@ -14,6 +14,7 @@ import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.converters.Converter;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
+import hu.me.iit.malus.thesis.dto.ServiceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -89,7 +90,7 @@ public class CourseServiceImpl implements CourseService {
         course.setCreator(userClient.getTeacherByCreatedCourseId(courseId));
         course.setStudents(userClient.getStudentsByAssignedCourseId(courseId));
         course.setTasks(taskClient.getAllTasks(courseId));
-        course.setFiles(fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.COURSE, courseId));
+        course.setFiles(fileManagementClient.getAllFilesByTagId(ServiceType.COURSE, courseId));
         course.setComments(feedbackClient.getAllCourseComments(courseId));
         log.debug("Course found: {}", courseId);
         return Converter.createCourseFullDetailsDtoFromCourse(course);
@@ -124,7 +125,7 @@ public class CourseServiceImpl implements CourseService {
             courseRepository.deleteById(courseId);
             userClient.removeCourseIdFromRelatedUserLists(courseId);
             taskClient.removeTasksByCourseId(courseId);
-            fileManagementClient.removeFilesByServiceAndTagId(hu.me.iit.malus.thesis.dto.Service.COURSE, courseId);
+            fileManagementClient.removeFilesByServiceAndTagId(ServiceType.COURSE, courseId);
             feedbackClient.removeCourseCommentsByCourseId(courseId);
             return;
         }
