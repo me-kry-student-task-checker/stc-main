@@ -13,8 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.Part;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +46,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      * @return
      */
     @Override
-    public FileDescriptorDto uploadFile(Part file, ServiceType serviceType, String userEmail, Long tagId) throws IOException {
+    public FileDescriptorDto uploadFile(MultipartFile file, ServiceType serviceType, String userEmail, Long tagId) throws IOException {
         var fileName = String.format(
                 FILE_NAME_PATTERN, userEmail.hashCode(), serviceType.hashCode(), tagId.hashCode(), UUID.randomUUID());
         var downloadLink = String.format(DOWNLOAD_LINK_PATTERN, fileName);

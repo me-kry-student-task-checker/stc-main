@@ -4,8 +4,8 @@ import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.Part;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -29,7 +29,7 @@ public interface FileManagementService {
      * @return The object that represents the file which was uploaded and saved to database.
      * @throws IOException thrown when the file saving fails
      */
-    FileDescriptorDto uploadFile(Part file, ServiceType serviceType, String userEmail, Long tagId) throws IOException;
+    FileDescriptorDto uploadFile(MultipartFile file, ServiceType serviceType, String userEmail, Long tagId) throws IOException;
 
     /**
      * Deletes a file from the storage. If the file is uploaded by multiple services, than it just removes the entry from the services field.

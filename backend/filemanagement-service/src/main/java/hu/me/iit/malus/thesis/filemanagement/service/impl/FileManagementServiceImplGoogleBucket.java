@@ -18,8 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.Part;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -52,19 +52,19 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      * @return
      */
     @Override
-    public FileDescriptorDto uploadFile(Part file, ServiceType serviceType, String userEmail, Long tagId) throws IOException {
+    public FileDescriptorDto uploadFile(MultipartFile file, ServiceType serviceType, String userEmail, Long tagId) throws IOException {
         String userHash = hashIt(userEmail);
-        var fileName = String.format("%s_%s", userHash, file.getSubmittedFileName());
+        var fileName = String.format("%s_%s", userHash, file.getName());
         var blob = storage.create(
                 BlobInfo.newBuilder(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(),
                 file.getInputStream().readAllBytes()
         );
-        log.debug("File successfully uploaded to google bucket: {}", file.getSubmittedFileName());
+        log.debug("File successfully uploaded to google bucket: {}", file.getName());
         var fileDescriptor = new FileDescriptor(
                 null, fileName, blob.getMediaLink(), file.getSize(), new Date(), userEmail, file.getContentType(), serviceType, tagId);
         fileDescriptorRepository.save(fileDescriptor);
         log.debug("File description successfully saved to database: {}", fileDescriptor);
-        fileDescriptor.setName(file.getSubmittedFileName());
+        fileDescriptor.setName(file.getName());
         return Converter.createFileDescriptorDtoFromFileDescriptor(fileDescriptor);
     }
 

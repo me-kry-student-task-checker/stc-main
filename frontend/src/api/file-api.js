@@ -4,7 +4,7 @@ export default {
 	createFileEntry(files, service, tagId) {
 		let formData = new FormData();
 		files.forEach((file) => {
-			formData.append('file', file);
+			formData.append('files', file);
 		});
 		formData.append('serviceType', service);
 		formData.append('tagId', tagId);
