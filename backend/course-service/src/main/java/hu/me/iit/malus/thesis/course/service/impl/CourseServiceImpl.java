@@ -42,8 +42,6 @@ public class CourseServiceImpl implements CourseService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     @Transactional
@@ -58,13 +56,11 @@ public class CourseServiceImpl implements CourseService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public CourseOverviewDto edit(CourseModificationDto dto, String editorsEmail) throws ForbiddenCourseEditException, CourseNotFoundException {
         Course course = courseRepository.findById(dto.getId()).orElseThrow(CourseNotFoundException::new);
-        if (!course.getCreator().getEmail().equals(editorsEmail)) {
+        if (!userClient.isRelated(course.getId())) {
             log.warn("Creator of this course {} is not the editor: {}!", course, editorsEmail);
             throw new ForbiddenCourseEditException();
         }
@@ -76,8 +72,6 @@ public class CourseServiceImpl implements CourseService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public CourseFullDetailsDto get(Long courseId, String userEmail) throws CourseNotFoundException {
@@ -98,8 +92,6 @@ public class CourseServiceImpl implements CourseService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public Set<CourseOverviewDto> getAll(String userEmail) {
@@ -113,6 +105,9 @@ public class CourseServiceImpl implements CourseService {
         return relatedCourses.stream().map(Converter::createCourseOverviewDtoFromCourse).collect(Collectors.toSet());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void deleteCourse(Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException {
