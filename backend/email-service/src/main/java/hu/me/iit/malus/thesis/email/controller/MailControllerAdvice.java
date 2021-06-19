@@ -11,7 +11,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class MailControllerAdvice {
 
-    private static final String MSG = "msg";
+    public static final String MSG = "msg";
 
     @ExceptionHandler(MailCouldNotBeSentException.class)
     public ResponseEntity<Map<String, String>> handle(MailCouldNotBeSentException e) {

@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.email.controller.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -13,6 +14,7 @@ import java.util.List;
  * @author Attila Szőke
  */
 @Data
+@AllArgsConstructor
 public class MailDto {
 
     @NotEmpty(message = "To cannot be empty")
