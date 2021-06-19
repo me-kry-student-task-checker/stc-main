@@ -15,6 +15,8 @@ public class MailControllerAdvice {
 
     @ExceptionHandler(MailCouldNotBeSentException.class)
     public ResponseEntity<Map<String, String>> handle(MailCouldNotBeSentException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(MSG, e.getMessage()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                Map.of(MSG, String.format("%s - { %s }", e.getMessage(), e.getCause().getMessage()))
+        );
     }
 }

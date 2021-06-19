@@ -1,39 +1,24 @@
 package hu.me.iit.malus.thesis.email.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
+ * The main model object of the service.
+ *
  * @author Ilku Krisztián
- * The type Mail.
+ * @author Attila Szőke
  */
-
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
-@NoArgsConstructor
-public class Mail {
-
-    @NotNull(message = "To cannot be null")
-    @NotEmpty(message = "To cannot be empty")
+@Data
+@AllArgsConstructor
+public class Mail { // Not used for now, if emails will be stored it can be used, if not should be deleted
     private List<@Email String> to;
-
-    @NotNull(message = "Subject cannot be null")
-    @NotEmpty(message = "Subject cannot be empty")
     private String subject;
-
     private String[] ccs;
-
     private String[] bccs;
-
-    @NotNull(message = "Email content cannot be null")
-    @NotEmpty(message = "Email content cannot be empty")
     private String text;
-
     private String replyTo;
 }
