@@ -32,20 +32,22 @@ public class MailServiceImplTest {
     private final String[] testBccs = {"5oL9", "ns360R0K", "1OVU"};
     private final String testText = "tdKdty";
     private final String testReplyTo = "WzJS";
+
     @Captor
     private ArgumentCaptor<SimpleMailMessage> argumentCaptor;
+
     @Mock
     private JavaMailSender mockMailSender;
+
     @InjectMocks
     private MailServiceImpl service;
+
     private MailDto dto;
     private SimpleMailMessage mail;
 
     @Before
     public void setUp() {
-        dto = new MailDto(
-                testTo, testSubject, testCcs, testBccs, testText, testReplyTo
-        );
+        dto = new MailDto(testTo, testSubject, testCcs, testBccs, testText, testReplyTo);
         mail = new SimpleMailMessage();
         mail.setTo(dto.getTo().toArray(new String[0]));
         mail.setFrom(MailServiceImpl.FROM);

@@ -35,10 +35,13 @@ public class MailControllerTest {
     private final MailDto dto = new MailDto(
             testTo, testSubject, testCcs, testBccs, testText, testReplyTo
     );
+
     @Captor
     private ArgumentCaptor<MailDto> argumentCaptor;
+
     @Mock
     private MailService service;
+
     @InjectMocks
     private MailController controller;
 
