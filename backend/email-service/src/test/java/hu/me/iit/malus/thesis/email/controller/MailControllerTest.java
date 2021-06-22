@@ -10,7 +10,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -22,7 +21,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
 @RunWith(MockitoJUnitRunner.class)
 public class MailControllerTest {
 
@@ -57,8 +55,8 @@ public class MailControllerTest {
     @Test(expected = MailCouldNotBeSentException.class)
     public void send_exceptionThrownAndHandled() throws MailCouldNotBeSentException {
         String testMessage = "vYoL";
-        var cause = new Exception(testMessage);
-        var e = new MailCouldNotBeSentException(cause);
+        Exception cause = new Exception(testMessage);
+        MailCouldNotBeSentException e = new MailCouldNotBeSentException(cause);
         doThrow(e).when(service).sendEmail(any());
         controller.send(dto);
     }

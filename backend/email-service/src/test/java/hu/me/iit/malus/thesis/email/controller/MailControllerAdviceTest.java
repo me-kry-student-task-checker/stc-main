@@ -4,7 +4,6 @@ import hu.me.iit.malus.thesis.email.service.exception.MailCouldNotBeSentExceptio
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -16,7 +15,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-@SpringBootTest
 @RunWith(MockitoJUnitRunner.class)
 public class MailControllerAdviceTest {
 
@@ -32,9 +30,9 @@ public class MailControllerAdviceTest {
 
         assertThat(response.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
         assertThat(response.getBody(), is(not(nullValue())));
-        var body = response.getBody();
+        Map<String, String> body = response.getBody();
         assertTrue(body.containsKey(MailControllerAdvice.MSG));
-        var msg = body.get(MailControllerAdvice.MSG);
+        String msg = body.get(MailControllerAdvice.MSG);
         assertThat(msg, is(String.format(MailControllerAdvice.MSG_FORMAT, testException.getMessage(), testMsg)));
     }
 }

@@ -30,7 +30,7 @@ public class MailServiceImpl implements MailService {
      */
     @Override
     public void sendEmail(MailDto dto) throws MailCouldNotBeSentException {
-        var mail = new SimpleMailMessage();
+        SimpleMailMessage mail = new SimpleMailMessage();
         mail.setTo(dto.getTo().toArray(new String[0]));
         mail.setFrom(FROM);
         mail.setReplyTo(dto.getReplyTo());
