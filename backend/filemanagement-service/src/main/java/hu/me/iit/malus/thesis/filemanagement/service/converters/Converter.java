@@ -12,7 +12,7 @@ public class Converter {
     }
 
     public static FileDescriptorDto createFileDescriptorDtoFromFileDescriptor(FileDescriptor fileDescriptor) {
-        var fileDescriptorDto = new FileDescriptorDto();
+        FileDescriptorDto fileDescriptorDto = new FileDescriptorDto();
         fileDescriptorDto.setId(fileDescriptor.getId());
         fileDescriptorDto.setName(fileDescriptor.getName());
         fileDescriptorDto.setDownloadLink(fileDescriptor.getDownloadLink());

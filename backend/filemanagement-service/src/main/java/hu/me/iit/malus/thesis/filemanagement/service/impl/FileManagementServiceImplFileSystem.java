@@ -47,13 +47,13 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
      */
     @Override
     public FileDescriptorDto uploadFile(MultipartFile file, ServiceType serviceType, String userEmail, Long tagId) throws IOException {
-        var fileName = String.format(
+        String fileName = String.format(
                 FILE_NAME_PATTERN, userEmail.hashCode(), serviceType.hashCode(), tagId.hashCode(), UUID.randomUUID());
-        var downloadLink = String.format(DOWNLOAD_LINK_PATTERN, fileName);
-        var fileDescriptor = new FileDescriptor(
+        String downloadLink = String.format(DOWNLOAD_LINK_PATTERN, fileName);
+        FileDescriptor fileDescriptor = new FileDescriptor(
                 null, fileName, downloadLink, file.getSize(), new Date(), userEmail, file.getContentType(), serviceType, tagId);
         String uploadDir = env.getProperty(FILE_DIR_PROP);
-        var targetFile = Path.of(uploadDir, fileName);
+        Path targetFile = Path.of(uploadDir, fileName);
         Files.createDirectories(targetFile.getParent());
         Files.copy(file.getInputStream(), targetFile);
         log.debug("File successfully uploaded: {}", fileName);
@@ -68,7 +68,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
     @Override
     public void deleteFile(Long id, ServiceType serviceType, String email, String userRole)
             throws ForbiddenFileDeleteException, FileNotFoundException {
-        var fileDescriptor = fileDescriptorRepository.findById(id).orElseThrow(() -> {
+        FileDescriptor fileDescriptor = fileDescriptorRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
@@ -77,7 +77,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
             throw new ForbiddenFileDeleteException();
         }
         String uploadDir = env.getProperty(FILE_DIR_PROP);
-        var targetFile = Path.of(uploadDir, fileDescriptor.getName());
+        Path targetFile = Path.of(uploadDir, fileDescriptor.getName());
         try {
             Files.delete(targetFile);
             fileDescriptorRepository.delete(fileDescriptor);

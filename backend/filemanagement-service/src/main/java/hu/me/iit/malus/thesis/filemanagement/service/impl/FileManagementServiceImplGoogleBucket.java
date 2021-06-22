@@ -1,10 +1,7 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.*;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
@@ -54,13 +51,13 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     @Override
     public FileDescriptorDto uploadFile(MultipartFile file, ServiceType serviceType, String userEmail, Long tagId) throws IOException {
         String userHash = hashIt(userEmail);
-        var fileName = String.format("%s_%s", userHash, file.getName());
-        var blob = storage.create(
+        String fileName = String.format("%s_%s", userHash, file.getName());
+        Blob blob = storage.create(
                 BlobInfo.newBuilder(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileName).setContentType(file.getContentType()).build(),
                 file.getInputStream().readAllBytes()
         );
         log.debug("File successfully uploaded to google bucket: {}", file.getName());
-        var fileDescriptor = new FileDescriptor(
+        FileDescriptor fileDescriptor = new FileDescriptor(
                 null, fileName, blob.getMediaLink(), file.getSize(), new Date(), userEmail, file.getContentType(), serviceType, tagId);
         fileDescriptorRepository.save(fileDescriptor);
         log.debug("File description successfully saved to database: {}", fileDescriptor);
@@ -74,7 +71,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     @Override
     public void deleteFile(Long id, ServiceType serviceType, String email, String userRole)
             throws ForbiddenFileDeleteException, FileNotFoundException {
-        var fileDescriptor = fileDescriptorRepository.findById(id).orElseThrow(() -> {
+        FileDescriptor fileDescriptor = fileDescriptorRepository.findById(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
@@ -82,7 +79,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             log.warn("User: {} a {} does not have the privilege: to delete file {}", email, userRole, id);
             throw new ForbiddenFileDeleteException();
         }
-        var blobId = BlobId.of(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileDescriptor.getName());
+        BlobId blobId = BlobId.of(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileDescriptor.getName());
         boolean deleteSuccessful = storage.delete(blobId);
         if (deleteSuccessful) {
             fileDescriptorRepository.delete(fileDescriptor);
