@@ -28,7 +28,7 @@ public class Converter {
     }
 
     public static StudentDto createStudentDtoFromStudent(Student student) {
-        var dto = new StudentDto();
+        StudentDto dto = new StudentDto();
         dto.setEmail(student.getEmail());
         dto.setFirstName(student.getFirstName());
         dto.setLastName(student.getLastName());
@@ -38,7 +38,7 @@ public class Converter {
     }
 
     public static AdminDto createAdminDtoFromStudent(Admin admin) {
-        var dto = new AdminDto();
+        AdminDto dto = new AdminDto();
         dto.setEmail(admin.getEmail());
         dto.setFirstName(admin.getFirstName());
         dto.setLastName(admin.getLastName());
@@ -47,7 +47,7 @@ public class Converter {
     }
 
     public static TeacherDto createTeacherDtoFromTeacher(Teacher teacher) {
-        var dto = new TeacherDto();
+        TeacherDto dto = new TeacherDto();
         dto.setEmail(teacher.getEmail());
         dto.setFirstName(teacher.getFirstName());
         dto.setLastName(teacher.getLastName());

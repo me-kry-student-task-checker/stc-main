@@ -2,6 +2,7 @@ package hu.me.iit.malus.thesis.user.controller;
 
 import hu.me.iit.malus.thesis.user.controller.dto.*;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
+import hu.me.iit.malus.thesis.user.model.User;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import hu.me.iit.malus.thesis.user.service.exception.DatabaseOperationFailedException;
 import hu.me.iit.malus.thesis.user.service.exception.EmailExistsException;
@@ -35,7 +36,7 @@ public class UserController {
             throws EmailExistsException, UserAlreadyExistException {
         log.info("Registering user account by request: {}", registrationRequest);
 
-        var registeredUser = service.registerNewUserAccount(registrationRequest);
+        User registeredUser = service.registerNewUserAccount(registrationRequest);
         if (registeredUser == null) {
             throw new UserAlreadyExistException();
         }

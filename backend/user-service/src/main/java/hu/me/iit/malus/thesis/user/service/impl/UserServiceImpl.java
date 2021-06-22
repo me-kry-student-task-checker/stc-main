@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
             throw new EmailExistsException(
                     "There is already an account with that email address: " + registrationRequest.getEmail());
         }
-        var newUser = userFactory.create(registrationRequest);
+        User newUser = userFactory.create(registrationRequest);
         return saveUser(newUser);
     }
 
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void createActivationToken(User user, String token) {
-        final var userToken = ActivationToken.of(token, user);
+        final ActivationToken userToken = ActivationToken.of(token, user);
         tokenRepository.save(userToken);
     }
 
@@ -73,13 +73,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public boolean activateUser(String token) {
-        var activationTokenOpt = tokenRepository.findByToken(token);
+        Optional<ActivationToken> activationTokenOpt = tokenRepository.findByToken(token);
         if (activationTokenOpt.isEmpty()) {
             return false;
         }
-        var activationToken = activationTokenOpt.get();
-        final var user = activationToken.getUser();
-        final var cal = Calendar.getInstance();
+        ActivationToken activationToken = activationTokenOpt.get();
+        final User user = activationToken.getUser();
+        final Calendar cal = Calendar.getInstance();
         if ((activationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
             tokenRepository.delete(activationToken);
             return false;
@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public StudentDto getStudentByEmail(String studentEmail) throws DatabaseOperationFailedException, UserNotFoundException {
-        var student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
+        Student student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
         try {
             return Converter.createStudentDtoFromStudent(student);
         } catch (DataAccessException dataExc) {
@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public TeacherDto getTeacherByEmail(String teacherEmail) throws UserNotFoundException, DatabaseOperationFailedException {
-        var teacher = teacherRepository.findByEmail(teacherEmail).orElseThrow(() -> new UserNotFoundException(teacherEmail));
+        Teacher teacher = teacherRepository.findByEmail(teacherEmail).orElseThrow(() -> new UserNotFoundException(teacherEmail));
         try {
             return Converter.createTeacherDtoFromTeacher(teacher);
         } catch (DataAccessException e) {
@@ -183,7 +183,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public TeacherDto getTeacherByCreatedCourseId(Long courseId) throws UserNotFoundException, DatabaseOperationFailedException {
-        var teacher = teacherRepository.findByCreatedCourseId(courseId).orElseThrow(UserNotFoundException::new);
+        Teacher teacher = teacherRepository.findByCreatedCourseId(courseId).orElseThrow(UserNotFoundException::new);
         try {
             return Converter.createTeacherDtoFromTeacher(teacher);
         } catch (DataAccessException e) {
@@ -212,7 +212,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public boolean isRelatedToCourse(String email, Long courseId) throws UserNotFoundException {
-        var user = getAnyUserByEmail(email);
+        User user = getAnyUserByEmail(email);
         if (user instanceof Student) {
             return ((Student) user).getAssignedCourseIds().contains(courseId);
         }
@@ -227,7 +227,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User getAnyUserByEmail(String email) throws UserNotFoundException {
-        var opt = Stream.of(studentRepository.findByEmail(email), teacherRepository.findByEmail(email), adminRepository.findByEmail(email))
+        Optional<? extends User> opt = Stream.of(studentRepository.findByEmail(email), teacherRepository.findByEmail(email),
+                adminRepository.findByEmail(email))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();
@@ -240,7 +241,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDto getAnyUserDtoByEmail(String email) throws UserNotFoundException {
-        var user = getAnyUserByEmail(email);
+        User user = getAnyUserByEmail(email);
         return Converter.createUserDtoFromUser(user);
     }
 

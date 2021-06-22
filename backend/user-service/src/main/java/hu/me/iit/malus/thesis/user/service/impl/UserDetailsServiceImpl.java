@@ -38,9 +38,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         // These flags are not defined in our system, but should be used for userdetails.User
-        final var accountNonExpired = true;
-        final var credentialsNonExpired = true;
-        final var accountNonLocked = true;
+        final boolean accountNonExpired = true;
+        final boolean credentialsNonExpired = true;
+        final boolean accountNonLocked = true;
 
         final User user;
         try {
