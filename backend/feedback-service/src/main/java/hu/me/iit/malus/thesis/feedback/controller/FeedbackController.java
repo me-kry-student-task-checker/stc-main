@@ -1,18 +1,19 @@
 package hu.me.iit.malus.thesis.feedback.controller;
 
-import hu.me.iit.malus.thesis.feedback.controller.converters.Converter;
-import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentDto;
-import hu.me.iit.malus.thesis.feedback.controller.dto.TaskCommentDto;
-import hu.me.iit.malus.thesis.feedback.model.CourseComment;
-import hu.me.iit.malus.thesis.feedback.model.TaskComment;
+import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentCreateDto;
+import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentDetailsDto;
+import hu.me.iit.malus.thesis.feedback.controller.dto.TaskCommentCreateDto;
+import hu.me.iit.malus.thesis.feedback.controller.dto.TaskCommentDetailsDto;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
 import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
 import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.security.Principal;
 import java.util.List;
 
@@ -23,36 +24,28 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/feedback")
+@RequiredArgsConstructor
 public class FeedbackController {
 
     private final FeedbackService service;
 
-    @Autowired
-    public FeedbackController(FeedbackService service) {
-        this.service = service;
-    }
-
     @PostMapping("/createCourseComment")
-    public CourseComment create(@RequestBody CourseCommentDto courseComment, Principal principal) {
-        CourseComment cc = Converter.CourseCommentDtoToCourseComment(courseComment);
-        cc.setAuthorId(principal.getName());
-        return service.createCourseComment(cc);
+    public @Valid CourseCommentDetailsDto create(@RequestBody @Valid CourseCommentCreateDto dto, Principal principal) {
+        return service.createCourseComment(dto, principal.getName());
     }
 
     @PostMapping("/createTaskComment")
-    public TaskComment create(@RequestBody TaskCommentDto taskComment, Principal principal) {
-        TaskComment tc = Converter.TaskCommentDtoToTaskComment(taskComment);
-        tc.setAuthorId(principal.getName());
-        return service.createTaskComment(tc);
+    public @Valid TaskCommentDetailsDto create(@RequestBody @Valid TaskCommentCreateDto dto, Principal principal) {
+        return service.createTaskComment(dto, principal.getName());
     }
 
     @GetMapping("/getAllCourseComments/{courseId}")
-    public List<CourseComment> getAllCourseComments(@PathVariable Long courseId) {
+    public List<@Valid CourseCommentDetailsDto> getAllCourseComments(@PathVariable @Min(1) Long courseId) {
         return service.getAllCourseComments(courseId);
     }
 
     @GetMapping("/getAllTaskComments/{taskId}")
-    public List<TaskComment> getAllTaskComments(@PathVariable Long taskId) {
+    public List<@Valid TaskCommentDetailsDto> getAllTaskComments(@PathVariable @Min(1) Long taskId) {
         return service.getAllTaskComments(taskId);
     }
 
