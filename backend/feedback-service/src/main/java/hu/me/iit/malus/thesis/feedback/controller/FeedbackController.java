@@ -9,7 +9,6 @@ import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundExceptio
 import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -50,13 +49,13 @@ public class FeedbackController {
     }
 
     @DeleteMapping("/delete/course/{commentId}")
-    public void deleteCourseComment(@PathVariable Long commentId, Authentication authentication) throws CommentNotFoundException, ForbiddenCommentEditException {
-        service.removeCourseComment(commentId, authentication.getName());
+    public void deleteCourseComment(@PathVariable Long commentId, Principal principal) throws CommentNotFoundException, ForbiddenCommentEditException {
+        service.removeCourseComment(commentId, principal.getName());
     }
 
     @DeleteMapping("/delete/task/{commentId}")
-    public void deleteTaskComment(@PathVariable Long commentId, Authentication authentication) throws CommentNotFoundException, ForbiddenCommentEditException {
-        service.removeTaskComment(commentId, authentication.getName());
+    public void deleteTaskComment(@PathVariable Long commentId, Principal principal) throws CommentNotFoundException, ForbiddenCommentEditException {
+        service.removeTaskComment(commentId, principal.getName());
     }
 
     @DeleteMapping("/removeCourseCommentsByCourseId/{courseId}")
