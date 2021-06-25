@@ -5,7 +5,9 @@ import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
 import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
 import hu.me.iit.malus.thesis.user.controller.dto.UserDto;
 import hu.me.iit.malus.thesis.user.model.User;
-import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
+import hu.me.iit.malus.thesis.user.service.exception.DatabaseOperationFailedException;
+import hu.me.iit.malus.thesis.user.service.exception.EmailExistsException;
+import hu.me.iit.malus.thesis.user.service.exception.UserNotFoundException;
 
 import java.util.List;
 import java.util.Set;
@@ -48,70 +50,68 @@ public interface UserService {
      *
      * @param teacherEmail the teacher email
      * @param courseId     the course id
+     * @return the teacher dto
+     * @throws DatabaseOperationFailedException the database operation failed exception
+     * @throws UserNotFoundException            the user not found exception
      */
-    TeacherDto saveCourseCreation(String teacherEmail, Long courseId);
+    TeacherDto saveCourseCreation(String teacherEmail, Long courseId) throws DatabaseOperationFailedException, UserNotFoundException;
 
     /**
      * Adds the id of a course to the assigned the students.
      *
      * @param courseId      the course id
      * @param studentEmails the student emails
+     * @throws DatabaseOperationFailedException the database operation failed exception
      */
-    void assignStudentsToCourse(Long courseId, List<String> studentEmails);
-
-    /**
-     * Returns all the saved Students
-     *
-     * @return the students
-     */
-    Set<StudentDto> getAllStudents();
-
-    /**
-     * Returns all the saved Teachers
-     *
-     * @return the teachers
-     */
-    Set<TeacherDto> getAllTeachers();
+    void assignStudentsToCourse(Long courseId, List<String> studentEmails) throws DatabaseOperationFailedException;
 
     /**
      * Returns a single Student by its email (identifier)
      *
      * @param studentEmail Student's email
      * @return The corresponding Student
+     * @throws DatabaseOperationFailedException the database operation failed exception
+     * @throws UserNotFoundException            the user not found exception
      */
-    StudentDto getStudentByEmail(String studentEmail);
+    StudentDto getStudentByEmail(String studentEmail) throws DatabaseOperationFailedException, UserNotFoundException;
 
     /**
      * Returns all the Students who has been assigned to a course
      *
      * @param courseId Id of a course, that the Students assigned to
      * @return The corresponding Students
+     * @throws DatabaseOperationFailedException the database operation failed exception
      */
-    Set<StudentDto> getStudentsByAssignedCourseId(Long courseId);
+    Set<StudentDto> getStudentsByAssignedCourseId(Long courseId) throws DatabaseOperationFailedException;
 
     /**
      * Returns all the Students who is not already assigned to the given course
      *
      * @param courseId Id of a course, that the Student NOT assigned to
      * @return The corresponding Students
+     * @throws DatabaseOperationFailedException the database operation failed exception
      */
-    Set<StudentDto> getStudentsByNotAssignedCourseId(Long courseId);
+    Set<StudentDto> getStudentsByNotAssignedCourseId(Long courseId) throws DatabaseOperationFailedException;
 
     /**
      * Returns a single Teacher by its email (identifier)
      *
      * @param teacherEmail Teacher's email
      * @return The corresponding Teacher
+     * @throws DatabaseOperationFailedException the database operation failed exception
+     * @throws UserNotFoundException            the user not found exception
      */
-    TeacherDto getTeacherByEmail(String teacherEmail);
+    TeacherDto getTeacherByEmail(String teacherEmail) throws DatabaseOperationFailedException, UserNotFoundException;
 
     /**
      * Returns a single Teacher by a course id, that he owns
      *
      * @param courseId Id of a course, that the Teacher has created before
      * @return The corresponding Teacher
+     * @throws UserNotFoundException            the user not found exception
+     * @throws DatabaseOperationFailedException the database operation failed exception
      */
-    TeacherDto getTeacherByCreatedCourseId(Long courseId);
+    TeacherDto getTeacherByCreatedCourseId(Long courseId) throws UserNotFoundException, DatabaseOperationFailedException;
 
     /**
      * Returns all the course ids, that the user has connection to
@@ -119,8 +119,9 @@ public interface UserService {
      *
      * @param userEmail Identifier of a user
      * @return List of course ids, that is connected to the given user
+     * @throws UserNotFoundException the user not found exception
      */
-    Set<Long> getRelatedCourseIds(String userEmail);
+    Set<Long> getRelatedCourseIds(String userEmail) throws UserNotFoundException;
 
     /**
      * Returns whether the user has any connection with the given course
@@ -129,24 +130,27 @@ public interface UserService {
      * @param email    Email address of the user
      * @param courseId Course id of the course where the connection should be tested
      * @return True if the user is connected to the course, false otherwise
+     * @throws UserNotFoundException the user not found exception
      */
-    Boolean isRelatedToCourse(String email, Long courseId);
+    boolean isRelatedToCourse(String email, Long courseId) throws UserNotFoundException;
 
     /**
      * Return a complete User object, queried by its email (identifier)
      *
      * @param email of the User
      * @return User any user by email
+     * @throws UserNotFoundException the user not found exception
      */
-    User getAnyUserByEmail(String email);
+    User getAnyUserByEmail(String email) throws UserNotFoundException;
 
     /**
      * Gets a dto from user, for the controller to use.
      *
-     * @param user the user
+     * @param email the user email
      * @return the dto
+     * @throws UserNotFoundException the user not found exception
      */
-    UserDto getDtoFromAnyUser(User user);
+    UserDto getAnyUserDtoByEmail(String email) throws UserNotFoundException;
 
     /**
      * Removes course id from related course ids. Used in case of course deletion.

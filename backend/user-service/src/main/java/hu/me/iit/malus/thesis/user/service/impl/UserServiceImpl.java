@@ -7,26 +7,31 @@ import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
 import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
 import hu.me.iit.malus.thesis.user.controller.dto.UserDto;
 import hu.me.iit.malus.thesis.user.model.*;
-import hu.me.iit.malus.thesis.user.model.exception.DatabaseOperationFailedException;
-import hu.me.iit.malus.thesis.user.model.exception.EmailExistsException;
-import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
-import hu.me.iit.malus.thesis.user.repository.*;
+import hu.me.iit.malus.thesis.user.model.factory.UserFactory;
+import hu.me.iit.malus.thesis.user.repository.ActivationTokenRepository;
+import hu.me.iit.malus.thesis.user.repository.AdminRepository;
+import hu.me.iit.malus.thesis.user.repository.StudentRepository;
+import hu.me.iit.malus.thesis.user.repository.TeacherRepository;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import hu.me.iit.malus.thesis.user.service.converter.Converter;
+import hu.me.iit.malus.thesis.user.service.exception.DatabaseOperationFailedException;
+import hu.me.iit.malus.thesis.user.service.exception.EmailExistsException;
+import hu.me.iit.malus.thesis.user.service.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Default implementation of UserService
+ * Default implementation of UserService.
  *
  * @author Javorek Dénes
+ * @author Attila Szőke
  */
 @Service
 @Slf4j
@@ -37,8 +42,8 @@ public class UserServiceImpl implements UserService {
     private final TeacherRepository teacherRepository;
     private final AdminRepository adminRepository;
     private final ActivationTokenRepository tokenRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
     private final EmailClient emailClient;
+    private final UserFactory userFactory;
 
     /**
      * {@inheritDoc}
@@ -49,27 +54,8 @@ public class UserServiceImpl implements UserService {
             throw new EmailExistsException(
                     "There is already an account with that email address: " + registrationRequest.getEmail());
         }
-
-        UserRole userRole = UserRole.fromString(registrationRequest.getRole());
-        switch (userRole) {
-            case ADMIN: {
-                Admin newAdmin = new Admin(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName());
-                return adminRepository.save(newAdmin);
-            }
-            case TEACHER: {
-                Teacher newTeacher = new Teacher(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
-                return teacherRepository.save(newTeacher);
-            }
-            case STUDENT: {
-                Student newStudent = new Student(registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
-                        registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
-                return studentRepository.save(newStudent);
-            }
-            default:
-                throw new IllegalStateException("User type cannot be recognized");
-        }
+        User newUser = userFactory.create(registrationRequest);
+        return saveUser(newUser);
     }
 
     /**
@@ -85,50 +71,21 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public boolean activateUser(String token) {
-        final ActivationToken activationToken = tokenRepository.findByToken(token);
-        if (activationToken == null) {
+        Optional<ActivationToken> activationTokenOpt = tokenRepository.findByToken(token);
+        if (activationTokenOpt.isEmpty()) {
             return false;
         }
-
+        ActivationToken activationToken = activationTokenOpt.get();
         final User user = activationToken.getUser();
         final Calendar cal = Calendar.getInstance();
-        if ((activationToken.getExpiryDate()
-                .getTime()
-                - cal.getTime()
-                .getTime()) <= 0) {
+        if ((activationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
             tokenRepository.delete(activationToken);
             return false;
         }
-
-        UserBaseRepository userRepository = null;
-
-        switch (user.getRole()) {
-            case STUDENT: {
-                userRepository = studentRepository;
-                break;
-            }
-            case TEACHER: {
-                userRepository = teacherRepository;
-                break;
-            }
-            case ADMIN: {
-                userRepository = adminRepository;
-                break;
-            }
-            default: {
-                log.warn("User corresponding to token {}, does not have a valid role, cannot activate it.", token);
-                return false;
-            }
-        }
-
-        Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
-        if (optionalUser.isPresent()) {
-            User userToActivate = optionalUser.get();
-            userToActivate.setEnabled(true);
-            userRepository.save(userToActivate);
-        }
-
+        user.setEnabled(true);
+        saveUser(user);
         tokenRepository.delete(activationToken);
         return true;
     }
@@ -136,10 +93,10 @@ public class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
-    @Transactional
     @Override
-    public TeacherDto saveCourseCreation(String teacherEmail, Long courseId) {
-        Teacher teacher = teacherRepository.findLockByEmail(teacherEmail).orElseThrow(UserNotFoundException::new);
+    @Transactional
+    public TeacherDto saveCourseCreation(String teacherEmail, Long courseId) throws UserNotFoundException, DatabaseOperationFailedException {
+        var teacher = teacherRepository.findLockByEmail(teacherEmail).orElseThrow(UserNotFoundException::new);
         try {
             teacher.getCreatedCourseIds().add(courseId);
             return Converter.createTeacherDtoFromTeacher(teacherRepository.save(teacher));
@@ -151,17 +108,17 @@ public class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
-    @Transactional
     @Override
-    public void assignStudentsToCourse(Long courseId, List<String> studentEmails) {
-        studentRepository.findAllLockByEmailIn(studentEmails).forEach(student -> {
+    @Transactional
+    public void assignStudentsToCourse(Long courseId, List<String> studentEmails) throws DatabaseOperationFailedException {
+        for (Student student : studentRepository.findAllLockByEmailIn(studentEmails)) {
             try {
                 student.getAssignedCourseIds().add(courseId);
                 studentRepository.save(student);
             } catch (DataAccessException e) {
                 throw new DatabaseOperationFailedException(e);
             }
-        });
+        }
         emailClient.sendMail(new Mail(studentEmails, "Course assignment notification", "You have been assigned to a course."));
     }
 
@@ -169,39 +126,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<StudentDto> getAllStudents() {
-        try {
-            return studentRepository
-                    .findAll()
-                    .stream()
-                    .map(Converter::createStudentDtoFromStudent)
-                    .collect(Collectors.toSet());
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationFailedException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<TeacherDto> getAllTeachers() {
-        try {
-            return teacherRepository
-                    .findAll()
-                    .stream()
-                    .map(Converter::createTeacherDtoFromTeacher)
-                    .collect(Collectors.toSet());
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationFailedException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StudentDto getStudentByEmail(String studentEmail) {
+    public StudentDto getStudentByEmail(String studentEmail) throws DatabaseOperationFailedException, UserNotFoundException {
         Student student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
         try {
             return Converter.createStudentDtoFromStudent(student);
@@ -214,7 +139,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<StudentDto> getStudentsByAssignedCourseId(Long courseId) {
+    public Set<StudentDto> getStudentsByAssignedCourseId(Long courseId) throws DatabaseOperationFailedException {
         try {
             return studentRepository.findAllAssignedForCourseId(courseId)
                     .stream()
@@ -229,7 +154,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<StudentDto> getStudentsByNotAssignedCourseId(Long courseId) {
+    public Set<StudentDto> getStudentsByNotAssignedCourseId(Long courseId) throws DatabaseOperationFailedException {
         try {
             return studentRepository.findAllNotAssignedForCourseId(courseId)
                     .stream()
@@ -244,7 +169,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public TeacherDto getTeacherByEmail(String teacherEmail) {
+    public TeacherDto getTeacherByEmail(String teacherEmail) throws UserNotFoundException, DatabaseOperationFailedException {
         Teacher teacher = teacherRepository.findByEmail(teacherEmail).orElseThrow(() -> new UserNotFoundException(teacherEmail));
         try {
             return Converter.createTeacherDtoFromTeacher(teacher);
@@ -257,7 +182,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public TeacherDto getTeacherByCreatedCourseId(Long courseId) {
+    public TeacherDto getTeacherByCreatedCourseId(Long courseId) throws UserNotFoundException, DatabaseOperationFailedException {
         Teacher teacher = teacherRepository.findByCreatedCourseId(courseId).orElseThrow(UserNotFoundException::new);
         try {
             return Converter.createTeacherDtoFromTeacher(teacher);
@@ -270,13 +195,13 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public Set<Long> getRelatedCourseIds(String userEmail) {
+    public Set<Long> getRelatedCourseIds(String userEmail) throws UserNotFoundException {
         Set<Long> relatedCourseIds = new HashSet<>();
-        User user = getAnyUserByEmail(userEmail);
-
+        var user = getAnyUserByEmail(userEmail);
         if (user instanceof Student) {
             relatedCourseIds.addAll(((Student) user).getAssignedCourseIds());
-        } else if (user instanceof Teacher) {
+        }
+        if (user instanceof Teacher) {
             relatedCourseIds.addAll(((Teacher) user).getCreatedCourseIds());
         }
         return relatedCourseIds;
@@ -286,65 +211,38 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public User getAnyUserByEmail(String email) {
-        // TODO: Looks ugly, there are better options for Optional chaining, maybe try those later
-        Optional<? extends User> userToLoad = studentRepository.findByEmail(email);
-        if (userToLoad.isEmpty()) {
-            userToLoad = teacherRepository.findByEmail(email);
+    public boolean isRelatedToCourse(String email, Long courseId) throws UserNotFoundException {
+        User user = getAnyUserByEmail(email);
+        if (user instanceof Student) {
+            return ((Student) user).getAssignedCourseIds().contains(courseId);
         }
-        if (userToLoad.isEmpty()) {
-            userToLoad = adminRepository.findByEmail(email);
+        if (user instanceof Teacher) {
+            return ((Teacher) user).getCreatedCourseIds().contains(courseId);
         }
-
-        if (userToLoad.isEmpty()) {
-            throw new UserNotFoundException(email);
-        }
-        return userToLoad.get();
+        return false;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Boolean isRelatedToCourse(String email, Long courseId) {
-        Optional<? extends User> optionalUser = studentRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            if (((Student) optionalUser.get()).getAssignedCourseIds().contains(courseId)) {
-                return Boolean.TRUE;
-            }
-            return Boolean.FALSE;
-        }
-
-        optionalUser = teacherRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            if (((Teacher) optionalUser.get()).getCreatedCourseIds().contains(courseId)) {
-                return Boolean.TRUE;
-            }
-            return Boolean.FALSE;
-        }
-        return Boolean.FALSE;
-    }
-
-    /**
-     * Checks whether a given email address already exists in our system, or not.
-     *
-     * @param email To check
-     * @return True if email already exists, false otherwise
-     */
-    private boolean emailExists(String email) {
-        return studentRepository.findByEmail(email).isPresent() || teacherRepository.findByEmail(email).isPresent() ||
-                adminRepository.findByEmail(email).isPresent();
+    public User getAnyUserByEmail(String email) throws UserNotFoundException {
+        Optional<? extends User> opt = Stream.of(studentRepository.findByEmail(email), teacherRepository.findByEmail(email),
+                adminRepository.findByEmail(email))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
+        if (opt.isEmpty()) throw new UserNotFoundException(email);
+        return opt.get();
     }
 
     /**
      * {@inheritDoc}
      */
-    public UserDto getDtoFromAnyUser(User user) {
-        if (user instanceof Student) {
-            return Converter.createStudentDtoFromStudent((Student) user);
-        } else {
-            return Converter.createTeacherDtoFromTeacher((Teacher) user);
-        }
+    @Override
+    public UserDto getAnyUserDtoByEmail(String email) throws UserNotFoundException {
+        User user = getAnyUserByEmail(email);
+        return Converter.createUserDtoFromUser(user);
     }
 
     @Override
@@ -355,9 +253,39 @@ public class UserServiceImpl implements UserService {
         studentRepository.saveAll(students);
         Optional<Teacher> opt = teacherRepository.findByCreatedCourseId(courseId);
         if (opt.isPresent()) {
-            Teacher teacher = opt.get();
+            var teacher = opt.get();
             teacher.getCreatedCourseIds().remove(courseId);
             teacherRepository.save(teacher);
         }
+    }
+
+    /**
+     * Checks whether a given email address already exists in our system, or not.
+     *
+     * @param email To check
+     * @return True if email already exists, false otherwise
+     */
+    private boolean emailExists(String email) {
+        return studentRepository.findByEmail(email).isPresent()
+                || teacherRepository.findByEmail(email).isPresent()
+                || adminRepository.findByEmail(email).isPresent();
+    }
+
+    /**
+     * Saves a user with the respective repository.
+     *
+     * @param user the user
+     * @return the saved user
+     */
+    private User saveUser(User user) {
+        switch (user.getRole()) {
+            case ADMIN:
+                return adminRepository.save((Admin) user);
+            case TEACHER:
+                return teacherRepository.save((Teacher) user);
+            case STUDENT:
+                return studentRepository.save((Student) user);
+        }
+        throw new IllegalStateException("User type cannot be recognized");
     }
 }
