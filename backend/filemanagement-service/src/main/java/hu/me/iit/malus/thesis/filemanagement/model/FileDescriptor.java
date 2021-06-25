@@ -1,7 +1,8 @@
 package hu.me.iit.malus.thesis.filemanagement.model;
 
-import com.google.common.base.Objects;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -13,48 +14,32 @@ import java.util.Date;
  * @author Ilku Krisztian
  */
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-@Builder()
-@ToString
+@NoArgsConstructor
 public class FileDescriptor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
-    Long id;
+    private Long id;
 
     @Column(length = 2000)
-    String name;
+    private String name;
 
     @Column(length = 5000)
-    String downloadLink;
+    private String downloadLink;
 
-    long size;
+    private long size;
 
-    Date uploadDate;
+    private Date uploadDate;
 
-    String uploadedBy;
+    private String uploadedBy;
 
-    String contentType;
+    private String contentType;
 
     @Enumerated(EnumType.STRING)
-    ServiceType serviceType;
+    private ServiceType serviceType;
 
-    Long tagId;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FileDescriptor that = (FileDescriptor) o;
-        return Objects.equal(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+    private Long tagId;
 }

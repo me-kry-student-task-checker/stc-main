@@ -13,11 +13,11 @@ import java.util.List;
 public class FileUploadDto {
 
     @Size(min = 1)
-    List<MultipartFile> files;
+    private List<MultipartFile> files;
 
     @NotNull
-    ServiceType serviceType;
+    private ServiceType serviceType;
 
     @Min(1)
-    Long tagId;
+    private Long tagId;
 }

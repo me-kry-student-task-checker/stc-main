@@ -12,6 +12,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -40,7 +41,7 @@ public class FileManagementController {
     public ResponseEntity<@Size(min = 1) List<@Valid FileDescriptorDto>> uploadFiles(@Valid FileUploadDto dto, Principal principal)
             throws IOException {
         List<FileDescriptorDto> result = new ArrayList<>();
-        for (var file : dto.getFiles()) {
+        for (MultipartFile file : dto.getFiles()) {
             result.add(fileManagementService.uploadFile(file, dto.getServiceType(), principal.getName(), dto.getTagId()));
         }
         return ResponseEntity.ok(result);
