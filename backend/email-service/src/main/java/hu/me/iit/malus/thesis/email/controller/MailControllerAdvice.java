@@ -11,10 +11,13 @@ import java.util.Map;
 @RestControllerAdvice
 public class MailControllerAdvice {
 
-    private static final String MSG = "msg";
+    public static final String MSG = "msg";
+    public static final String MSG_FORMAT = "%s - { %s }";
 
     @ExceptionHandler(MailCouldNotBeSentException.class)
     public ResponseEntity<Map<String, String>> handle(MailCouldNotBeSentException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(MSG, e.getMessage()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                Map.of(MSG, String.format(MSG_FORMAT, e.getMessage(), e.getCause().getMessage()))
+        );
     }
 }

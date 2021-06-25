@@ -1,6 +1,6 @@
 package hu.me.iit.malus.thesis.email.controller;
 
-import hu.me.iit.malus.thesis.email.model.Mail;
+import hu.me.iit.malus.thesis.email.controller.dto.MailDto;
 import hu.me.iit.malus.thesis.email.service.MailService;
 import hu.me.iit.malus.thesis.email.service.exception.MailCouldNotBeSentException;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,8 @@ public class MailController {
     private final MailService mailService;
 
     @PostMapping("/send")
-    public ResponseEntity<Void> send(@Valid @RequestBody Mail mail) throws MailCouldNotBeSentException {
-        mailService.sendEmail(mail);
+    public ResponseEntity<Void> send(@Valid @RequestBody MailDto dto) throws MailCouldNotBeSentException {
+        mailService.sendEmail(dto);
         return ResponseEntity.ok().build();
     }
 }
