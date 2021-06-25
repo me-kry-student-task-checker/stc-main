@@ -4,6 +4,7 @@ package hu.me.iit.malus.thesis.email.service.exception;
  * It is thrown if the attachments could not be read, or the mail could not be sent.
  *
  * @author Ilku Krisztian
+ * @author Attila Szőke
  */
 public class MailCouldNotBeSentException extends Exception {
 
