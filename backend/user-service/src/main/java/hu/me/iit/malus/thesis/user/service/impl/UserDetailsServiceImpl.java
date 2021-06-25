@@ -1,8 +1,8 @@
 package hu.me.iit.malus.thesis.user.service.impl;
 
 import hu.me.iit.malus.thesis.user.model.User;
-import hu.me.iit.malus.thesis.user.model.exception.UserNotFoundException;
 import hu.me.iit.malus.thesis.user.service.UserService;
+import hu.me.iit.malus.thesis.user.service.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,7 +30,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     /**
      * Functional interface implementation, loads the user objects by email.
      * In our case the email equals to the user's email, because we dont use separate email field.
-     * @param email
+     *
+     * @param email email of the user
      * @return The corresponding UserDetails object, which holds the data of the give user
      * @throws UsernameNotFoundException If the user cannot be found
      */
@@ -42,7 +43,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         final boolean accountNonLocked = true;
 
         final User user;
-
         try {
             user = userService.getAnyUserByEmail(email);
         } catch (UserNotFoundException notFoundExc) {

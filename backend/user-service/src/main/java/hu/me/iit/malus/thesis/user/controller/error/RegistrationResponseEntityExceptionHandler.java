@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.user.controller.error;
 
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationResponse;
-import hu.me.iit.malus.thesis.user.model.exception.UserAlreadyExistException;
+import hu.me.iit.malus.thesis.user.service.exception.UserAlreadyExistException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

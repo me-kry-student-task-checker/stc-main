@@ -3,8 +3,11 @@ package hu.me.iit.malus.thesis.user.controller;
 import hu.me.iit.malus.thesis.user.controller.dto.*;
 import hu.me.iit.malus.thesis.user.event.RegistrationCompletedEvent;
 import hu.me.iit.malus.thesis.user.model.User;
-import hu.me.iit.malus.thesis.user.model.exception.UserAlreadyExistException;
 import hu.me.iit.malus.thesis.user.service.UserService;
+import hu.me.iit.malus.thesis.user.service.exception.DatabaseOperationFailedException;
+import hu.me.iit.malus.thesis.user.service.exception.EmailExistsException;
+import hu.me.iit.malus.thesis.user.service.exception.UserAlreadyExistException;
+import hu.me.iit.malus.thesis.user.service.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,8 +32,8 @@ public class UserController {
     private final ApplicationEventPublisher eventPublisher;
 
     @PostMapping("/registration")
-    public RegistrationResponse registerUserAccount(
-            @RequestBody @Valid RegistrationRequest registrationRequest) {
+    public RegistrationResponse registerUserAccount(@RequestBody @Valid RegistrationRequest registrationRequest)
+            throws EmailExistsException, UserAlreadyExistException {
         log.info("Registering user account by request: {}", registrationRequest);
 
         User registeredUser = service.registerNewUserAccount(registrationRequest);
@@ -57,65 +60,61 @@ public class UserController {
 
     @PreAuthorize("hasRole('ROLE_Teacher')")
     @PostMapping("/saveCourseCreation")
-    public @Valid TeacherDto saveCourseCreation(Principal principal, @RequestBody @Min(1) Long courseId) {
+    public @Valid TeacherDto saveCourseCreation(Principal principal, @RequestBody @Min(1) Long courseId)
+            throws DatabaseOperationFailedException, UserNotFoundException {
         return service.saveCourseCreation(principal.getName(), courseId);
     }
 
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     @PostMapping("/assignStudentsToCourse")
-    public void assignStudentsToCourse(@RequestBody @Valid CourseAssignmentDto dto) {
+    public void assignStudentsToCourse(@RequestBody @Valid CourseAssignmentDto dto) throws DatabaseOperationFailedException {
         service.assignStudentsToCourse(dto.getCourseId(), dto.getStudentEmails());
     }
 
-    @GetMapping("/students")
-    public Set<@Valid StudentDto> getAllStudents() {
-        return service.getAllStudents();
-    }
-
-    @GetMapping("/teachers")
-    public Set<@Valid TeacherDto> getAllTeachers() {
-        return service.getAllTeachers();
-    }
-
     @GetMapping("/student/{email:.+}")
-    public @Valid StudentDto getStudentByEmail(@PathVariable("email") @NotBlank String studentEmail) {
+    public @Valid StudentDto getStudentByEmail(@PathVariable("email") @NotBlank String studentEmail)
+            throws DatabaseOperationFailedException, UserNotFoundException {
         return service.getStudentByEmail(studentEmail);
     }
 
     @GetMapping("/teacher/{email:.+}")
-    public @Valid TeacherDto getTeacherByEmail(@PathVariable("email") @NotBlank String teacherEmail) {
+    public @Valid TeacherDto getTeacherByEmail(@PathVariable("email") @NotBlank String teacherEmail)
+            throws DatabaseOperationFailedException, UserNotFoundException {
         return service.getTeacherByEmail(teacherEmail);
     }
 
     @GetMapping("/student/assigned/{courseId}")
-    public Set<@Valid StudentDto> getStudentsByAssignedCourseId(@PathVariable("courseId") @Min(1) Long courseId) {
+    public Set<@Valid StudentDto> getStudentsByAssignedCourseId(@PathVariable("courseId") @Min(1) Long courseId)
+            throws DatabaseOperationFailedException {
         return service.getStudentsByAssignedCourseId(courseId);
     }
 
     @GetMapping("/student/notassigned/{courseId}")
-    public Set<@Valid StudentDto> getStudentsByNotAssignedCourseId(@PathVariable("courseId") @Min(1) Long courseId) {
+    public Set<@Valid StudentDto> getStudentsByNotAssignedCourseId(@PathVariable("courseId") @Min(1) Long courseId)
+            throws DatabaseOperationFailedException {
         return service.getStudentsByNotAssignedCourseId(courseId);
     }
 
     @GetMapping("/isRelated/course/{courseId}")
-    public Boolean isRelated(Principal principal, @PathVariable("courseId") @Min(1) Long courseId) {
+    public Boolean isRelated(Principal principal, @PathVariable("courseId") @Min(1) Long courseId) throws UserNotFoundException {
         return service.isRelatedToCourse(principal.getName(), courseId);
     }
 
     @GetMapping("/related/course")
-    public Set<Long> getRelatedCourseIds(Principal principal) {
+    public Set<Long> getRelatedCourseIds(Principal principal) throws UserNotFoundException {
         return service.getRelatedCourseIds(principal.getName());
     }
 
 
     @GetMapping("/teacher/created/{courseId}")
-    public @Valid TeacherDto getTeacherByCreatedCourseId(@PathVariable("courseId") @Min(1) Long courseId) {
+    public @Valid TeacherDto getTeacherByCreatedCourseId(@PathVariable("courseId") @Min(1) Long courseId)
+            throws UserNotFoundException, DatabaseOperationFailedException {
         return service.getTeacherByCreatedCourseId(courseId);
     }
 
     @GetMapping("/me")
-    public @Valid UserDto getMe(Principal principal) {
-        return service.getDtoFromAnyUser(service.getAnyUserByEmail(principal.getName()));
+    public @Valid UserDto getMe(Principal principal) throws UserNotFoundException {
+        return service.getAnyUserDtoByEmail(principal.getName());
     }
 
     @DeleteMapping("/removeCourseIdFromRelatedUserLists/{courseId}")
