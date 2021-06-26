@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.course.client;
 
 import hu.me.iit.malus.thesis.dto.File;
-import hu.me.iit.malus.thesis.dto.Service;
+import hu.me.iit.malus.thesis.dto.ServiceType;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,9 +12,9 @@ import java.util.Set;
 @FeignClient("filemanagement-service")
 public interface FileManagementClient {
 
-    @GetMapping("/api/filemanagement/download/getByTagId/{service}/{tagId}")
-    Set<File> getAllFilesByTagId(@PathVariable Service service, @PathVariable Long tagId);
+    @GetMapping("/api/filemanagement/download/getByTagId/{serviceType}/{tagId}")
+    Set<File> getAllFilesByTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId);
 
-    @DeleteMapping("/api/filemanagement/deleteAll/{service}/{tagId}")
-    void removeFilesByServiceAndTagId(@PathVariable Service service, @PathVariable Long tagId);
+    @DeleteMapping("/api/filemanagement/deleteAll/{serviceType}/{tagId}")
+    void removeFilesByServiceAndTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId);
 }

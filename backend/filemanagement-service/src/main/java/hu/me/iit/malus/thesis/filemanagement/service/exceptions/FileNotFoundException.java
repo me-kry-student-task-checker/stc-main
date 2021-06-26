@@ -7,4 +7,8 @@ public class FileNotFoundException extends Exception {
     public FileNotFoundException() {
         super(ERROR_MSG);
     }
+
+    public FileNotFoundException(Throwable cause) {
+        super(ERROR_MSG, cause);
+    }
 }

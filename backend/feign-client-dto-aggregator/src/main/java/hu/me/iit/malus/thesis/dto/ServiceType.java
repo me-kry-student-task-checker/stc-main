@@ -1,5 +1,5 @@
 package hu.me.iit.malus.thesis.dto;
 
-public enum Service {
+public enum ServiceType {
     COURSE, TASK, EMAIL, FEEDBACK
 }
