@@ -2,22 +2,26 @@ package hu.me.iit.malus.thesis.feedback.service.impl;
 
 import hu.me.iit.malus.thesis.dto.ServiceType;
 import hu.me.iit.malus.thesis.feedback.client.FileManagementClient;
+import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentCreateDto;
+import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentDetailsDto;
+import hu.me.iit.malus.thesis.feedback.controller.dto.TaskCommentCreateDto;
+import hu.me.iit.malus.thesis.feedback.controller.dto.TaskCommentDetailsDto;
 import hu.me.iit.malus.thesis.feedback.model.CourseComment;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 import hu.me.iit.malus.thesis.feedback.repository.CourseCommentRepository;
 import hu.me.iit.malus.thesis.feedback.repository.TaskCommentRepository;
 import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
+import hu.me.iit.malus.thesis.feedback.service.converters.DtoConverter;
 import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
 import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of Feedback Service interface.
@@ -26,6 +30,7 @@ import java.util.Optional;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
 
     private final CourseCommentRepository courseCommentRepository;
@@ -33,64 +38,59 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final FileManagementClient fileManagementClient;
 
     /**
-     * Instantiates a new FeedbackServiceImpl
+     * {@inheritDoc}
      */
-    @Autowired
-    public FeedbackServiceImpl(CourseCommentRepository courseCommentRepository, TaskCommentRepository taskCommentRepository,
-                               FileManagementClient fileManagementClient) {
-        this.courseCommentRepository = courseCommentRepository;
-        this.taskCommentRepository = taskCommentRepository;
-        this.fileManagementClient = fileManagementClient;
+    @Override
+    public CourseCommentDetailsDto createCourseComment(CourseCommentCreateDto dto, String authorId) {
+        CourseComment newComment = DtoConverter.courseCommentCreateDtoToCourseComment(dto);
+        newComment.setCreateDate(new Date());
+        newComment.setAuthorId(authorId);
+        newComment = courseCommentRepository.save(newComment);
+        log.debug("Created course comment: {}", newComment);
+        return DtoConverter.courseCommentToCourseCommentDetailsDto(newComment);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public CourseComment createCourseComment(CourseComment courseComment) {
-        log.info("Created course comment: {}", courseComment);
-        courseComment.setCreateDate(new Date());
-        return courseCommentRepository.save(courseComment);
+    public TaskCommentDetailsDto createTaskComment(TaskCommentCreateDto dto, String authorId) {
+        TaskComment newComment = DtoConverter.taskCommentCreateDtoToTaskComment(dto);
+        newComment.setCreateDate(new Date());
+        newComment.setAuthorId(authorId);
+        newComment = taskCommentRepository.save(newComment);
+        log.debug("Created task comment: {}", newComment);
+        return DtoConverter.taskCommentToTaskCommentDetailsDto(newComment);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public TaskComment createTaskComment(TaskComment taskComment) {
-        log.info("Created task comment: {}", taskComment);
-        taskComment.setCreateDate(new Date());
-        return taskCommentRepository.save(taskComment);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<CourseComment> getAllCourseComments(Long courseId) {
-        log.info("Listing comments for course id: {}", courseId);
-        Optional<List<CourseComment>> opt = courseCommentRepository.findAllByCourseId(courseId);
-        List<CourseComment> results = opt.orElseGet(ArrayList::new);
+    public List<CourseCommentDetailsDto> getAllCourseComments(Long courseId) {
+        List<CourseComment> results = courseCommentRepository.findAllByCourseId(courseId);
         results.forEach(courseComment -> courseComment.setFiles(
-                fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK,
-                        courseComment.getId())));
-
-        return results;
+                fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, courseComment.getId()))
+        );
+        log.debug("Listing comments for course id: {}", courseId);
+        return results.stream().map(DtoConverter::courseCommentToCourseCommentDetailsDto).collect(Collectors.toList());
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @return
      */
     @Override
-    public List<TaskComment> getAllTaskComments(Long taskId) {
-        log.info("Listing comments for task id: {}", taskId);
-        Optional<List<TaskComment>> opt = taskCommentRepository.findAllByTaskId(taskId);
-        List<TaskComment> results = opt.orElseGet(ArrayList::new);
+    public List<TaskCommentDetailsDto> getAllTaskComments(Long taskId) {
+        List<TaskComment> results = taskCommentRepository.findAllByTaskId(taskId);
         results.forEach(taskComment -> taskComment.setFiles(
-                fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK,
-                        taskComment.getId())));
-
-        return results;
+                fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, taskComment.getId()))
+        );
+        log.debug("Listing comments for task id: {}", taskId);
+        return results.stream().map(DtoConverter::taskCommentToTaskCommentDetailsDto).collect(Collectors.toList());
     }
 
     @Override
