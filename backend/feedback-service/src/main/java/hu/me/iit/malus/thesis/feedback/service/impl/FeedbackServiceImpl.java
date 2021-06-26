@@ -72,7 +72,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     public List<CourseCommentDetailsDto> getAllCourseComments(Long courseId) {
         List<CourseComment> results = courseCommentRepository.findAllByCourseId(courseId);
         results.forEach(courseComment -> courseComment.setFiles(
-                fileManagementClient.getAllFilesByTagId(Service.FEEDBACK, courseComment.getId()))
+                fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, courseComment.getId()))
         );
         log.debug("Listing comments for course id: {}", courseId);
         return results.stream().map(DtoConverter::courseCommentToCourseCommentDetailsDto).collect(Collectors.toList());
@@ -87,7 +87,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     public List<TaskCommentDetailsDto> getAllTaskComments(Long taskId) {
         List<TaskComment> results = taskCommentRepository.findAllByTaskId(taskId);
         results.forEach(taskComment -> taskComment.setFiles(
-                fileManagementClient.getAllFilesByTagId(Service.FEEDBACK, taskComment.getId()))
+                fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, taskComment.getId()))
         );
         log.debug("Listing comments for task id: {}", taskId);
         return results.stream().map(DtoConverter::taskCommentToTaskCommentDetailsDto).collect(Collectors.toList());

@@ -1,6 +1,6 @@
 package hu.me.iit.malus.thesis.feedback.service.impl;
 
-import hu.me.iit.malus.thesis.dto.Service;
+import hu.me.iit.malus.thesis.dto.ServiceType;
 import hu.me.iit.malus.thesis.feedback.client.FileManagementClient;
 import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentCreateDto;
 import hu.me.iit.malus.thesis.feedback.controller.dto.CourseCommentDetailsDto;
@@ -94,13 +94,13 @@ public class FeedbackServiceImplTest {
         shouldBeComment.setAuthorId(testAuthor);
         List<CourseComment> testList = List.of(shouldBeComment, shouldBeComment);
         when(courseCommentRepository.findAllByCourseId(testCourseId)).thenReturn(testList);
-        when(fileManagementClient.getAllFilesByTagId(Service.FEEDBACK, testId)).thenReturn(Set.of());
+        when(fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, testId)).thenReturn(Set.of());
 
         List<CourseCommentDetailsDto> result = service.getAllCourseComments(testCourseId);
 
         assertThat(result, is(testList.stream().map(DtoConverter::courseCommentToCourseCommentDetailsDto).collect(Collectors.toList())));
         verify(courseCommentRepository).findAllByCourseId(testCourseId);
-        verify(fileManagementClient, times(2)).getAllFilesByTagId(Service.FEEDBACK, testId);
+        verify(fileManagementClient, times(2)).getAllFilesByTagId(ServiceType.FEEDBACK, testId);
     }
 
     @Test
@@ -117,13 +117,13 @@ public class FeedbackServiceImplTest {
         shouldBeComment.setAuthorId(testAuthor);
         List<TaskComment> testList = List.of(shouldBeComment, shouldBeComment);
         when(taskCommentRepository.findAllByTaskId(testTaskId)).thenReturn(testList);
-        when(fileManagementClient.getAllFilesByTagId(Service.FEEDBACK, testId)).thenReturn(Set.of());
+        when(fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, testId)).thenReturn(Set.of());
 
         List<TaskCommentDetailsDto> result = service.getAllTaskComments(testTaskId);
 
         assertThat(result, is(testList.stream().map(DtoConverter::taskCommentToTaskCommentDetailsDto).collect(Collectors.toList())));
         verify(taskCommentRepository).findAllByTaskId(testTaskId);
-        verify(fileManagementClient, times(2)).getAllFilesByTagId(Service.FEEDBACK, testId);
+        verify(fileManagementClient, times(2)).getAllFilesByTagId(ServiceType.FEEDBACK, testId);
 
     }
 
@@ -136,13 +136,13 @@ public class FeedbackServiceImplTest {
         courseComment.setAuthorId(testAuthorId);
         when(courseCommentRepository.findById(testId)).thenReturn(Optional.of(courseComment));
         doNothing().when(courseCommentRepository).delete(courseComment);
-        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(Service.FEEDBACK, testId);
+        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
 
         service.removeCourseComment(testId, testAuthorId);
 
         verify(courseCommentRepository).findById(testId);
         verify(courseCommentRepository).delete(courseComment);
-        verify(fileManagementClient).removeFilesByServiceAndTagId(Service.FEEDBACK, testId);
+        verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
     }
 
     @Test(expected = CommentNotFoundException.class)
@@ -175,13 +175,13 @@ public class FeedbackServiceImplTest {
         taskComment.setAuthorId(testAuthor);
         when(taskCommentRepository.findById(testId)).thenReturn(Optional.of(taskComment));
         doNothing().when(taskCommentRepository).delete(taskComment);
-        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(Service.FEEDBACK, testId);
+        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
 
         service.removeTaskComment(testId, testAuthor);
 
         verify(taskCommentRepository).findById(testId);
         verify(taskCommentRepository).delete(taskComment);
-        verify(fileManagementClient).removeFilesByServiceAndTagId(Service.FEEDBACK, testId);
+        verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
     }
 
     @Test(expected = CommentNotFoundException.class)
@@ -212,12 +212,12 @@ public class FeedbackServiceImplTest {
         courseComment.setId(testCourseId);
         List<CourseComment> testList = List.of(courseComment, courseComment, courseComment);
         when(courseCommentRepository.deleteByCourseId(testCourseId)).thenReturn(testList);
-        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(Service.FEEDBACK, courseComment.getId());
+        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
 
         service.removeFeedbacksByCourseId(testCourseId);
 
         verify(courseCommentRepository).deleteByCourseId(testCourseId);
-        verify(fileManagementClient, times(3)).removeFilesByServiceAndTagId(Service.FEEDBACK, testCourseId);
+        verify(fileManagementClient, times(3)).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testCourseId);
     }
 
     @Test
@@ -227,11 +227,11 @@ public class FeedbackServiceImplTest {
         taskComment.setId(testTaskId);
         List<TaskComment> testList = List.of(taskComment, taskComment, taskComment);
         when(taskCommentRepository.deleteByTaskId(testTaskId)).thenReturn(testList);
-        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(Service.FEEDBACK, taskComment.getId());
+        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
 
         service.removeFeedbacksByTaskId(testTaskId);
 
         verify(taskCommentRepository).deleteByTaskId(testTaskId);
-        verify(fileManagementClient, times(3)).removeFilesByServiceAndTagId(Service.FEEDBACK, testTaskId);
+        verify(fileManagementClient, times(3)).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testTaskId);
     }
 }
