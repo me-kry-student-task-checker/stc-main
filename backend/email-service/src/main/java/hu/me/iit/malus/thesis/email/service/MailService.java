@@ -1,19 +1,20 @@
 package hu.me.iit.malus.thesis.email.service;
 
-import hu.me.iit.malus.thesis.email.model.Mail;
+import hu.me.iit.malus.thesis.email.controller.dto.MailDto;
 import hu.me.iit.malus.thesis.email.service.exception.MailCouldNotBeSentException;
 
 /**
- * The interface Mail service.
+ * The main interface definition of the service.
  *
  * @author Ilku Krisztián
+ * @author Attila Szőke
  */
 public interface MailService {
 
     /**
-     * Sends a email.
+     * Sends an email.
      *
      * @param mail the mail parameters
      */
-    void sendEmail(Mail mail) throws MailCouldNotBeSentException;
+    void sendEmail(MailDto mail) throws MailCouldNotBeSentException;
 }
