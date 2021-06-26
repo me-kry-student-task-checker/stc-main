@@ -18,10 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -71,8 +69,7 @@ public class FeedbackServiceImpl implements FeedbackService {
      */
     @Override
     public List<CourseCommentDetailsDto> getAllCourseComments(Long courseId) {
-        Optional<List<CourseComment>> opt = courseCommentRepository.findAllByCourseId(courseId);
-        List<CourseComment> results = opt.orElseGet(ArrayList::new);
+        List<CourseComment> results = courseCommentRepository.findAllByCourseId(courseId);
         results.forEach(courseComment -> courseComment.setFiles(
                 fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, courseComment.getId()))
         );
@@ -87,8 +84,7 @@ public class FeedbackServiceImpl implements FeedbackService {
      */
     @Override
     public List<TaskCommentDetailsDto> getAllTaskComments(Long taskId) {
-        Optional<List<TaskComment>> opt = taskCommentRepository.findAllByTaskId(taskId);
-        List<TaskComment> results = opt.orElseGet(ArrayList::new);
+        List<TaskComment> results = taskCommentRepository.findAllByTaskId(taskId);
         results.forEach(taskComment -> taskComment.setFiles(
                 fileManagementClient.getAllFilesByTagId(hu.me.iit.malus.thesis.dto.Service.FEEDBACK, taskComment.getId()))
         );
