@@ -4,9 +4,9 @@ export default {
 	createFileEntry(files, service, tagId) {
 		let formData = new FormData();
 		files.forEach((file) => {
-			formData.append('file', file);
+			formData.append('files', file);
 		});
-		formData.append('service', service);
+		formData.append('serviceType', service);
 		formData.append('tagId', tagId);
 		return axios.post('/api/filemanagement/uploadFiles', formData,
 			{

@@ -84,6 +84,6 @@ public class UsernameAndPasswordAuthenticationFilter extends UsernamePasswordAut
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())
                 .compact();
         response.getWriter().printf("{\"id_token\": \"%s\"}%n", token);
-        response.addHeader(HttpHeaders.AUTHORIZATION, token);
+        response.addHeader(HttpHeaders.AUTHORIZATION, token); // TODO kiszed ha már nem kell a régi frontend
     }
 }

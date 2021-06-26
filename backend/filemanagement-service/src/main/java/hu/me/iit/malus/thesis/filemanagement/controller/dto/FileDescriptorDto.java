@@ -1,37 +1,33 @@
 package hu.me.iit.malus.thesis.filemanagement.controller.dto;
 
-import lombok.*;
+import lombok.Data;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString
-@EqualsAndHashCode
+@Data
 public class FileDescriptorDto {
 
     @Min(1)
-    Long id;
+    private Long id;
 
     @NotBlank
-    String name;
+    private String name;
 
     @NotBlank
-    String downloadLink;
+    private String downloadLink;
 
     @NotNull
-    Date uploadDate;
+    private Date uploadDate;
 
     @NotBlank
-    String uploadedBy;
+    private String uploadedBy;
 
     @NotBlank
-    String contentType;
+    private String contentType;
 
     @Min(1)
-    Long tagId;
+    private Long tagId;
 }
