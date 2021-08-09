@@ -4,9 +4,9 @@ import hu.me.iit.malus.thesis.task.controller.dto.BriefTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 
-public class Converter {
+public class DtoConverter {
 
-    private Converter() {
+    private DtoConverter() {
     }
 
     public static Task createTaskFromTaskDto(CreateTaskDto taskDto) {

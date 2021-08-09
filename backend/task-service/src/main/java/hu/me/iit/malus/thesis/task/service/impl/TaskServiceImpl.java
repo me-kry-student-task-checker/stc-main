@@ -12,7 +12,7 @@ import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.repository.TaskRepository;
 import hu.me.iit.malus.thesis.task.service.TaskService;
-import hu.me.iit.malus.thesis.task.service.converters.Converter;
+import hu.me.iit.malus.thesis.task.service.converters.DtoConverter;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -42,11 +42,11 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public BriefTaskDto create(CreateTaskDto dto) {
-        Task newTask = Converter.createTaskFromTaskDto(dto);
+        Task newTask = DtoConverter.createTaskFromTaskDto(dto);
         newTask.setCreationDate(new Date());
         Task savedTask = repository.save(newTask);
         log.debug("Task created: {}", dto);
-        return Converter.createBriefTaskDtoFromTask(savedTask);
+        return DtoConverter.createBriefTaskDtoFromTask(savedTask);
     }
 
     /**
@@ -59,7 +59,7 @@ public class TaskServiceImpl implements TaskService {
         taskToChange.setDescription(dto.getDescription());
         Task editedTask = repository.save(taskToChange);
         log.debug("Task edited: {}", editedTask);
-        return Converter.createBriefTaskDtoFromTask(editedTask);
+        return DtoConverter.createBriefTaskDtoFromTask(editedTask);
     }
 
     /**
