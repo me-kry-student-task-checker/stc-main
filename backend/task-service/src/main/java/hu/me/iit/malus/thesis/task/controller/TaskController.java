@@ -5,6 +5,7 @@ import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.service.TaskService;
+import hu.me.iit.malus.thesis.task.service.exception.ForbiddenTaskEditException;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -36,13 +37,13 @@ public class TaskController {
 
     @PutMapping("/edit")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public @Valid BriefTaskDto editTask(@Valid @RequestBody EditTaskDto dto) {
-        return service.edit(dto);
+    public @Valid BriefTaskDto editTask(@Valid @RequestBody EditTaskDto dto, Principal principal) throws ForbiddenTaskEditException, TaskNotFoundException {
+        return service.edit(dto, principal.getName());
     }
 
     @GetMapping("/get/{taskId}")
-    public @Valid DetailedTaskDto getTask(@Min(1) @PathVariable Long taskId) throws TaskNotFoundException {
-        return service.get(taskId);
+    public @Valid DetailedTaskDto getTask(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException {
+        return service.get(taskId, principal.getName());
     }
 
     @GetMapping("/getAll/{courseId}")

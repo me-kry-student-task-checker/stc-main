@@ -4,6 +4,7 @@ import hu.me.iit.malus.thesis.task.controller.dto.BriefTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
+import hu.me.iit.malus.thesis.task.service.exception.ForbiddenTaskEditException;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 
@@ -31,7 +32,7 @@ public interface TaskService {
      * @param task the new task
      * @return the saved task
      */
-    BriefTaskDto edit(EditTaskDto task);
+    BriefTaskDto edit(EditTaskDto task, String editorsEmail) throws TaskNotFoundException, ForbiddenTaskEditException;
 
     /**
      * Returns a single Task by its id
@@ -39,7 +40,7 @@ public interface TaskService {
      * @param taskId id of the Task
      * @return the corresponding Task
      */
-    DetailedTaskDto get(Long taskId) throws TaskNotFoundException;
+    DetailedTaskDto get(Long taskId, String userEmail) throws TaskNotFoundException;
 
     /**
      * Gets every task based on it's course id

@@ -45,35 +45,41 @@ public class TaskControllerTest {
     }
 
     @Test
-    public void editTask() {
+    public void editTask() throws Exception {
+        String studentId = "Z8IMlf0";
         EditTaskDto editTaskDto = new EditTaskDto();
         BriefTaskDto briefTaskDto = new BriefTaskDto();
-        when(service.edit(editTaskDto)).thenReturn(briefTaskDto);
+        when(principal.getName()).thenReturn(studentId);
+        when(service.edit(editTaskDto, studentId)).thenReturn(briefTaskDto);
 
-        BriefTaskDto dto = controller.editTask(editTaskDto);
+        BriefTaskDto dto = controller.editTask(editTaskDto, principal);
 
         assertThat(dto, is(briefTaskDto));
-        verify(service).edit(editTaskDto);
+        verify(service).edit(editTaskDto, studentId);
     }
 
     @Test
     public void getTask() throws Exception {
+        String studentId = "X4ee";
         long taskId = 904L;
         DetailedTaskDto detailedTaskDto = new DetailedTaskDto();
-        when(service.get(taskId)).thenReturn(detailedTaskDto);
+        when(principal.getName()).thenReturn(studentId);
+        when(service.get(taskId, studentId)).thenReturn(detailedTaskDto);
 
-        DetailedTaskDto dto = controller.getTask(taskId);
+        DetailedTaskDto dto = controller.getTask(taskId, principal);
 
         assertThat(dto, is(detailedTaskDto));
-        verify(service).get(taskId);
+        verify(service).get(taskId, studentId);
     }
 
     @Test(expected = TaskNotFoundException.class)
     public void getTaskException() throws Exception {
+        String studentId = "NfWSe";
         long taskId = 118L;
-        when(service.get(taskId)).thenThrow(TaskNotFoundException.class);
+        when(principal.getName()).thenReturn(studentId);
+        when(service.get(taskId, studentId)).thenThrow(TaskNotFoundException.class);
 
-        controller.getTask(taskId);
+        controller.getTask(taskId, principal);
     }
 
     @Test

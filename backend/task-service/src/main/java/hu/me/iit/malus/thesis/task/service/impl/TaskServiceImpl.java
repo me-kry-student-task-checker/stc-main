@@ -13,6 +13,7 @@ import hu.me.iit.malus.thesis.task.model.Task;
 import hu.me.iit.malus.thesis.task.repository.TaskRepository;
 import hu.me.iit.malus.thesis.task.service.TaskService;
 import hu.me.iit.malus.thesis.task.service.converters.DtoConverter;
+import hu.me.iit.malus.thesis.task.service.exception.ForbiddenTaskEditException;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of the Task Service interface
@@ -53,29 +58,30 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public BriefTaskDto edit(EditTaskDto dto) {
-        Task taskToChange = repository.getOne(dto.getId());
-        taskToChange.setName(dto.getName());
-        taskToChange.setDescription(dto.getDescription());
-        Task editedTask = repository.save(taskToChange);
-        log.debug("Task edited: {}", editedTask);
-        return DtoConverter.createBriefTaskDtoFromTask(editedTask);
+    public BriefTaskDto edit(EditTaskDto dto, String editorsEmail) throws TaskNotFoundException, ForbiddenTaskEditException {
+        Task task = repository.findById(dto.getId()).orElseThrow(TaskNotFoundException::new);
+        if (!userClient.isRelated(task.getCourseId())) {
+            log.warn("Creator of this course {} is not the task editor: {}!", task, editorsEmail);
+            throw new ForbiddenTaskEditException();
+        }
+        task.setName(dto.getName());
+        task.setDescription(dto.getDescription());
+        log.debug("Task edited: {}", task);
+        return DtoConverter.createBriefTaskDtoFromTask(repository.save(task));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public DetailedTaskDto get(Long taskId) throws TaskNotFoundException {
-        Optional<Task> optTask = repository.findById(taskId);
-        if (optTask.isPresent()) {
-            DetailedTaskDto taskDto = getDetailedTask(optTask.get());
-            log.debug("Task queried by id: {}, successfully", taskId);
-            return taskDto;
-        } else {
-            log.warn("No task found with this id: {}", taskId);
+    public DetailedTaskDto get(Long taskId, String userEmail) throws TaskNotFoundException {
+        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        if (!userClient.isRelated(task.getCourseId())) {
+            log.warn("This user ({}) is not related to this task's ({}) course!", userEmail, task);
             throw new TaskNotFoundException();
         }
+        log.debug("Task queried by id: {}!", taskId);
+        return getDetailedTask(task);
     }
 
     /**
@@ -83,19 +89,9 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public Set<DetailedTaskDto> getAll(Long courseId) {
-        Optional<Set<Task>> optTasks = repository.findAllByCourseId(courseId);
-        if (optTasks.isPresent()) {
-            Set<DetailedTaskDto> taskDtos = new HashSet<>();
-            Set<Task> tasks = optTasks.get();
-            for (Task task : tasks) {
-                taskDtos.add(getDetailedTask(task));
-            }
-            log.debug("Tasks queried for course: {}, found {} tasks", courseId, taskDtos.size());
-            return taskDtos;
-        } else {
-            log.warn("No task found for this course id: {}", courseId);
-            return new HashSet<>();
-        }
+        Set<DetailedTaskDto> taskDtoList = repository.findAllByCourseId(courseId).stream().map(this::getDetailedTask).collect(Collectors.toSet());
+        log.debug("Tasks queried for course: ({}), found ({}) tasks!", courseId, taskDtoList.size());
+        return taskDtoList;
     }
 
     /**
@@ -103,79 +99,55 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public void changeDoneStatus(Long taskId) throws TaskNotFoundException {
-        Optional<Task> opt = repository.findById(taskId);
-        if (opt.isPresent()) {
-            Task task = opt.get();
-            task.setDone(!task.isDone());
-            repository.save(task);
-            log.debug("Task's ({}) done status changed to: {}", task, !task.isDone());
-        } else {
-            log.warn("No task found with this task id: {}", taskId);
-            throw new TaskNotFoundException();
-        }
+        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        task.setDone(!task.isDone());
+        repository.save(task);
+        log.debug("Task's ({}) done status changed to: {}", task, !task.isDone());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void changeCompletion(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
-        Optional<Task> opt = repository.findById(taskId);
-        if (opt.isPresent()) {
-            Task task = opt.get();
-
-            Student student = userClient.getStudentByEmail(studentId);
-            if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
-                log.warn("Cannot change task completion, as Student {} is not assigned to this course {}",
-                        studentId, task.getCourseId());
-                throw new StudentIdNotFoundException();
-            }
-
-            Set<String> completedStudentIds = task.getCompletedStudentIds();
-            if (completedStudentIds.contains(studentId)) {
-                completedStudentIds.remove(studentId);
-                task.setCompletedStudentIds(completedStudentIds);
-                repository.save(task);
-                log.debug("From a task's ({}) completion list this student was removed: {}", task, studentId);
-                return;
-            }
-            task.addStudentIdToCompleted(studentId);
-            repository.save(task);
-            log.debug("To task's ({}) completion list this student was added: {}", task, studentId);
-        } else {
-            log.warn("No task found with this task id: {}", taskId);
-            throw new TaskNotFoundException();
+    public void changeCompletion(Long taskId, String studentEmail) throws TaskNotFoundException, StudentIdNotFoundException {
+        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        Student student = userClient.getStudentByEmail(studentEmail);
+        if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
+            log.warn("Cannot change task completion, as Student {} is not assigned to this course {}", studentEmail, task.getCourseId());
+            throw new StudentIdNotFoundException();
         }
+        Set<String> completedStudentIds = task.getCompletedStudentIds();
+        if (completedStudentIds.contains(studentEmail)) {
+            completedStudentIds.remove(studentEmail);
+            task.setCompletedStudentIds(completedStudentIds);
+            repository.save(task);
+            log.debug("From a task's ({}) completion list this student was removed: {}", task, studentEmail);
+            return;
+        }
+        task.addStudentIdToCompleted(studentEmail);
+        repository.save(task);
+        log.debug("To task's ({}) completion list this student was added: {}", task, studentEmail);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void toggleHelp(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException {
-        Optional<Task> optTask = repository.findById(taskId);
-        if (optTask.isPresent()) {
-            Task task = optTask.get();
-
-            Student student = userClient.getStudentByEmail(studentId);
-            if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
-                log.warn("Cannot change task completion, as Student {} is not assigned to this course {}",
-                        studentId, task.getCourseId());
-                throw new StudentIdNotFoundException();
-            }
-
-            if (task.getHelpNeededStudentIds().contains(studentId)) {
-                task.getHelpNeededStudentIds().remove(studentId);
-                repository.save(task);
-                log.debug("Removed an id ({}) from the help needed list of task ({})", studentId, taskId);
-            } else {
-                task.addStudentIdToHelp(studentId);
-                repository.save(task);
-                log.debug("Added Student ({}) to the help needed list of task ({})", studentId, taskId);
-            }
+    public void toggleHelp(Long taskId, String studentEmail) throws StudentIdNotFoundException, TaskNotFoundException {
+        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        Student student = userClient.getStudentByEmail(studentEmail);
+        if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
+            log.warn("Cannot change task completion, as Student {} is not assigned to this course {}", studentEmail, task.getCourseId());
+            throw new StudentIdNotFoundException();
+        }
+        if (task.getHelpNeededStudentIds().contains(studentEmail)) {
+            task.getHelpNeededStudentIds().remove(studentEmail);
+            repository.save(task);
+            log.debug("Removed an id ({}) from the help needed list of task ({})", studentEmail, taskId);
         } else {
-            log.warn("Could not toggle help request for {} - No task found with id: {}", studentId, taskId);
-            throw new TaskNotFoundException();
+            task.addStudentIdToHelp(studentEmail);
+            repository.save(task);
+            log.debug("Added Student ({}) to the help needed list of task ({})", studentEmail, taskId);
         }
     }
 

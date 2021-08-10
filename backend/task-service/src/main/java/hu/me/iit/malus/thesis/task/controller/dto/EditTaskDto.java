@@ -21,7 +21,4 @@ public class EditTaskDto {
 
     @NotBlank
     private String description;
-
-    @Min(1)
-    private Long courseId;
 }
