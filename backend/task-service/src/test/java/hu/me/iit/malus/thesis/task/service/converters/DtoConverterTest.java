@@ -2,9 +2,11 @@ package hu.me.iit.malus.thesis.task.service.converters;
 
 import hu.me.iit.malus.thesis.task.controller.dto.BriefTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.CreateTaskDto;
+import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
 import hu.me.iit.malus.thesis.task.model.Task;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 
@@ -48,5 +50,29 @@ public class DtoConverterTest {
         assertThat(dto.getCreationDate(), is(creationDate));
         assertThat(dto.isDone(), is(false));
         assertThat(dto.getCourseId(), is(courseId));
+    }
+
+    @Test
+    public void createDetailedTaskDtoFromTas() {
+        String name = "gsPa74";
+        String description = "MQWv";
+        Date creationDate = new Date();
+        long courseId = 575L;
+        Task task = new Task(name, description, creationDate, false, courseId, new HashSet<>(), new HashSet<>());
+        long id = 634L;
+        task.setId(id);
+
+        DetailedTaskDto dto = DtoConverter.createDetailedTaskDtoFromTas(task, new HashSet<>(), new HashSet<>(), new HashSet<>(), new ArrayList<>());
+
+        assertThat(dto.getId(), is(id));
+        assertThat(dto.getName(), is(name));
+        assertThat(dto.getDescription(), is(description));
+        assertThat(dto.getCreationDate(), is(creationDate));
+        assertThat(dto.isDone(), is(false));
+        assertThat(dto.getCourseId(), is(courseId));
+        assertThat(dto.getCompletedStudents().size(), is(0));
+        assertThat(dto.getHelpNeededStudents().size(), is(0));
+        assertThat(dto.getFiles().size(), is(0));
+        assertThat(dto.getComments().size(), is(0));
     }
 }

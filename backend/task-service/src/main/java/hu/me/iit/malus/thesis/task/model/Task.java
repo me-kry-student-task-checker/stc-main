@@ -49,7 +49,10 @@ public class Task {
     @Transient
     private List<TaskComment> comments;
 
-    public Task(String name, String description, Date creationDate, boolean isDone, Long courseId, Set<String> helpNeededStudentIds, Set<String> completedStudentIds) {
+    public Task(
+            String name, String description, Date creationDate, boolean isDone, Long courseId,
+            Set<String> helpNeededStudentIds, Set<String> completedStudentIds
+    ) {
         this.name = name;
         this.description = description;
         this.creationDate = creationDate;

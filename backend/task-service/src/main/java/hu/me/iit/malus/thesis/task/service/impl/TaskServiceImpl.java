@@ -1,7 +1,9 @@
 package hu.me.iit.malus.thesis.task.service.impl;
 
+import hu.me.iit.malus.thesis.dto.File;
 import hu.me.iit.malus.thesis.dto.ServiceType;
 import hu.me.iit.malus.thesis.dto.Student;
+import hu.me.iit.malus.thesis.dto.TaskComment;
 import hu.me.iit.malus.thesis.task.client.FeedbackClient;
 import hu.me.iit.malus.thesis.task.client.FileManagementClient;
 import hu.me.iit.malus.thesis.task.client.UserClient;
@@ -22,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -167,23 +168,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private DetailedTaskDto getDetailedTask(Task task) {
-        DetailedTaskDto taskDto = new DetailedTaskDto(task);
-
         Set<Student> allStudentsInCourse = userClient.getStudentsByAssignedCourseId(task.getCourseId());
-        Set<Student> completed = new HashSet<>();
-        Set<Student> helpNeeded = new HashSet<>();
-        for (Student student : allStudentsInCourse) {
-            if (task.getCompletedStudentIds().contains(student.getEmail()))
-                completed.add(student);
-            if (task.getHelpNeededStudentIds().contains(student.getEmail()))
-                helpNeeded.add(student);
-        }
-        taskDto.setCompletedStudents(completed);
-        taskDto.setHelpNeededStudents(helpNeeded);
-        taskDto.setComments(feedbackClient.getAllTaskComments(task.getId()));
-        taskDto.setFiles(fileManagementClient.getAllFilesByTagId(ServiceType.TASK, task.getId()));
-
-        return taskDto;
+        Set<Student> completed = allStudentsInCourse.stream()
+                .filter(student -> task.getCompletedStudentIds().contains(student.getEmail())).collect(Collectors.toSet());
+        Set<Student> helpNeeded = allStudentsInCourse.stream()
+                .filter(student -> task.getHelpNeededStudentIds().contains(student.getEmail())).collect(Collectors.toSet());
+        List<TaskComment> comments = feedbackClient.getAllTaskComments(task.getId());
+        Set<File> files = fileManagementClient.getAllFilesByTagId(ServiceType.TASK, task.getId());
+        return DtoConverter.createDetailedTaskDtoFromTas(task, files, helpNeeded, completed, comments);
     }
 
     private void removeCommentsAndFiles(Long taskId) {
