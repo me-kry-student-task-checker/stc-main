@@ -152,6 +152,9 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void deleteTask(Long taskId) throws TaskNotFoundException {
@@ -160,6 +163,9 @@ public class TaskServiceImpl implements TaskService {
         removeCommentsAndFiles(task.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void deleteTasksByCourseId(Long courseId) {

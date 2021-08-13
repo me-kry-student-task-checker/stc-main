@@ -14,7 +14,7 @@ import lombok.*;
 @ToString @EqualsAndHashCode
 public class User
 {
-    private final String email;
+    private String email;
     private String password;
     private String firstName, lastName;
 
