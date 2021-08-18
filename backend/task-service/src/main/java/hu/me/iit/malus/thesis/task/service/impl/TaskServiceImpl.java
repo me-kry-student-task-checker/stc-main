@@ -110,24 +110,16 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    public void changeCompletion(Long taskId, String studentEmail) throws TaskNotFoundException, StudentIdNotFoundException {
+    public void toggleCompletion(Long taskId, String studentEmail) throws TaskNotFoundException, StudentIdNotFoundException {
         Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
         Student student = userClient.getStudentByEmail(studentEmail);
         if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
             log.warn("Cannot change task completion, as Student {} is not assigned to this course {}", studentEmail, task.getCourseId());
             throw new StudentIdNotFoundException();
         }
-        Set<String> completedStudentIds = task.getCompletedStudentIds();
-        if (completedStudentIds.contains(studentEmail)) {
-            completedStudentIds.remove(studentEmail);
-            task.setCompletedStudentIds(completedStudentIds);
-            repository.save(task);
-            log.debug("From a task's ({}) completion list this student was removed: {}", task, studentEmail);
-            return;
-        }
-        task.addStudentIdToCompleted(studentEmail);
+        task.toggleCompletedStudent(studentEmail);
         repository.save(task);
-        log.debug("To task's ({}) completion list this student was added: {}", task, studentEmail);
+        log.debug("Tasks' ({}) completion status changed for this student: {}", task, student);
     }
 
     /**
@@ -141,15 +133,9 @@ public class TaskServiceImpl implements TaskService {
             log.warn("Cannot change task completion, as Student {} is not assigned to this course {}", studentEmail, task.getCourseId());
             throw new StudentIdNotFoundException();
         }
-        if (task.getHelpNeededStudentIds().contains(studentEmail)) {
-            task.getHelpNeededStudentIds().remove(studentEmail);
-            repository.save(task);
-            log.debug("Removed an id ({}) from the help needed list of task ({})", studentEmail, taskId);
-        } else {
-            task.addStudentIdToHelp(studentEmail);
-            repository.save(task);
-            log.debug("Added Student ({}) to the help needed list of task ({})", studentEmail, taskId);
-        }
+        task.toggleHelpNeededStudent(studentEmail);
+        repository.save(task);
+        log.debug("Tasks' ({}) help needed status changed for this student: {}", task, student);
     }
 
     /**

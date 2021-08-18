@@ -60,7 +60,7 @@ public class TaskController {
     @PostMapping("/setComplete/{taskId}")
     @PreAuthorize("hasRole('ROLE_Student')")
     public void changeTasksCompletion(@Min(1) @PathVariable Long taskId, Principal principal) throws TaskNotFoundException, StudentIdNotFoundException {
-        service.changeCompletion(taskId, principal.getName());
+        service.toggleCompletion(taskId, principal.getName());
     }
 
     @PostMapping("/toggleHelp/{taskId}")

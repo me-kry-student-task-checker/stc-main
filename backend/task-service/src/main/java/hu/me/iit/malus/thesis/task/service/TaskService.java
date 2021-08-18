@@ -63,7 +63,7 @@ public interface TaskService {
      * @param taskId    the task to save the students
      * @param studentId the id to save
      */
-    void changeCompletion(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException;
+    void toggleCompletion(Long taskId, String studentId) throws StudentIdNotFoundException, TaskNotFoundException;
 
     /**
      * Toggles (adds-removes) a student id from a task's 'help needed' list

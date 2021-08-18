@@ -62,21 +62,19 @@ public class Task {
         this.completedStudentIds = completedStudentIds;
     }
 
-    /**
-     * Adds a new student to the need help set
-     *
-     * @param studentIdToAdd this student's id will be added
-     */
-    public void addStudentIdToHelp(String studentIdToAdd) {
-        helpNeededStudentIds.add(studentIdToAdd);
+    public void toggleCompletedStudent(String studentEmail) {
+        if (completedStudentIds.contains(studentEmail)) {
+            completedStudentIds.remove(studentEmail);
+            return;
+        }
+        completedStudentIds.add(studentEmail);
     }
 
-    /**
-     * Adds a new student to the completed set
-     *
-     * @param studentIdToAdd this student's id will be added
-     */
-    public void addStudentIdToCompleted(String studentIdToAdd) {
-        completedStudentIds.add(studentIdToAdd);
+    public void toggleHelpNeededStudent(String studentEmail) {
+        if (helpNeededStudentIds.contains(studentEmail)) {
+            helpNeededStudentIds.remove(studentEmail);
+            return;
+        }
+        helpNeededStudentIds.add(studentEmail);
     }
 }

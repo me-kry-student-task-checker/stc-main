@@ -117,11 +117,11 @@ public class TaskControllerTest {
         long taskId = 72L;
         String studentId = "qAwp6M";
         when(principal.getName()).thenReturn(studentId);
-        doNothing().when(service).changeCompletion(taskId, studentId);
+        doNothing().when(service).toggleCompletion(taskId, studentId);
 
         controller.changeTasksCompletion(taskId, principal);
 
-        verify(service).changeCompletion(taskId, studentId);
+        verify(service).toggleCompletion(taskId, studentId);
     }
 
     @Test(expected = TaskNotFoundException.class)
@@ -129,7 +129,7 @@ public class TaskControllerTest {
         long taskId = 514L;
         String studentId = "D3a6mUp";
         when(principal.getName()).thenReturn(studentId);
-        doThrow(TaskNotFoundException.class).when(service).changeCompletion(taskId, studentId);
+        doThrow(TaskNotFoundException.class).when(service).toggleCompletion(taskId, studentId);
 
         controller.changeTasksCompletion(taskId, principal);
     }
@@ -139,7 +139,7 @@ public class TaskControllerTest {
         long taskId = 175L;
         String studentId = "Z8IMlf0";
         when(principal.getName()).thenReturn(studentId);
-        doThrow(StudentIdNotFoundException.class).when(service).changeCompletion(taskId, studentId);
+        doThrow(StudentIdNotFoundException.class).when(service).toggleCompletion(taskId, studentId);
 
         controller.changeTasksCompletion(taskId, principal);
     }

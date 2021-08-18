@@ -103,6 +103,9 @@ public class TaskServiceImplTest {
         assertThat(dto.getId(), is(taskId));
         assertThat(dto.getName(), is(editTaskName));
         assertThat(dto.getDescription(), is(editTaskDescription));
+        verify(repository).findById(taskId);
+        verify(userClient).isRelated(courseId);
+        verify(repository).save(task);
     }
 
     @Test(expected = TaskNotFoundException.class)
@@ -162,6 +165,10 @@ public class TaskServiceImplTest {
         assertThat(dto.getHelpNeededStudents().size(), is(0));
         assertThat(dto.getComments().size(), is(0));
         assertThat(dto.getFiles().size(), is(0));
+        verify(repository).findById(taskId);
+        verify(userClient).isRelated(courseId);
+        verify(feedbackClient).getAllTaskComments(taskId);
+        verify(fileManagementClient).getAllFilesByTagId(ServiceType.TASK, taskId);
     }
 
     @Test(expected = TaskNotFoundException.class)
@@ -204,6 +211,9 @@ public class TaskServiceImplTest {
         Set<DetailedTaskDto> dtos = service.getAll(courseId);
 
         assertThat(dtos.size(), is(1));
+        verify(repository).findAllByCourseId(courseId);
+        verify(feedbackClient).getAllTaskComments(taskId);
+        verify(fileManagementClient).getAllFilesByTagId(ServiceType.TASK, taskId);
     }
 
     @Test
@@ -217,6 +227,7 @@ public class TaskServiceImplTest {
 
         service.changeDoneStatus(taskId);
 
+        verify(repository).findById(taskId);
         verify(repository).save(captor.capture());
         assertThat(captor.getValue().isDone(), is(!done));
     }
@@ -247,12 +258,14 @@ public class TaskServiceImplTest {
         when(repository.findById(taskId)).thenReturn(Optional.of(task));
         when(userClient.getStudentByEmail(studentEmail)).thenReturn(student);
 
-        service.changeCompletion(taskId, studentEmail);
+        service.toggleCompletion(taskId, studentEmail);
         assertThat(task.getCompletedStudentIds().size(), is(1));
-        service.changeCompletion(taskId, studentEmail);
+        service.toggleCompletion(taskId, studentEmail);
         assertThat(task.getCompletedStudentIds().size(), is(0));
 
         verify(repository, times(2)).save(task);
+        verify(repository, times(2)).findById(taskId);
+        verify(userClient, times(2)).getStudentByEmail(studentEmail);
     }
 
     @Test(expected = TaskNotFoundException.class)
@@ -260,7 +273,7 @@ public class TaskServiceImplTest {
         long taskId = 821L;
         when(repository.findById(taskId)).thenReturn(Optional.empty());
 
-        service.changeCompletion(taskId, "1BWM");
+        service.toggleCompletion(taskId, "1BWM");
     }
 
     @Test(expected = StudentIdNotFoundException.class)
@@ -276,7 +289,7 @@ public class TaskServiceImplTest {
         when(repository.findById(taskId)).thenReturn(Optional.of(task));
         when(userClient.getStudentByEmail(studentEmail)).thenReturn(student);
 
-        service.changeCompletion(taskId, studentEmail);
+        service.toggleCompletion(taskId, studentEmail);
     }
 
     @Test
@@ -303,6 +316,8 @@ public class TaskServiceImplTest {
         assertThat(task.getHelpNeededStudentIds().size(), is(0));
 
         verify(repository, times(2)).save(task);
+        verify(repository, times(2)).findById(taskId);
+        verify(userClient, times(2)).getStudentByEmail(studentEmail);
     }
 
     @Test(expected = TaskNotFoundException.class)
@@ -345,6 +360,7 @@ public class TaskServiceImplTest {
         verify(repository).delete(task);
         verify(feedbackClient).removeTaskCommentsByTaskId(taskId);
         verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.TASK, taskId);
+        verify(repository).findById(taskId);
     }
 
     @Test(expected = TaskNotFoundException.class)
