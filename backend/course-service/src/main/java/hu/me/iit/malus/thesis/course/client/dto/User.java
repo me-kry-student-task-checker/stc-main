@@ -19,12 +19,13 @@ public abstract class User
 {
     private final String email;
     private String password;
-    private String firstName, lastName;
+    private String firstName;
+    private String lastName;
 
     private UserRole role;
     private boolean enabled;
 
-    public User() {
+    protected User() {
         super();
         this.email = null;
         this.enabled = false;

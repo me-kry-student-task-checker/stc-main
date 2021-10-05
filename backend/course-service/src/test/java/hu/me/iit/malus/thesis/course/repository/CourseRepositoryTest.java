@@ -46,7 +46,7 @@ public class CourseRepositoryTest {
         Optional<Course> foundById = repository.findById(courseId);
 
         // Then
-        Assertions.assertThat(foundById.isPresent()).isEqualTo(true);
+        Assertions.assertThat(foundById).isPresent();
         Assertions.assertThat(foundById.get()).isEqualTo(course);
     }
 
