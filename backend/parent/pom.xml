@@ -31,7 +31,7 @@
         <jaxb.runtime.version>2.3.3</jaxb.runtime.version>
         <spring.cloud.dependencies.version>Greenwich.RELEASE</spring.cloud.dependencies.version>
         <spring.retry.version>1.2.4.RELEASE</spring.retry.version>
-        <lombok.version>1.18.8</lombok.version>
+        <lombok.version>1.18.20</lombok.version>
         <mysql.connector.version>8.0.25</mysql.connector.version>
     </properties>
 

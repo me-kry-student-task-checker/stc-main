@@ -18,4 +18,7 @@ public interface UserClient {
 
     @GetMapping("/api/user/student/assigned/{courseId}")
     Set<Student> getStudentsByAssignedCourseId(@PathVariable("courseId") Long courseId);
+
+    @GetMapping("/api/user/isRelated/course/{courseId}")
+    boolean isRelated(@PathVariable("courseId") Long courseId);
 }

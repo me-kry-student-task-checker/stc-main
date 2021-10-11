@@ -3,7 +3,6 @@ package hu.me.iit.malus.thesis.task.controller.dto;
 import hu.me.iit.malus.thesis.dto.File;
 import hu.me.iit.malus.thesis.dto.Student;
 import hu.me.iit.malus.thesis.dto.TaskComment;
-import hu.me.iit.malus.thesis.task.model.Task;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
@@ -49,13 +48,4 @@ public class DetailedTaskDto {
 
     @NotNull
     private List<TaskComment> comments;
-
-    public DetailedTaskDto(Task task) {
-        this.id = task.getId();
-        this.name = task.getName();
-        this.description = task.getDescription();
-        this.creationDate = task.getCreationDate();
-        this.isDone = task.isDone();
-        this.courseId = task.getCourseId();
-    }
 }

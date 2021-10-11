@@ -1,6 +1,5 @@
 package hu.me.iit.malus.thesis.task.model;
 
-import com.google.common.base.Objects;
 import hu.me.iit.malus.thesis.dto.File;
 import hu.me.iit.malus.thesis.dto.TaskComment;
 import lombok.Getter;
@@ -50,7 +49,10 @@ public class Task {
     @Transient
     private List<TaskComment> comments;
 
-    public Task(String name, String description, Date creationDate, boolean isDone, Long courseId, Set<String> helpNeededStudentIds, Set<String> completedStudentIds) {
+    public Task(
+            String name, String description, Date creationDate, boolean isDone, Long courseId,
+            Set<String> helpNeededStudentIds, Set<String> completedStudentIds
+    ) {
         this.name = name;
         this.description = description;
         this.creationDate = creationDate;
@@ -60,70 +62,19 @@ public class Task {
         this.completedStudentIds = completedStudentIds;
     }
 
-    /**
-     * Adds a new student to the need help set
-     *
-     * @param studentIdToAdd this student's id will be added
-     */
-    public void addStudentIdToHelp(String studentIdToAdd) {
-        helpNeededStudentIds.add(studentIdToAdd);
+    public void toggleCompletedStudent(String studentEmail) {
+        if (completedStudentIds.contains(studentEmail)) {
+            completedStudentIds.remove(studentEmail);
+            return;
+        }
+        completedStudentIds.add(studentEmail);
     }
 
-    /**
-     * Adds more students to the need help set
-     *
-     * @param studentIdsToAdd these student ids will be added
-     */
-    public void addAllStudentIdsToHelp(Set<String> studentIdsToAdd) {
-        helpNeededStudentIds.addAll(studentIdsToAdd);
-    }
-
-    /**
-     * Adds a new student to the completed set
-     *
-     * @param studentIdToAdd this student's id will be added
-     */
-    public void addStudentIdToCompleted(String studentIdToAdd) {
-        completedStudentIds.add(studentIdToAdd);
-    }
-
-    /**
-     * Adds more students to the completed set
-     *
-     * @param studentIdsToAdd these student ids will be added
-     */
-    public void addAllStudentIdsToCompleted(Set<String> studentIdsToAdd) {
-        completedStudentIds.addAll(studentIdsToAdd);
-    }
-
-    /**
-     * Adds a comment under this task
-     *
-     * @param commentToAdd the comment which will be added
-     */
-    public void addComment(TaskComment commentToAdd) {
-        comments.add(commentToAdd);
-    }
-
-    /**
-     * Adds more comments under this task
-     *
-     * @param commentsToAdd the comments which will be added
-     */
-    public void addAllComment(Set<TaskComment> commentsToAdd) {
-        comments.addAll(commentsToAdd);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Task task = (Task) o;
-        return Objects.equal(id, task.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
+    public void toggleHelpNeededStudent(String studentEmail) {
+        if (helpNeededStudentIds.contains(studentEmail)) {
+            helpNeededStudentIds.remove(studentEmail);
+            return;
+        }
+        helpNeededStudentIds.add(studentEmail);
     }
 }
