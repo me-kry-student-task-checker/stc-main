@@ -29,4 +29,20 @@ public class Teacher extends User {
         super(email, password, firstName, lastName, UserRole.TEACHER, false);
         this.createdCourseIds = createdCourseIds;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        Teacher teacher = (Teacher) o;
+
+        return createdCourseIds.equals(teacher.createdCourseIds);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }
