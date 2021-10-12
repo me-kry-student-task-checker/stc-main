@@ -55,8 +55,8 @@ public class TeacherRepositoryTest {
         Optional<Teacher> foundByCreatedCourseId = repository.findByCreatedCourseId(criteriaCourseId);
 
         // Then
-        Assertions.assertThat(foundByCreatedCourseId.isPresent()).isEqualTo(true);
-        Assertions.assertThat(foundByCreatedCourseId.get()).isEqualTo(teacherToFind);
+        Assertions.assertThat(foundByCreatedCourseId.isPresent()).isTrue();
+        Assertions.assertThat(foundByCreatedCourseId).contains(teacherToFind);
     }
 
     @Test
@@ -76,6 +76,6 @@ public class TeacherRepositoryTest {
         Optional<Teacher> foundByCreatedCourseId = repository.findByCreatedCourseId(criteriaCourseId_missing);
 
         // Then
-        Assertions.assertThat(foundByCreatedCourseId.isPresent()).isEqualTo(false);
+        Assertions.assertThat(foundByCreatedCourseId.isPresent()).isFalse();
     }
 }

@@ -13,6 +13,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.*;
 
+import static org.springframework.util.Assert.isTrue;
+
 /**
  * @author Javorek Dénes
  */
@@ -53,7 +55,7 @@ public class StudentRepositoryTest {
 
         // Then
         Assertions.assertThat(foundByAssignedCourseId.size()).isEqualTo(1);
-        Assertions.assertThat(foundByAssignedCourseId.contains(studentToFind)).isEqualTo(true);
+        Assertions.assertThat(foundByAssignedCourseId.contains(studentToFind)).isTrue();
     }
 
     @Test
@@ -73,7 +75,7 @@ public class StudentRepositoryTest {
         Set<Student> foundByAssignedCourseId = new HashSet<>(repository.findAllAssignedForCourseId(criteriaCourseId_missing));
 
         // Then
-        Assertions.assertThat(foundByAssignedCourseId.size()).isEqualTo(0);
+        Assertions.assertThat(foundByAssignedCourseId.size()).isZero();
     }
 
     @Test
@@ -98,6 +100,6 @@ public class StudentRepositoryTest {
 
         // Then
         Assertions.assertThat(foundByAssignedCourseId.size()).isEqualTo(1);
-        Assertions.assertThat(foundByAssignedCourseId.contains(studentToFind)).isEqualTo(true);
+        Assertions.assertThat(foundByAssignedCourseId.contains(studentToFind)).isTrue();
     }
 }

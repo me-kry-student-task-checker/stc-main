@@ -11,10 +11,11 @@ import lombok.Getter;
 public class UserNotFoundException extends Exception {
 
     private static final String MSG = "User, cannot be found!";
-    private String email;
+    private final String email;
 
     public UserNotFoundException() {
         super(MSG);
+        this.email = "";
     }
 
     public UserNotFoundException(String requestedEmail) {
