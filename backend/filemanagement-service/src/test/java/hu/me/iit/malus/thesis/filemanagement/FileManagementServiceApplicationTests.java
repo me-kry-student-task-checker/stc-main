@@ -9,7 +9,7 @@ public class FileManagementServiceApplicationTests {
     /**
      * Rigorous Test :-)
      */
-    @Test
+    @Test(expected = Test.None.class /* no exception expected */)
     public void shouldAnswerWithTrue() {
         assertTrue(true);
     }
