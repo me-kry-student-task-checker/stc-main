@@ -2,15 +2,14 @@ package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 
 import com.google.cloud.storage.*;
+import hu.me.iit.malus.thesis.filemanagement.controller.FileManagementControllerBase;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptorRepository;
-import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.converters.Converter;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -23,7 +22,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Default implementation for FileDescription management service.
@@ -33,15 +31,18 @@ import java.util.List;
 @Service
 @Slf4j
 @Profile("google")
-@RequiredArgsConstructor
-public class FileManagementServiceImplGoogleBucket implements FileManagementService {
+public class FileManagementServiceImplGoogleBucket extends FileManagementControllerBase{
 
 
     private static final Storage storage = StorageOptions.getDefaultInstance().getService();
     @Value("${google-cloud-bucket-name}")
     private String BUCKET_NAME;
 
-    private final FileDescriptorRepository fileDescriptorRepository;
+    public FileManagementServiceImplGoogleBucket(
+        FileDescriptorRepository fileDescriptorRepository) {
+        super(fileDescriptorRepository);
+    }
+
 
     /**
      * {@inheritDoc}
@@ -90,30 +91,6 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public List<FileDescriptorDto> getAllFilesByUser(String userEmail) {
-        List<FileDescriptor> results = fileDescriptorRepository.findAllByUploadedBy(userEmail);
-        log.debug("Files found by user {}: {}", userEmail, results);
-        return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public List<FileDescriptorDto> getAllFilesByServiceTypeAndTagId(Long tagId, ServiceType serviceType) {
-        List<FileDescriptor> results = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
-        log.debug("Files found by file service {} and tagId {}: {}", serviceType, tagId, results);
-        return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
-    }
-
     @Override
     public Path getFileByName(String name) {
         // no implementation as it is not needed nor called when google buckets are used
@@ -141,14 +118,5 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             stringBuilder.append(String.format("%02X", b));
         }
         return stringBuilder.toString();
-    }
-
-    @Override
-    public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
-            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
-        for (FileDescriptor fileDescription : fileDescriptions) {
-            deleteFile(fileDescription.getId(), serviceType, email, userRole);
-        }
     }
 }

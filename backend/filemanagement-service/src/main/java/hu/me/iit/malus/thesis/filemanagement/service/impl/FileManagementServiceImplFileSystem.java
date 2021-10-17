@@ -1,14 +1,13 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
+import hu.me.iit.malus.thesis.filemanagement.controller.FileManagementControllerBase;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
 import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptorRepository;
-import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.converters.Converter;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
@@ -19,7 +18,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -29,16 +27,21 @@ import java.util.UUID;
  **/
 @Service
 @Slf4j
-@RequiredArgsConstructor
 @Profile("!google")
-public class FileManagementServiceImplFileSystem implements FileManagementService {
+public class FileManagementServiceImplFileSystem extends FileManagementControllerBase {
 
     private static final String FILE_DIR_PROP = "files.upload.dir";
     private static final String FILE_NAME_PATTERN = "%d_%d_%d_%s";
     private static final String DOWNLOAD_LINK_PATTERN = "/api/filemanagement/download/link/%s";
 
     private final Environment env; // environment is used for retrieving the upload destination from cloud props file, because @Value sets null
-    private final FileDescriptorRepository fileDescriptorRepository;
+
+    public FileManagementServiceImplFileSystem(
+        FileDescriptorRepository fileDescriptorRepository, Environment env) {
+        super(fileDescriptorRepository);
+        this.env = env;
+    }
+
 
     /**
      * {@inheritDoc}
@@ -88,29 +91,6 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public List<FileDescriptorDto> getAllFilesByUser(String userEmail) {
-        List<FileDescriptor> results = fileDescriptorRepository.findAllByUploadedBy(userEmail);
-        log.debug("Files found by user {}: {}", userEmail, results);
-        return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public List<FileDescriptorDto> getAllFilesByServiceTypeAndTagId(Long tagId, ServiceType serviceType) {
-        List<FileDescriptor> results = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
-        log.debug("Files found by file service {} and tagId {}: {}", serviceType, tagId, results);
-        return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
-    }
 
     /**
      * {@inheritDoc}
@@ -123,12 +103,4 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
         return Path.of(uploadDir, name);
     }
 
-    @Override
-    public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
-            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
-        for (FileDescriptor fileDescription : fileDescriptions) {
-            deleteFile(fileDescription.getId(), serviceType, email, userRole);
-        }
-    }
 }
