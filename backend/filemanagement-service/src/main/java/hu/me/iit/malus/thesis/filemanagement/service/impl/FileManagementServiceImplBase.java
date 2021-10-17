@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.filemanagement.controller;
+package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-public abstract class FileManagementControllerBase implements FileManagementService{
+public abstract class FileManagementServiceImplBase implements FileManagementService{
 
   protected final FileDescriptorRepository fileDescriptorRepository;
 

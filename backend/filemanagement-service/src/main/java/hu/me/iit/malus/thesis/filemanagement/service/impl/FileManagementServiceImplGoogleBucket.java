@@ -2,7 +2,6 @@ package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 
 import com.google.cloud.storage.*;
-import hu.me.iit.malus.thesis.filemanagement.controller.FileManagementControllerBase;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
@@ -31,7 +30,7 @@ import java.util.Date;
 @Service
 @Slf4j
 @Profile("google")
-public class FileManagementServiceImplGoogleBucket extends FileManagementControllerBase{
+public class FileManagementServiceImplGoogleBucket extends FileManagementServiceImplBase {
 
 
     private static final Storage storage = StorageOptions.getDefaultInstance().getService();

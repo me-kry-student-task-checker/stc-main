@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.filemanagement.controller;
+package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -27,14 +27,14 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
-public class FileManagementControllerBaseTest {
+public class FileManagementServiceImplBaseTest {
 
   @Test
   public void testGetAllFilesByUser() {
     // GIVEN
     FileDescriptorRepository mockFileDescriptorRepository = mock(FileDescriptorRepository.class);
 
-    FileManagementControllerBase mockClass = mock(FileManagementControllerBase.class,
+    FileManagementServiceImplBase mockClass = mock(FileManagementServiceImplBase.class,
         withSettings().useConstructor(mockFileDescriptorRepository)
             .defaultAnswer(CALLS_REAL_METHODS));
     String testUserEmail = "testMail";
@@ -92,7 +92,7 @@ public class FileManagementControllerBaseTest {
   public void testGetAllFilesByServiceTypeAndTagId() {
     FileDescriptorRepository mockFileDescriptorRepository = mock(FileDescriptorRepository.class);
 
-    FileManagementControllerBase mockClass = mock(FileManagementControllerBase.class,
+    FileManagementServiceImplBase mockClass = mock(FileManagementServiceImplBase.class,
         withSettings().useConstructor(mockFileDescriptorRepository)
             .defaultAnswer(CALLS_REAL_METHODS));
 
@@ -151,7 +151,7 @@ public class FileManagementControllerBaseTest {
       throws FileNotFoundException, ForbiddenFileDeleteException {
     FileDescriptorRepository mockFileDescriptorRepository = mock(FileDescriptorRepository.class);
 
-    FileManagementControllerBase mockClass = mock(FileManagementControllerBase.class,
+    FileManagementServiceImplBase mockClass = mock(FileManagementServiceImplBase.class,
         withSettings().useConstructor(mockFileDescriptorRepository)
             .defaultAnswer(CALLS_REAL_METHODS));
 

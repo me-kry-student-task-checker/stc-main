@@ -1,6 +1,5 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
-import hu.me.iit.malus.thesis.filemanagement.controller.FileManagementControllerBase;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
@@ -28,7 +27,7 @@ import java.util.UUID;
 @Service
 @Slf4j
 @Profile("!google")
-public class FileManagementServiceImplFileSystem extends FileManagementControllerBase {
+public class FileManagementServiceImplFileSystem extends FileManagementServiceImplBase {
 
     private static final String FILE_DIR_PROP = "files.upload.dir";
     private static final String FILE_NAME_PATTERN = "%d_%d_%d_%s";
@@ -41,7 +40,6 @@ public class FileManagementServiceImplFileSystem extends FileManagementControlle
         super(fileDescriptorRepository);
         this.env = env;
     }
-
 
     /**
      * {@inheritDoc}
@@ -90,7 +88,6 @@ public class FileManagementServiceImplFileSystem extends FileManagementControlle
             throw new FileNotFoundException(e);
         }
     }
-
 
     /**
      * {@inheritDoc}
