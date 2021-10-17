@@ -1,19 +1,15 @@
 package hu.me.iit.malus.thesis.filemanagement.controller;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileUploadDto;
 import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
 import hu.me.iit.malus.thesis.filemanagement.service.FileManagementService;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
