@@ -58,15 +58,6 @@ public class FileManagementServiceImplBaseTest {
     when(mockFileDescriptorRepository.findAllByUploadedBy(testUserEmail))
         .thenReturn(testFileDescriptorList);
 
-    FileDescriptorDto expectedResultElement = new FileDescriptorDto();
-    expectedResultElement.setId(testId);
-    expectedResultElement.setName(testName);
-    expectedResultElement.setDownloadLink(testLink);
-    expectedResultElement.setUploadDate(testUploadDate);
-    expectedResultElement.setUploadedBy(testUploader);
-    expectedResultElement.setContentType(testContentType);
-    expectedResultElement.setTagId(testTagId);
-
     doCallRealMethod().when(mockClass).getAllFilesByUser(testUserEmail);
 
     // WHEN
@@ -114,15 +105,6 @@ public class FileManagementServiceImplBaseTest {
 
     when(mockFileDescriptorRepository.findAllByServiceTypeAndTagId(testServiceType, testTagId))
         .thenReturn(testFileDescriptorList);
-
-    FileDescriptorDto expectedResultElement = new FileDescriptorDto();
-    expectedResultElement.setId(testId);
-    expectedResultElement.setName(testName);
-    expectedResultElement.setDownloadLink(testLink);
-    expectedResultElement.setUploadDate(testUploadDate);
-    expectedResultElement.setUploadedBy(testUploader);
-    expectedResultElement.setContentType(testContentType);
-    expectedResultElement.setTagId(testTagId);
 
     doCallRealMethod().when(mockClass).getAllFilesByServiceTypeAndTagId(testTagId, testServiceType);
 
