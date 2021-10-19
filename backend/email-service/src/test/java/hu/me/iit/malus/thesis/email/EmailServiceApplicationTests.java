@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class EmailServiceApplicationTests {
 
-    @Test
+    @Test(expected = Test.None.class)
     public void contextLoads() {
     }
 
