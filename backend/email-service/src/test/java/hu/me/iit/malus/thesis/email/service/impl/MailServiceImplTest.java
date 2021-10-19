@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -68,7 +69,6 @@ public class MailServiceImplTest {
     public void sendEmail_exceptionThrown() throws MailCouldNotBeSentException {
         doThrow(mock(MailException.class)).when(mockMailSender).send(any(SimpleMailMessage.class));
         service.sendEmail(dto);
-        verify(mockMailSender).send(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue(), is(mail));
+        fail();
     }
 }
