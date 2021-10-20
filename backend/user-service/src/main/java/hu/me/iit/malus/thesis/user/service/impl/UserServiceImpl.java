@@ -127,8 +127,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public StudentDto getStudentByEmail(String studentEmail) throws DatabaseOperationFailedException, UserNotFoundException {
-        Student student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
         try {
+            Student student = studentRepository.findByEmail(studentEmail).orElseThrow(() -> new UserNotFoundException(studentEmail));
             return Converter.createStudentDtoFromStudent(student);
         } catch (DataAccessException dataExc) {
             throw new DatabaseOperationFailedException(dataExc);
