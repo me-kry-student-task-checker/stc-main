@@ -58,8 +58,15 @@ services:
     networks:
       - studentTaskChecker
     ports:
-      - "3666:3306" # Mind the difference
+      - "3666:3306"
 
+  redis:
+    image: redis:6.0.13-alpine
+    container_name: redis-store
+    networks:
+      - studentTaskChecker
+    ports:
+      - "6379:6379"
 
   config-service:
     container_name: config-service
@@ -129,22 +136,6 @@ services:
       - discovery-service-peer2
       - mailhog
 
-  task-service:
-    container_name: task-service
-    build:
-      context: ./task-service
-      dockerfile: dockerfile
-    image: task-service:latest
-    networks:
-      - studentTaskChecker
-    ports:
-      - "8080"
-    depends_on:
-      - config-service
-      - discovery-service-peer1
-      - discovery-service-peer2
-      - mysql-database
-
   course-service:
     container_name: course-service
     build:
@@ -160,7 +151,58 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
+      - redis
 
+  task-service:
+    container_name: task-service
+    build:
+      context: ./task-service
+      dockerfile: dockerfile
+    image: task-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
+      - redis
+
+  feedback-service:
+    container_name: feedback-service
+    build:
+      context: ./feedback-service
+      dockerfile: dockerfile
+    image: feedback-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
+      - redis
+
+  user-service:
+    container_name: user-service
+    build:
+      context: ./user-service
+      dockerfile: dockerfile
+    image: user-service:latest
+    networks:
+      - studentTaskChecker
+    ports:
+      - "8080"
+    depends_on:
+      - config-service
+      - discovery-service-peer1
+      - discovery-service-peer2
+      - mysql-database
+      - redis
 
   filemanagement-service:
     container_name: filemanagement-service
@@ -181,50 +223,4 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
-
-
-  feedback-service:
-    container_name: feedback-service
-    build:
-      context: ./feedback-service
-      dockerfile: dockerfile
-    image: feedback-service:latest
-    networks:
-      - studentTaskChecker
-    ports:
-      - "8080"
-    depends_on:
-      - config-service
-      - discovery-service-peer1
-      - discovery-service-peer2
-      - mysql-database
-
-  user-service:
-    container_name: user-service
-    build:
-      context: ./user-service
-      dockerfile: dockerfile
-    image: user-service:latest
-    networks:
-      - studentTaskChecker
-    ports:
-      - "8080"
-    depends_on:
-      - config-service
-      - discovery-service-peer1
-      - discovery-service-peer2
-      - mysql-database
-
- # frontend:
-  #  container_name: frontend
-   # build:
-    #  context: ../frontend
-     # dockerfile: dockerfile
-#    image: front-end:latest
- #   networks:
-  #    - studentTaskChecker
-   # ports:
-    #  - 3000:3000
-#    depends_on:
- #     - gateway-service
-  #  restart: on-failure
+      - redis
