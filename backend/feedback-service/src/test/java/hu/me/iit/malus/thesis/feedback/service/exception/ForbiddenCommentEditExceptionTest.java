@@ -1,8 +1,5 @@
 package hu.me.iit.malus.thesis.feedback.service.exception;
 
-import static org.junit.Assert.*;
-
-
 import org.junit.Test;
 
 public class ForbiddenCommentEditExceptionTest {
