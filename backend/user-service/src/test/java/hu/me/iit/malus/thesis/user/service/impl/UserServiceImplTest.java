@@ -4,6 +4,7 @@ import hu.me.iit.malus.thesis.user.client.EmailClient;
 import hu.me.iit.malus.thesis.user.controller.dto.RegistrationRequest;
 import hu.me.iit.malus.thesis.user.controller.dto.StudentDto;
 import hu.me.iit.malus.thesis.user.controller.dto.TeacherDto;
+import hu.me.iit.malus.thesis.user.controller.dto.UserDto;
 import hu.me.iit.malus.thesis.user.model.*;
 import hu.me.iit.malus.thesis.user.model.factory.UserFactory;
 import hu.me.iit.malus.thesis.user.repository.ActivationTokenRepository;
@@ -11,6 +12,7 @@ import hu.me.iit.malus.thesis.user.repository.AdminRepository;
 import hu.me.iit.malus.thesis.user.repository.StudentRepository;
 import hu.me.iit.malus.thesis.user.repository.TeacherRepository;
 import hu.me.iit.malus.thesis.user.service.UserService;
+import hu.me.iit.malus.thesis.user.service.converter.Converter;
 import hu.me.iit.malus.thesis.user.service.exception.DatabaseOperationFailedException;
 import hu.me.iit.malus.thesis.user.service.exception.EmailExistsException;
 import hu.me.iit.malus.thesis.user.service.exception.UserNotFoundException;
@@ -400,5 +402,254 @@ public class UserServiceImplTest {
         // THEN
         verify(studentRepository, times(1)).findAllNotAssignedForCourseId(courseId);
         Assertions.assertThat(studentDtoSet.size()).isEqualTo(studentList.size());
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void whenUserIsNotFound_thenGetTeacherByEmailThrowsException() throws DatabaseOperationFailedException, UserNotFoundException {
+        // GIVEN
+        String teacherEmail = "teacher@example.com";
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.empty());
+
+        // WHEN
+        userService.getTeacherByEmail(teacherEmail);
+
+        // THEN
+    }
+
+    @Test(expected = DataRetrievalFailureException.class)
+    public void whenDatabaseErrorOccures_thenGetTeacherByEmailThrowsException() throws DatabaseOperationFailedException, UserNotFoundException {
+        // GIVEN
+        String teacherEmail = "teacher@example.com";
+        when(teacherRepository.findByEmail(any())).thenThrow(DataRetrievalFailureException.class);
+
+        // WHEN
+        userService.getTeacherByEmail(teacherEmail);
+
+        // THEN
+    }
+
+    @Test
+    public void getTeacherByEmail() throws UserNotFoundException, DatabaseOperationFailedException {
+        // GIVEN
+        String teacherEmail = "teacher@example.com";
+        String teacherFirstName = "First";
+        String teacherLastName = "Last";
+        String teacherPassword = "psw";
+        Teacher teacher = new Teacher(teacherEmail, teacherPassword, teacherFirstName, teacherLastName, List.of());
+
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.of(teacher));
+
+        // WHEN
+        TeacherDto teacherDto = userService.getTeacherByEmail(teacherEmail);
+
+        // THEN
+        verify(teacherRepository, times(1)).findByEmail(teacherEmail);
+        Assertions.assertThat(teacherDto.getEmail()).isEqualTo(teacherEmail);
+        Assertions.assertThat(teacherDto.getFirstName()).isEqualTo(teacherFirstName);
+        Assertions.assertThat(teacherDto.getLastName()).isEqualTo(teacherLastName);
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void whenUserIsNotFound_thenGetTeacherByCreatedCourseIdThrowsException() throws DatabaseOperationFailedException, UserNotFoundException {
+        // GIVEN
+        Long courseId = 16L;
+        when(teacherRepository.findByCreatedCourseId(any())).thenReturn(Optional.empty());
+
+        // WHEN
+        userService.getTeacherByCreatedCourseId(courseId);
+
+        // THEN
+    }
+
+    @Test(expected = DataRetrievalFailureException.class)
+    public void whenDatabaseErrorOccured_thenGetTeacherByCreatedCourseIdThrowsException() throws UserNotFoundException, DatabaseOperationFailedException {
+        // GIVEN
+        Long courseId = 16L;
+        when(teacherRepository.findByCreatedCourseId(any())).thenThrow(DataRetrievalFailureException.class);
+
+        // WHEN
+        userService.getTeacherByCreatedCourseId(courseId);
+
+        // THEN
+    }
+
+    @Test
+    public void getTeacherByCreatedCourseId() throws UserNotFoundException, DatabaseOperationFailedException {
+        // GIVEN
+        Long courseId = 16L;
+        Teacher teacher = new Teacher("teacher@example.com", "psw1", "First1", "Last1", List.of(courseId, 18L, 22L));
+
+        when(teacherRepository.findByCreatedCourseId(any())).thenReturn(Optional.of(teacher));
+
+        // WHEN
+        TeacherDto teacherDto = userService.getTeacherByCreatedCourseId(courseId);
+
+        // THEN
+        verify(teacherRepository, times(1)).findByCreatedCourseId(courseId);
+        Assertions.assertThat(teacherDto.getEmail()).isEqualTo(teacher.getEmail());
+        Assertions.assertThat(teacherDto.getFirstName()).isEqualTo(teacher.getFirstName());
+        Assertions.assertThat(teacherDto.getLastName()).isEqualTo(teacher.getLastName());
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void whenUserIsNotFound_thenGetRelatedCourseIdsThrowsException() throws UserNotFoundException {
+        // GIVEN
+        String userEmail = "teacher@example.com";
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.empty());
+
+        // WHEN
+        userService.getRelatedCourseIds(userEmail);
+
+        // THEN
+    }
+
+    @Test
+    public void getRelatedCourseIds() throws UserNotFoundException {
+        // GIVEN
+        String userEmail = "teacher@example.com";
+        Teacher teacher = new Teacher(userEmail, "psw1", "First1", "Last1", List.of(18L, 22L));
+
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.of(teacher));
+        // WHEN
+
+        Set<Long> relatedCourseIds = userService.getRelatedCourseIds(userEmail);
+
+        // THEN
+        verify(teacherRepository, times(1)).findByEmail(userEmail);
+        Assertions.assertThat(relatedCourseIds.size()).isEqualTo(teacher.getCreatedCourseIds().size());
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void whenUserIsNotFound_thenIsRelatedToCourseThrowsException() throws UserNotFoundException {
+        // GIVEN
+        String userEmail = "teacher@example.com";
+        Long courseId = 16L;
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.empty());
+
+        // WHEN
+        userService.isRelatedToCourse(userEmail, courseId);
+
+        // THEN
+    }
+
+    @Test
+    public void isRelatedToCourse() throws UserNotFoundException {
+        // GIVEN
+        String userEmail = "teacher@example.com";
+        Long courseId = 16L;
+        Teacher teacher = new Teacher(userEmail, "psw1", "First1", "Last1", List.of(courseId, 18L, 22L));
+
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.of(teacher));
+
+        // WHEN
+        boolean isRelatedToCourse = userService.isRelatedToCourse(userEmail, courseId);
+
+        verify(teacherRepository, times(1)).findByEmail(userEmail);
+        Assertions.assertThat(isRelatedToCourse).isEqualTo(teacher.getCreatedCourseIds().contains(courseId));
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void whenUserIsNotFound_thenGetAnyUserByEmailThrowsException() throws UserNotFoundException {
+        // GIVEN
+        String userEmail = "teacher@example.com";
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.empty());
+
+        // WHEN
+        userService.getAnyUserByEmail(userEmail);
+
+        // THEN
+    }
+
+    @Test
+    public void getAnyUserByEmail() throws UserNotFoundException {
+        // GIVEN
+        String email = "teacher@example.com";
+        Teacher teacher = new Teacher(email, "psw1", "First1", "Last1", List.of());
+
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.of(teacher));
+
+        // WHEN
+        Teacher resultTeacher = (Teacher) userService.getAnyUserByEmail(email);
+
+        // THEN
+        verify(teacherRepository, times(1)).findByEmail(email);
+        Assertions.assertThat(resultTeacher.getEmail()).isEqualTo(teacher.getEmail());
+        Assertions.assertThat(resultTeacher.getFirstName()).isEqualTo(teacher.getFirstName());
+        Assertions.assertThat(resultTeacher.getLastName()).isEqualTo(teacher.getLastName());
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void whenUserIsNotFound_thenGetAnyUserDtoByEmailThrowsException() throws UserNotFoundException {
+        // GIVEN
+        String userEmail = "teacher@example.com";
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.empty());
+
+        // WHEN
+        userService.getAnyUserDtoByEmail(userEmail);
+
+        // THEN
+    }
+
+    @Test
+    public void getAnyUserDtoByEmail() throws UserNotFoundException {
+        // GIVEN
+        String email = "teacher@example.com";
+
+        Teacher teacher = new Teacher(email, "psw1", "First1", "Last1", List.of());
+        UserDto teacherDto = Converter.createUserDtoFromUser(teacher);
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.of(teacher));
+
+        // WHEN
+        UserDto resultDto = userService.getAnyUserDtoByEmail(email);
+
+        // THEN
+        verify(teacherRepository, times(1)).findByEmail(email);
+        Assertions.assertThat(resultDto.getEmail()).isEqualTo(teacherDto.getEmail());
+        Assertions.assertThat(resultDto.getFirstName()).isEqualTo(teacherDto.getFirstName());
+        Assertions.assertThat(resultDto.getLastName()).isEqualTo(teacherDto.getLastName());
+    }
+
+    @Test
+    public void removeCourseIdFromRelatedLists() {
+        // GIVEN
+        Long courseId = 16L;
+
+        List<Long> courses1 = new ArrayList<>();
+        courses1.add(courseId);
+        courses1.add(22L);
+
+        List<Long> courses2 = new ArrayList<>();
+        courses2.add(courseId);
+
+        Student student1 = new Student("stud1@example.com", "psw1", "First1", "Last1", courses1);
+        Student student2 = new Student("stud2@example.com", "psw2", "First2", "Last2", courses2);
+        List<Student> studentList = new ArrayList<>();
+        studentList.add(student1);
+        studentList.add(student2);
+
+        List<Long> coursesTeacher = new ArrayList<>();
+        coursesTeacher.add(courseId);
+        coursesTeacher.add(22L);
+
+        Teacher teacher = new Teacher("teacher1@example.com", "psw1", "First1", "Last1", coursesTeacher);
+
+        when(studentRepository.findAllAssignedForCourseId(any())).thenReturn(studentList);
+        when(teacherRepository.findByCreatedCourseId(any())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.save(teacher)).thenReturn(teacher);
+
+        // WHEN
+        userService.removeCourseIdFromRelatedLists(courseId);
+
+        // THEN
+        verify(studentRepository, times(1)).findAllAssignedForCourseId(courseId);
+        verify(teacherRepository, times(1)).findByCreatedCourseId(courseId);
+        verify(teacherRepository, times(1)).save(teacher);
+
+        boolean hasCourseIdStudent = studentList
+                .stream()
+                .anyMatch(student -> student.getAssignedCourseIds().contains(courseId));
+        boolean hasCourseIdTeacher = teacher.getCreatedCourseIds().contains(courseId);
+        Assertions.assertThat(hasCourseIdStudent).isEqualTo(false);
+        Assertions.assertThat(hasCourseIdTeacher).isEqualTo(false);
     }
 }
