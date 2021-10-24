@@ -70,7 +70,7 @@ public class FeedbackServiceImpl implements FeedbackService {
      */
     @Override
     public List<CourseCommentDetailsDto> getAllCourseComments(Long courseId) {
-        List<CourseComment> results = courseCommentRepository.findAllByCourseId(courseId);
+        List<CourseComment> results = courseCommentRepository.findAllByCourseIdAndRemovedFalse(courseId);
         results.forEach(courseComment -> courseComment.setFiles(
                 fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, courseComment.getId()))
         );
@@ -85,7 +85,7 @@ public class FeedbackServiceImpl implements FeedbackService {
      */
     @Override
     public List<TaskCommentDetailsDto> getAllTaskComments(Long taskId) {
-        List<TaskComment> results = taskCommentRepository.findAllByTaskId(taskId);
+        List<TaskComment> results = taskCommentRepository.findAllByTaskIdAndRemovedFalse(taskId);
         results.forEach(taskComment -> taskComment.setFiles(
                 fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, taskComment.getId()))
         );
@@ -96,7 +96,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     @Transactional
     public void removeCourseComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
-        CourseComment courseComment = courseCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        CourseComment courseComment = courseCommentRepository.findByIdAndRemovedFalse(commentId).orElseThrow(CommentNotFoundException::new);
         if (!courseComment.getAuthorId().equals(authorId)) {
             throw new ForbiddenCommentEditException();
         }
@@ -107,7 +107,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     @Transactional
     public void removeTaskComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
-        TaskComment taskComment = taskCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        TaskComment taskComment = taskCommentRepository.findByIdAndRemovedFalse(commentId).orElseThrow(CommentNotFoundException::new);
         if (!taskComment.getAuthorId().equals(authorId)) {
             throw new ForbiddenCommentEditException();
         }

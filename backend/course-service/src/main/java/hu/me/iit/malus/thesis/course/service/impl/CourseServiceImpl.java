@@ -59,7 +59,7 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public CourseOverviewDto edit(CourseModificationDto dto, String editorsEmail) throws ForbiddenCourseEditException, CourseNotFoundException {
-        Course course = courseRepository.findById(dto.getId()).orElseThrow(CourseNotFoundException::new);
+        Course course = courseRepository.findByIdAndRemovedFalse(dto.getId()).orElseThrow(CourseNotFoundException::new);
         if (!userClient.isRelated(course.getId())) {
             log.warn("Creator of this course {} is not the editor: {}!", course, editorsEmail);
             throw new ForbiddenCourseEditException();
@@ -75,7 +75,7 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public CourseFullDetailsDto get(Long courseId, String userEmail) throws CourseNotFoundException {
-        Course course = courseRepository.findById(courseId).orElseThrow(CourseNotFoundException::new);
+        Course course = courseRepository.findByIdAndRemovedFalse(courseId).orElseThrow(CourseNotFoundException::new);
         if (!userClient.isRelated(course.getId())) {
             log.warn("User {} is not realated to this course {}!", userEmail, course);
             throw new CourseNotFoundException();
@@ -96,7 +96,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Set<CourseOverviewDto> getAll(String userEmail) {
         Set<Long> relatedCourseIds = userClient.getRelatedCourseIds();
-        Set<Course> relatedCourses = courseRepository.findAllByIdIsIn(relatedCourseIds);
+        Set<Course> relatedCourses = courseRepository.findAllByIdIsInAndRemovedFalse(relatedCourseIds);
 
         for (Course course : relatedCourses) {
             course.setCreator(userClient.getTeacherByCreatedCourseId(course.getId()));
@@ -118,10 +118,10 @@ public class CourseServiceImpl implements CourseService {
         }
         if (courseRepository.existsById(courseId)) {
             courseRepository.deleteById(courseId);
-            userClient.removeCourseIdFromRelatedUserLists(courseId);
             taskClient.removeTasksByCourseId(courseId);
-            fileManagementClient.removeFilesByServiceAndTagId(ServiceType.COURSE, courseId);
             feedbackClient.removeCourseCommentsByCourseId(courseId);
+            userClient.removeCourseIdFromRelatedUserLists(courseId);
+            fileManagementClient.removeFilesByServiceAndTagId(ServiceType.COURSE, courseId);
             return;
         }
         throw new CourseNotFoundException();

@@ -94,7 +94,7 @@ public class TaskServiceImplTest {
         task.setName(name);
         task.setDescription(description);
         task.setCourseId(courseId);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
         when(userClient.isRelated(courseId)).thenReturn(true);
         when(repository.save(task)).thenReturn(task);
 
@@ -103,7 +103,7 @@ public class TaskServiceImplTest {
         assertThat(dto.getId(), is(taskId));
         assertThat(dto.getName(), is(editTaskName));
         assertThat(dto.getDescription(), is(editTaskDescription));
-        verify(repository).findById(taskId);
+        verify(repository).findByIdAndRemovedFalse(taskId);
         verify(userClient).isRelated(courseId);
         verify(repository).save(task);
     }
@@ -113,7 +113,7 @@ public class TaskServiceImplTest {
         long taskId = 156L;
         EditTaskDto editTaskDto = new EditTaskDto();
         editTaskDto.setId(taskId);
-        when(repository.findById(taskId)).thenReturn(Optional.empty());
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.empty());
 
         service.edit(editTaskDto, "xz5uYR");
     }
@@ -127,7 +127,7 @@ public class TaskServiceImplTest {
         Task task = new Task();
         task.setId(taskId);
         task.setCourseId(courseId);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
         when(userClient.isRelated(courseId)).thenReturn(false);
 
         service.edit(editTaskDto, "xz5uYR");
@@ -148,7 +148,7 @@ public class TaskServiceImplTest {
         task.setCreationDate(creationDate);
         task.setDone(done);
         task.setCourseId(courseId);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
         when(userClient.isRelated(courseId)).thenReturn(true);
         when(feedbackClient.getAllTaskComments(taskId)).thenReturn(new ArrayList<>());
         when(fileManagementClient.getAllFilesByTagId(ServiceType.TASK, taskId)).thenReturn(new HashSet<>());
@@ -165,7 +165,7 @@ public class TaskServiceImplTest {
         assertThat(dto.getHelpNeededStudents().size(), is(0));
         assertThat(dto.getComments().size(), is(0));
         assertThat(dto.getFiles().size(), is(0));
-        verify(repository).findById(taskId);
+        verify(repository).findByIdAndRemovedFalse(taskId);
         verify(userClient).isRelated(courseId);
         verify(feedbackClient).getAllTaskComments(taskId);
         verify(fileManagementClient).getAllFilesByTagId(ServiceType.TASK, taskId);
@@ -174,7 +174,7 @@ public class TaskServiceImplTest {
     @Test(expected = TaskNotFoundException.class)
     public void getNotFoundException() throws Exception {
         long taskId = 905L;
-        when(repository.findById(taskId)).thenReturn(Optional.empty());
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.empty());
 
         service.get(taskId, "foIM");
     }
@@ -184,7 +184,7 @@ public class TaskServiceImplTest {
         long taskId = 905L;
         Task task = new Task();
         task.setId(taskId);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
 
         service.get(taskId, "foIM");
     }
@@ -204,14 +204,14 @@ public class TaskServiceImplTest {
         task.setCreationDate(creationDate);
         task.setDone(done);
         task.setCourseId(courseId);
-        when(repository.findAllByCourseId(courseId)).thenReturn(Set.of(task));
+        when(repository.findAllByCourseIdAndRemovedFalse(courseId)).thenReturn(Set.of(task));
         when(feedbackClient.getAllTaskComments(taskId)).thenReturn(new ArrayList<>());
         when(fileManagementClient.getAllFilesByTagId(ServiceType.TASK, taskId)).thenReturn(new HashSet<>());
 
         Set<DetailedTaskDto> dtos = service.getAll(courseId);
 
         assertThat(dtos.size(), is(1));
-        verify(repository).findAllByCourseId(courseId);
+        verify(repository).findAllByCourseIdAndRemovedFalse(courseId);
         verify(feedbackClient).getAllTaskComments(taskId);
         verify(fileManagementClient).getAllFilesByTagId(ServiceType.TASK, taskId);
     }
@@ -223,11 +223,11 @@ public class TaskServiceImplTest {
         Task task = new Task();
         task.setId(taskId);
         task.setDone(done);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
 
         service.changeDoneStatus(taskId);
 
-        verify(repository).findById(taskId);
+        verify(repository).findByIdAndRemovedFalse(taskId);
         verify(repository).save(captor.capture());
         assertThat(captor.getValue().isDone(), is(!done));
     }
@@ -235,7 +235,7 @@ public class TaskServiceImplTest {
     @Test(expected = TaskNotFoundException.class)
     public void changeDoneStatusNotFoundException() throws Exception {
         long taskId = 905L;
-        when(repository.findById(taskId)).thenReturn(Optional.empty());
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.empty());
 
         service.changeDoneStatus(taskId);
     }
@@ -255,7 +255,7 @@ public class TaskServiceImplTest {
         Student student = new Student();
         student.setEmail(studentEmail);
         student.setAssignedCourseIds(assignedCourseIds);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
         when(userClient.getStudentByEmail(studentEmail)).thenReturn(student);
 
         service.toggleCompletion(taskId, studentEmail);
@@ -264,14 +264,14 @@ public class TaskServiceImplTest {
         assertThat(task.getCompletedStudentIds().size(), is(0));
 
         verify(repository, times(2)).save(task);
-        verify(repository, times(2)).findById(taskId);
+        verify(repository, times(2)).findByIdAndRemovedFalse(taskId);
         verify(userClient, times(2)).getStudentByEmail(studentEmail);
     }
 
     @Test(expected = TaskNotFoundException.class)
     public void changeCompletionTaskNotFoundException() throws Exception {
         long taskId = 821L;
-        when(repository.findById(taskId)).thenReturn(Optional.empty());
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.empty());
 
         service.toggleCompletion(taskId, "1BWM");
     }
@@ -286,7 +286,7 @@ public class TaskServiceImplTest {
         Student student = new Student();
         student.setEmail(studentEmail);
         student.setAssignedCourseIds(assignedCourseIds);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
         when(userClient.getStudentByEmail(studentEmail)).thenReturn(student);
 
         service.toggleCompletion(taskId, studentEmail);
@@ -307,7 +307,7 @@ public class TaskServiceImplTest {
         Student student = new Student();
         student.setEmail(studentEmail);
         student.setAssignedCourseIds(assignedCourseIds);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
         when(userClient.getStudentByEmail(studentEmail)).thenReturn(student);
 
         service.toggleHelp(taskId, studentEmail);
@@ -316,14 +316,14 @@ public class TaskServiceImplTest {
         assertThat(task.getHelpNeededStudentIds().size(), is(0));
 
         verify(repository, times(2)).save(task);
-        verify(repository, times(2)).findById(taskId);
+        verify(repository, times(2)).findByIdAndRemovedFalse(taskId);
         verify(userClient, times(2)).getStudentByEmail(studentEmail);
     }
 
     @Test(expected = TaskNotFoundException.class)
     public void toggleHelpTaskNotFoundException() throws Exception {
         long taskId = 164L;
-        when(repository.findById(taskId)).thenReturn(Optional.empty());
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.empty());
 
         service.toggleHelp(taskId, "1BWM");
     }
@@ -338,7 +338,7 @@ public class TaskServiceImplTest {
         Student student = new Student();
         student.setEmail(studentEmail);
         student.setAssignedCourseIds(assignedCourseIds);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
         when(userClient.getStudentByEmail(studentEmail)).thenReturn(student);
 
         service.toggleHelp(taskId, studentEmail);
@@ -353,20 +353,20 @@ public class TaskServiceImplTest {
         task.setId(taskId);
         task.setCourseId(courseId);
         task.setHelpNeededStudentIds(helpNeededStudentIds);
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
 
         service.deleteTask(taskId);
 
         verify(repository).delete(task);
         verify(feedbackClient).removeTaskCommentsByTaskId(taskId);
         verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.TASK, taskId);
-        verify(repository).findById(taskId);
+        verify(repository).findByIdAndRemovedFalse(taskId);
     }
 
     @Test(expected = TaskNotFoundException.class)
     public void deleteTaskTaskNotFoundException() throws Exception {
         long taskId = 194L;
-        when(repository.findById(taskId)).thenReturn(Optional.empty());
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.empty());
 
         service.deleteTask(taskId);
     }

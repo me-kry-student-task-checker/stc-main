@@ -58,7 +58,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         );
         log.debug("File successfully uploaded to google bucket: {}", file.getName());
         FileDescriptor fileDescriptor = new FileDescriptor(
-                null, fileName, blob.getMediaLink(), file.getSize(), new Date(), userEmail, file.getContentType(), serviceType, tagId);
+                null, fileName, blob.getMediaLink(), file.getSize(), new Date(), userEmail, file.getContentType(), serviceType, tagId, false);
         fileDescriptorRepository.save(fileDescriptor);
         log.debug("File description successfully saved to database: {}", fileDescriptor);
         fileDescriptor.setName(file.getName());
@@ -71,7 +71,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     @Override
     public void deleteFile(Long id, ServiceType serviceType, String email, String userRole)
             throws ForbiddenFileDeleteException, FileNotFoundException {
-        FileDescriptor fileDescriptor = fileDescriptorRepository.findById(id).orElseThrow(() -> {
+        FileDescriptor fileDescriptor = fileDescriptorRepository.findByIdAndRemovedFalse(id).orElseThrow(() -> {
             log.debug("No file was found with the following id: {}", id);
             return new FileNotFoundException();
         });
@@ -97,7 +97,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      */
     @Override
     public List<FileDescriptorDto> getAllFilesByUser(String userEmail) {
-        List<FileDescriptor> results = fileDescriptorRepository.findAllByUploadedBy(userEmail);
+        List<FileDescriptor> results = fileDescriptorRepository.findAllByUploadedByAndRemovedFalse(userEmail);
         log.debug("Files found by user {}: {}", userEmail, results);
         return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
     }
@@ -109,7 +109,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
      */
     @Override
     public List<FileDescriptorDto> getAllFilesByServiceTypeAndTagId(Long tagId, ServiceType serviceType) {
-        List<FileDescriptor> results = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
+        List<FileDescriptor> results = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
         log.debug("Files found by file service {} and tagId {}: {}", serviceType, tagId, results);
         return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
     }
@@ -146,7 +146,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     @Override
     public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
             throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
+        List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
         for (FileDescriptor fileDescription : fileDescriptions) {
             deleteFile(fileDescription.getId(), serviceType, email, userRole);
         }

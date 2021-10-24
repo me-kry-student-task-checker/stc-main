@@ -34,8 +34,6 @@ public class Task {
     private Date creationDate;
     private boolean isDone;
     private Long courseId;
-    @Transient
-    private Set<File> files;
     @ElementCollection
     @OrderColumn(name = "help_index_no")
     @CollectionTable(name = "help_needed",
@@ -46,6 +44,10 @@ public class Task {
     @CollectionTable(name = "completed",
             joinColumns = @JoinColumn(name = "task_id"))
     private Set<String> completedStudentIds;
+    private boolean removed;
+
+    @Transient
+    private Set<File> files;
     @Transient
     private List<TaskComment> comments;
 

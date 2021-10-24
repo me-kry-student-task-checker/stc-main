@@ -60,7 +60,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public BriefTaskDto edit(EditTaskDto dto, String editorsEmail) throws TaskNotFoundException, ForbiddenTaskEditException {
-        Task task = repository.findById(dto.getId()).orElseThrow(TaskNotFoundException::new);
+        Task task = repository.findByIdAndRemovedFalse(dto.getId()).orElseThrow(TaskNotFoundException::new);
         if (!userClient.isRelated(task.getCourseId())) {
             log.warn("Creator of this course {} is not the task editor: {}!", task, editorsEmail);
             throw new ForbiddenTaskEditException();
@@ -76,7 +76,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public DetailedTaskDto get(Long taskId, String userEmail) throws TaskNotFoundException {
-        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
         if (!userClient.isRelated(task.getCourseId())) {
             log.warn("This user ({}) is not related to this task's ({}) course!", userEmail, task);
             throw new TaskNotFoundException();
@@ -90,7 +90,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public Set<DetailedTaskDto> getAll(Long courseId) {
-        Set<DetailedTaskDto> taskDtoList = repository.findAllByCourseId(courseId).stream().map(this::getDetailedTask).collect(Collectors.toSet());
+        Set<DetailedTaskDto> taskDtoList = repository.findAllByCourseIdAndRemovedFalse(courseId).stream().map(this::getDetailedTask).collect(Collectors.toSet());
         log.debug("Tasks queried for course: ({}), found ({}) tasks!", courseId, taskDtoList.size());
         return taskDtoList;
     }
@@ -100,7 +100,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public void changeDoneStatus(Long taskId) throws TaskNotFoundException {
-        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
         task.setDone(!task.isDone());
         repository.save(task);
         log.debug("Task's ({}) done status changed to: {}", task, !task.isDone());
@@ -111,7 +111,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public void toggleCompletion(Long taskId, String studentEmail) throws TaskNotFoundException, StudentIdNotFoundException {
-        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
         Student student = userClient.getStudentByEmail(studentEmail);
         if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
             log.warn("Cannot change task completion, as Student {} is not assigned to this course {}", studentEmail, task.getCourseId());
@@ -127,7 +127,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public void toggleHelp(Long taskId, String studentEmail) throws StudentIdNotFoundException, TaskNotFoundException {
-        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
         Student student = userClient.getStudentByEmail(studentEmail);
         if (!student.getAssignedCourseIds().contains(task.getCourseId())) {
             log.warn("Cannot change task completion, as Student {} is not assigned to this course {}", studentEmail, task.getCourseId());
@@ -144,7 +144,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public void deleteTask(Long taskId) throws TaskNotFoundException {
-        Task task = repository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
         repository.delete(task);
         removeCommentsAndFiles(task.getId());
     }

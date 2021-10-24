@@ -93,13 +93,13 @@ public class FeedbackServiceImplTest {
         shouldBeComment.setCreateDate(testDate);
         shouldBeComment.setAuthorId(testAuthor);
         List<CourseComment> testList = List.of(shouldBeComment, shouldBeComment);
-        when(courseCommentRepository.findAllByCourseId(testCourseId)).thenReturn(testList);
+        when(courseCommentRepository.findAllByCourseIdAndRemovedFalse(testCourseId)).thenReturn(testList);
         when(fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, testId)).thenReturn(Set.of());
 
         List<CourseCommentDetailsDto> result = service.getAllCourseComments(testCourseId);
 
         assertThat(result, is(testList.stream().map(DtoConverter::courseCommentToCourseCommentDetailsDto).collect(Collectors.toList())));
-        verify(courseCommentRepository).findAllByCourseId(testCourseId);
+        verify(courseCommentRepository).findAllByCourseIdAndRemovedFalse(testCourseId);
         verify(fileManagementClient, times(2)).getAllFilesByTagId(ServiceType.FEEDBACK, testId);
     }
 
@@ -116,13 +116,13 @@ public class FeedbackServiceImplTest {
         shouldBeComment.setCreateDate(testDate);
         shouldBeComment.setAuthorId(testAuthor);
         List<TaskComment> testList = List.of(shouldBeComment, shouldBeComment);
-        when(taskCommentRepository.findAllByTaskId(testTaskId)).thenReturn(testList);
+        when(taskCommentRepository.findAllByTaskIdAndRemovedFalse(testTaskId)).thenReturn(testList);
         when(fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, testId)).thenReturn(Set.of());
 
         List<TaskCommentDetailsDto> result = service.getAllTaskComments(testTaskId);
 
         assertThat(result, is(testList.stream().map(DtoConverter::taskCommentToTaskCommentDetailsDto).collect(Collectors.toList())));
-        verify(taskCommentRepository).findAllByTaskId(testTaskId);
+        verify(taskCommentRepository).findAllByTaskIdAndRemovedFalse(testTaskId);
         verify(fileManagementClient, times(2)).getAllFilesByTagId(ServiceType.FEEDBACK, testId);
 
     }
@@ -134,13 +134,13 @@ public class FeedbackServiceImplTest {
         CourseComment courseComment = new CourseComment();
         courseComment.setId(testId);
         courseComment.setAuthorId(testAuthorId);
-        when(courseCommentRepository.findById(testId)).thenReturn(Optional.of(courseComment));
+        when(courseCommentRepository.findByIdAndRemovedFalse(testId)).thenReturn(Optional.of(courseComment));
         doNothing().when(courseCommentRepository).delete(courseComment);
         doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
 
         service.removeCourseComment(testId, testAuthorId);
 
-        verify(courseCommentRepository).findById(testId);
+        verify(courseCommentRepository).findByIdAndRemovedFalse(testId);
         verify(courseCommentRepository).delete(courseComment);
         verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
     }
@@ -149,7 +149,7 @@ public class FeedbackServiceImplTest {
     public void removeCourseComment_commentNotFoundExceptionThrown() throws Exception {
         long testId = 355L;
         String testAuthorId = "263JLx";
-        when(courseCommentRepository.findById(testId)).thenReturn(Optional.empty());
+        when(courseCommentRepository.findByIdAndRemovedFalse(testId)).thenReturn(Optional.empty());
 
         service.removeCourseComment(testId, testAuthorId);
     }
@@ -161,7 +161,7 @@ public class FeedbackServiceImplTest {
         CourseComment courseComment = new CourseComment();
         courseComment.setId(testId);
         courseComment.setAuthorId(testAuthorId);
-        when(courseCommentRepository.findById(testId)).thenReturn(Optional.of(courseComment));
+        when(courseCommentRepository.findByIdAndRemovedFalse(testId)).thenReturn(Optional.of(courseComment));
 
         service.removeCourseComment(testId, "FinE7YKR");
     }
@@ -173,13 +173,13 @@ public class FeedbackServiceImplTest {
         TaskComment taskComment = new TaskComment();
         taskComment.setId(testId);
         taskComment.setAuthorId(testAuthor);
-        when(taskCommentRepository.findById(testId)).thenReturn(Optional.of(taskComment));
+        when(taskCommentRepository.findByIdAndRemovedFalse(testId)).thenReturn(Optional.of(taskComment));
         doNothing().when(taskCommentRepository).delete(taskComment);
         doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
 
         service.removeTaskComment(testId, testAuthor);
 
-        verify(taskCommentRepository).findById(testId);
+        verify(taskCommentRepository).findByIdAndRemovedFalse(testId);
         verify(taskCommentRepository).delete(taskComment);
         verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
     }
@@ -188,7 +188,7 @@ public class FeedbackServiceImplTest {
     public void removeTaskComment_commentNotFoundExceptionThrown() throws Exception {
         long testId = 483L;
         String testAuthorId = "pAY";
-        when(taskCommentRepository.findById(testId)).thenReturn(Optional.empty());
+        when(taskCommentRepository.findByIdAndRemovedFalse(testId)).thenReturn(Optional.empty());
 
         service.removeTaskComment(testId, testAuthorId);
     }
@@ -200,7 +200,7 @@ public class FeedbackServiceImplTest {
         TaskComment taskComment = new TaskComment();
         taskComment.setId(testId);
         taskComment.setAuthorId(testAuthorId);
-        when(taskCommentRepository.findById(testId)).thenReturn(Optional.of(taskComment));
+        when(taskCommentRepository.findByIdAndRemovedFalse(testId)).thenReturn(Optional.of(taskComment));
 
         service.removeTaskComment(testId, "9SDL");
     }
