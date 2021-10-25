@@ -79,4 +79,8 @@ public class Task {
         }
         helpNeededStudentIds.add(studentEmail);
     }
+
+    public void remove() {
+        this.removed = true;
+    }
 }

@@ -35,4 +35,8 @@ public class Comment {
 
     @Transient
     private Set<File> files;
+
+    public void remove() {
+        this.removed = true;
+    }
 }

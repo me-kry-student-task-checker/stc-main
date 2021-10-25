@@ -72,12 +72,12 @@ public interface FeedbackService {
      *
      * @param courseId the course dd
      */
-    void removeFeedbacksByCourseId(Long courseId);
+    void removeCourseCommentsByCourseId(Long courseId);
 
     /**
      * Deletes all feedbacks of a task.
      *
      * @param taskId the task id
      */
-    void removeFeedbacksByTaskId(Long taskId);
+    void removeTaskCommentsByTaskId(Long taskId);
 }

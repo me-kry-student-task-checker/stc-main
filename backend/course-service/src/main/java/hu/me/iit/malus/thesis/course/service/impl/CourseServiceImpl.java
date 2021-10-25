@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -116,11 +117,14 @@ public class CourseServiceImpl implements CourseService {
             log.warn("Only the creator can delete a course!");
             throw new ForbiddenCourseEditException();
         }
-        if (courseRepository.existsById(courseId)) {
-            courseRepository.deleteById(courseId);
+        Optional<Course> opt = courseRepository.findByIdAndRemovedFalse(courseId);
+        if (opt.isPresent()) {
+            Course course = opt.get();
+            course.remove();
+            courseRepository.save(course);
+
             taskClient.removeTasksByCourseId(courseId);
             feedbackClient.removeCourseCommentsByCourseId(courseId);
-            userClient.removeCourseIdFromRelatedUserLists(courseId);
             fileManagementClient.removeFilesByServiceAndTagId(ServiceType.COURSE, courseId);
             return;
         }

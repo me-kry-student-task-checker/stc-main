@@ -10,6 +10,4 @@ public interface CourseCommentRepository extends CommentBaseRepository<CourseCom
     Optional<CourseComment> findByIdAndRemovedFalse(Long id);
 
     List<CourseComment> findAllByCourseIdAndRemovedFalse(Long courseId);
-
-    List<CourseComment> deleteByCourseId(Long courseId);
 }

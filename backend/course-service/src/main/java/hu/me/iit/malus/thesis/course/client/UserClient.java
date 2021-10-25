@@ -4,7 +4,10 @@ import hu.me.iit.malus.thesis.dto.Student;
 import hu.me.iit.malus.thesis.dto.Teacher;
 import hu.me.iit.malus.thesis.dto.User;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Set;
 
@@ -41,7 +44,4 @@ public interface UserClient {
 
     @GetMapping("/api/user/me")
     User getMe();
-
-    @DeleteMapping("/api/user/removeCourseIdFromRelatedUserLists/{courseId}")
-    void removeCourseIdFromRelatedUserLists(@PathVariable Long courseId);
 }

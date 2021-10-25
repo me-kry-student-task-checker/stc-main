@@ -100,7 +100,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         if (!courseComment.getAuthorId().equals(authorId)) {
             throw new ForbiddenCommentEditException();
         }
-        courseCommentRepository.delete(courseComment);
+        courseComment.remove();
+        courseCommentRepository.save(courseComment);
         fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
     }
 
@@ -111,25 +112,34 @@ public class FeedbackServiceImpl implements FeedbackService {
         if (!taskComment.getAuthorId().equals(authorId)) {
             throw new ForbiddenCommentEditException();
         }
-        taskCommentRepository.delete(taskComment);
+        taskComment.remove();
+        taskCommentRepository.save(taskComment);
         fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
     }
 
     @Override
     @Transactional
-    public void removeFeedbacksByCourseId(Long courseId) {
-        List<CourseComment> courseComments = courseCommentRepository.deleteByCourseId(courseId);
+    public void removeCourseCommentsByCourseId(Long courseId) {
+        List<CourseComment> courseComments = courseCommentRepository.findAllByCourseIdAndRemovedFalse(courseId);
         courseComments.forEach(
-                courseComment -> fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId())
+                courseComment -> {
+                    fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
+                    courseComment.remove();
+                }
         );
+        courseCommentRepository.saveAll(courseComments);
     }
 
     @Override
     @Transactional
-    public void removeFeedbacksByTaskId(Long taskId) {
-        List<TaskComment> taskComments = taskCommentRepository.deleteByTaskId(taskId);
+    public void removeTaskCommentsByTaskId(Long taskId) {
+        List<TaskComment> taskComments = taskCommentRepository.findAllByTaskIdAndRemovedFalse(taskId);
         taskComments.forEach(
-                taskComment -> fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId())
+                taskComment -> {
+                    fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
+                    taskComment.remove();
+                }
         );
+        taskCommentRepository.saveAll(taskComments);
     }
 }

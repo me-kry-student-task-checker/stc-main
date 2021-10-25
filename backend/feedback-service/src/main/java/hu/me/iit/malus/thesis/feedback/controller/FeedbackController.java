@@ -61,12 +61,12 @@ public class FeedbackController {
     @DeleteMapping("/removeCourseCommentsByCourseId/{courseId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public void removeCourseCommentsByCourseId(@PathVariable Long courseId) {
-        service.removeFeedbacksByCourseId(courseId);
+        service.removeCourseCommentsByCourseId(courseId);
     }
 
     @DeleteMapping("/removeTaskCommentsByTaskId/{taskId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
     public void removeTaskCommentsByTaskId(@PathVariable Long taskId) {
-        service.removeFeedbacksByTaskId(taskId);
+        service.removeTaskCommentsByTaskId(taskId);
     }
 }

@@ -204,7 +204,7 @@ public class TaskServiceImplTest {
         task.setCreationDate(creationDate);
         task.setDone(done);
         task.setCourseId(courseId);
-        when(repository.findAllByCourseIdAndRemovedFalse(courseId)).thenReturn(Set.of(task));
+        when(repository.findAllByCourseIdAndRemovedFalse(courseId)).thenReturn(List.of(task));
         when(feedbackClient.getAllTaskComments(taskId)).thenReturn(new ArrayList<>());
         when(fileManagementClient.getAllFilesByTagId(ServiceType.TASK, taskId)).thenReturn(new HashSet<>());
 
@@ -357,7 +357,8 @@ public class TaskServiceImplTest {
 
         service.deleteTask(taskId);
 
-        verify(repository).delete(task);
+        assertThat(task.isRemoved(), is(true));
+        verify(repository).save(task);
         verify(feedbackClient).removeTaskCommentsByTaskId(taskId);
         verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.TASK, taskId);
         verify(repository).findByIdAndRemovedFalse(taskId);
@@ -377,14 +378,14 @@ public class TaskServiceImplTest {
         long taskId = 323L;
         Task task = new Task();
         task.setId(taskId);
-        List<Task> deletedTasks = new ArrayList<>();
-        deletedTasks.add(task);
-        deletedTasks.add(task);
-        when(repository.deleteByCourseId(courseId)).thenReturn(deletedTasks);
+        List<Task> tasks = new ArrayList<>();
+        tasks.add(task);
+        tasks.add(task);
+        when(repository.findAllByCourseIdAndRemovedFalse(courseId)).thenReturn(tasks);
 
         service.deleteTasksByCourseId(courseId);
 
-        verify(repository).deleteByCourseId(courseId);
+        verify(repository).findAllByCourseIdAndRemovedFalse(courseId);
         verify(feedbackClient, times(2)).removeTaskCommentsByTaskId(taskId);
         verify(fileManagementClient, times(2)).removeFilesByServiceAndTagId(ServiceType.TASK, taskId);
     }

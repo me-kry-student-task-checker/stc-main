@@ -1,7 +1,10 @@
 package hu.me.iit.malus.thesis.filemanagement.service.impl;
 
 
-import com.google.cloud.storage.*;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import hu.me.iit.malus.thesis.filemanagement.controller.dto.FileDescriptorDto;
 import hu.me.iit.malus.thesis.filemanagement.model.FileDescriptor;
 import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
@@ -79,15 +82,8 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             log.warn("User: {} a {} does not have the privilege: to delete file {}", email, userRole, id);
             throw new ForbiddenFileDeleteException();
         }
-        BlobId blobId = BlobId.of(BUCKET_NAME, serviceType.toString().toLowerCase() + "/" + fileDescriptor.getName());
-        boolean deleteSuccessful = storage.delete(blobId);
-        if (deleteSuccessful) {
-            fileDescriptorRepository.delete(fileDescriptor);
-            log.debug("File successfully deleted: {}", id);
-        } else {
-            log.error("File could not be deleted: {}", id);
-            throw new FileNotFoundException();
-        }
+        fileDescriptor.remove();
+        fileDescriptorRepository.save(fileDescriptor);
     }
 
     /**

@@ -145,7 +145,8 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public void deleteTask(Long taskId) throws TaskNotFoundException {
         Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
-        repository.delete(task);
+        task.remove();
+        repository.save(task);
         removeCommentsAndFiles(task.getId());
     }
 
@@ -155,7 +156,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public void deleteTasksByCourseId(Long courseId) {
-        List<Task> tasks = repository.deleteByCourseId(courseId);
+        List<Task> tasks = repository.findAllByCourseIdAndRemovedFalse(courseId);
+        tasks.forEach(Task::remove);
+        repository.saveAll(tasks);
         tasks.forEach(task -> removeCommentsAndFiles(task.getId()));
     }
 

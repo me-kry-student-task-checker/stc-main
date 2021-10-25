@@ -135,13 +135,13 @@ public class FeedbackServiceImplTest {
         courseComment.setId(testId);
         courseComment.setAuthorId(testAuthorId);
         when(courseCommentRepository.findByIdAndRemovedFalse(testId)).thenReturn(Optional.of(courseComment));
-        doNothing().when(courseCommentRepository).delete(courseComment);
         doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
 
         service.removeCourseComment(testId, testAuthorId);
 
+        assertThat(courseComment.isRemoved(), is(true));
         verify(courseCommentRepository).findByIdAndRemovedFalse(testId);
-        verify(courseCommentRepository).delete(courseComment);
+        verify(courseCommentRepository).save(courseComment);
         verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
     }
 
@@ -174,13 +174,13 @@ public class FeedbackServiceImplTest {
         taskComment.setId(testId);
         taskComment.setAuthorId(testAuthor);
         when(taskCommentRepository.findByIdAndRemovedFalse(testId)).thenReturn(Optional.of(taskComment));
-        doNothing().when(taskCommentRepository).delete(taskComment);
         doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
 
         service.removeTaskComment(testId, testAuthor);
 
+        assertThat(taskComment.isRemoved(), is(true));
         verify(taskCommentRepository).findByIdAndRemovedFalse(testId);
-        verify(taskCommentRepository).delete(taskComment);
+        verify(taskCommentRepository).save(taskComment);
         verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testId);
     }
 
@@ -211,12 +211,12 @@ public class FeedbackServiceImplTest {
         CourseComment courseComment = new CourseComment();
         courseComment.setId(testCourseId);
         List<CourseComment> testList = List.of(courseComment, courseComment, courseComment);
-        when(courseCommentRepository.deleteByCourseId(testCourseId)).thenReturn(testList);
+        when(courseCommentRepository.findAllByCourseIdAndRemovedFalse(testCourseId)).thenReturn(testList);
         doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
 
-        service.removeFeedbacksByCourseId(testCourseId);
+        service.removeCourseCommentsByCourseId(testCourseId);
 
-        verify(courseCommentRepository).deleteByCourseId(testCourseId);
+        verify(courseCommentRepository).findAllByCourseIdAndRemovedFalse(testCourseId);
         verify(fileManagementClient, times(3)).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testCourseId);
     }
 
@@ -226,12 +226,12 @@ public class FeedbackServiceImplTest {
         TaskComment taskComment = new TaskComment();
         taskComment.setId(testTaskId);
         List<TaskComment> testList = List.of(taskComment, taskComment, taskComment);
-        when(taskCommentRepository.deleteByTaskId(testTaskId)).thenReturn(testList);
+        when(taskCommentRepository.findAllByTaskIdAndRemovedFalse(testTaskId)).thenReturn(testList);
         doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
 
-        service.removeFeedbacksByTaskId(testTaskId);
+        service.removeTaskCommentsByTaskId(testTaskId);
 
-        verify(taskCommentRepository).deleteByTaskId(testTaskId);
+        verify(taskCommentRepository).findAllByTaskIdAndRemovedFalse(testTaskId);
         verify(fileManagementClient, times(3)).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testTaskId);
     }
 }

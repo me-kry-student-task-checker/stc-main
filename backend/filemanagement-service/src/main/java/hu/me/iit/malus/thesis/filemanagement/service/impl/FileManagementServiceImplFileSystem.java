@@ -76,16 +76,8 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
             log.warn("User: {}, a(n) {} does not have the privilege to delete file {}", email, userRole, id);
             throw new ForbiddenFileDeleteException();
         }
-        String uploadDir = env.getProperty(FILE_DIR_PROP);
-        Path targetFile = Path.of(uploadDir, fileDescriptor.getName());
-        try {
-            Files.delete(targetFile);
-            fileDescriptorRepository.delete(fileDescriptor);
-            log.debug("File successfully deleted: {}", id);
-        } catch (IOException e) {
-            log.error("File could not be deleted: {}", id);
-            throw new FileNotFoundException(e);
-        }
+        fileDescriptor.remove();
+        fileDescriptorRepository.save(fileDescriptor);
     }
 
     /**

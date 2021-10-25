@@ -46,6 +46,10 @@ public class Course {
         this.creator = creator;
     }
 
+    public void remove() {
+        this.removed = true;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

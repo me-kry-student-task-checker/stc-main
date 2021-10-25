@@ -165,20 +165,20 @@ public class FeedbackControllerTest {
     @Test
     public void removeCourseCommentsByCourseId() {
         long courseId = 187L;
-        doNothing().when(service).removeFeedbacksByCourseId(courseId);
+        doNothing().when(service).removeCourseCommentsByCourseId(courseId);
 
         controller.removeCourseCommentsByCourseId(courseId);
 
-        verify(service).removeFeedbacksByCourseId(courseId);
+        verify(service).removeCourseCommentsByCourseId(courseId);
     }
 
     @Test
     public void removeTaskCommentsByTaskId() {
         long taskId = 469L;
-        doNothing().when(service).removeFeedbacksByTaskId(taskId);
+        doNothing().when(service).removeTaskCommentsByTaskId(taskId);
 
         controller.removeTaskCommentsByTaskId(taskId);
 
-        verify(service).removeFeedbacksByTaskId(taskId);
+        verify(service).removeTaskCommentsByTaskId(taskId);
     }
 }
