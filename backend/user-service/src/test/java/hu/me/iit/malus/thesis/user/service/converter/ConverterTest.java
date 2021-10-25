@@ -46,13 +46,25 @@ public class ConverterTest {
     @Test
     public void createUserDtoFromUser() {
         // GIVEN
-        UserDto userDto = Converter.createUserDtoFromUser(student);
+        UserDto userDtoFromStudent = Converter.createUserDtoFromUser(student);
+        UserDto userDtoFromTeacher = Converter.createUserDtoFromUser(teacher);
+        UserDto userDtoFromAdmin = Converter.createUserDtoFromUser(admin);
 
         // THEN
-        assertThat(student.getEmail(), equalTo(userDto.getEmail()));
-        assertThat(student.getRole(), equalTo(userDto.getRole()));
-        assertThat(student.getFirstName(), equalTo(userDto.getFirstName()));
-        assertThat(student.getLastName(), equalTo(userDto.getLastName()));
+        assertThat(student.getEmail(), equalTo(userDtoFromStudent.getEmail()));
+        assertThat(student.getRole(), equalTo(userDtoFromStudent.getRole()));
+        assertThat(student.getFirstName(), equalTo(userDtoFromStudent.getFirstName()));
+        assertThat(student.getLastName(), equalTo(userDtoFromStudent.getLastName()));
+
+        assertThat(teacher.getEmail(), equalTo(userDtoFromTeacher.getEmail()));
+        assertThat(teacher.getRole(), equalTo(userDtoFromTeacher.getRole()));
+        assertThat(teacher.getFirstName(), equalTo(userDtoFromTeacher.getFirstName()));
+        assertThat(teacher.getLastName(), equalTo(userDtoFromTeacher.getLastName()));
+
+        assertThat(admin.getEmail(), equalTo(userDtoFromAdmin.getEmail()));
+        assertThat(admin.getRole(), equalTo(userDtoFromAdmin.getRole()));
+        assertThat(admin.getFirstName(), equalTo(userDtoFromAdmin.getFirstName()));
+        assertThat(admin.getLastName(), equalTo(userDtoFromAdmin.getLastName()));
     }
 
     @Test

@@ -505,18 +505,22 @@ public class UserServiceImplTest {
 
     @Test
     public void getRelatedCourseIds() throws UserNotFoundException {
+        Set<Long> relatedCourseIds;
+
         // GIVEN
         String userEmail = "teacher@example.com";
         Teacher teacher = new Teacher(userEmail, "psw1", "First1", "Last1", List.of(18L, 22L));
+        Student student = new Student(userEmail, "psw1", "First1", "Last1", List.of(18L));
 
         when(teacherRepository.findByEmail(any())).thenReturn(Optional.of(teacher));
-        // WHEN
-
-        Set<Long> relatedCourseIds = userService.getRelatedCourseIds(userEmail);
-
-        // THEN
+        relatedCourseIds = userService.getRelatedCourseIds(userEmail);
         verify(teacherRepository, times(1)).findByEmail(userEmail);
         Assertions.assertThat(relatedCourseIds.size()).isEqualTo(teacher.getCreatedCourseIds().size());
+
+        when(studentRepository.findByEmail(any())).thenReturn(Optional.of(student));
+        relatedCourseIds = userService.getRelatedCourseIds(userEmail);
+        verify(studentRepository, times(2)).findByEmail(userEmail);
+        Assertions.assertThat(relatedCourseIds.size()).isEqualTo(student.getAssignedCourseIds().size());
     }
 
     @Test(expected = UserNotFoundException.class)
@@ -534,18 +538,28 @@ public class UserServiceImplTest {
 
     @Test
     public void isRelatedToCourse() throws UserNotFoundException {
+        boolean isRelatedToCourse;
+
         // GIVEN
-        String userEmail = "teacher@example.com";
+        String userEmail = "test@example.com";
         Long courseId = 16L;
         Teacher teacher = new Teacher(userEmail, "psw1", "First1", "Last1", List.of(courseId, 18L, 22L));
+        Student student = new Student(userEmail, "psw1", "First1", "Last1", List.of(courseId, 18L));
 
         when(teacherRepository.findByEmail(any())).thenReturn(Optional.of(teacher));
-
-        // WHEN
-        boolean isRelatedToCourse = userService.isRelatedToCourse(userEmail, courseId);
-
+        isRelatedToCourse = userService.isRelatedToCourse(userEmail, courseId);
         verify(teacherRepository, times(1)).findByEmail(userEmail);
         Assertions.assertThat(isRelatedToCourse).isEqualTo(teacher.getCreatedCourseIds().contains(courseId));
+
+        when(studentRepository.findByEmail(any())).thenReturn(Optional.of(student));
+        isRelatedToCourse = userService.isRelatedToCourse(userEmail, courseId);
+        verify(studentRepository, times(2)).findByEmail(userEmail);
+        Assertions.assertThat(isRelatedToCourse).isEqualTo(student.getAssignedCourseIds().contains(courseId));
+
+        when(studentRepository.findByEmail(any())).thenReturn(Optional.empty());
+        isRelatedToCourse = userService.isRelatedToCourse(userEmail, courseId);
+        verify(studentRepository, times(3)).findByEmail(userEmail);
+        Assertions.assertThat(isRelatedToCourse).isEqualTo(true);
     }
 
     @Test(expected = UserNotFoundException.class)
