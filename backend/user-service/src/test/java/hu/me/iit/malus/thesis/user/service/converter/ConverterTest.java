@@ -43,6 +43,11 @@ public class ConverterTest {
         );
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void whenInvalidStateErrorOccures_thenCreateUserDtoFromUserThrowsException() {
+        UserDto userDtoFromStudent = Converter.createUserDtoFromUser(null);
+    }
+
     @Test
     public void createUserDtoFromUser() {
         // GIVEN

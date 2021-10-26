@@ -171,11 +171,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public TeacherDto getTeacherByEmail(String teacherEmail) throws UserNotFoundException, DatabaseOperationFailedException {
         Teacher teacher = teacherRepository.findByEmail(teacherEmail).orElseThrow(() -> new UserNotFoundException(teacherEmail));
-        try {
-            return Converter.createTeacherDtoFromTeacher(teacher);
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationFailedException(e);
-        }
+
+        return Converter.createTeacherDtoFromTeacher(teacher);
     }
 
     /**
@@ -184,11 +181,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public TeacherDto getTeacherByCreatedCourseId(Long courseId) throws UserNotFoundException, DatabaseOperationFailedException {
         Teacher teacher = teacherRepository.findByCreatedCourseId(courseId).orElseThrow(UserNotFoundException::new);
-        try {
-            return Converter.createTeacherDtoFromTeacher(teacher);
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationFailedException(e);
-        }
+
+        return Converter.createTeacherDtoFromTeacher(teacher);
     }
 
     /**
@@ -283,9 +277,8 @@ public class UserServiceImpl implements UserService {
                 return adminRepository.save((Admin) user);
             case TEACHER:
                 return teacherRepository.save((Teacher) user);
-            case STUDENT:
+            default:
                 return studentRepository.save((Student) user);
         }
-        throw new IllegalStateException("User type cannot be recognized");
     }
 }

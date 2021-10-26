@@ -54,7 +54,29 @@ public class UserServiceImplTest {
     }
 
     @Test(expected = EmailExistsException.class)
-    public void whenEmailIsAlreadyExists_doNotRegisterNewUserAccount() throws EmailExistsException {
+    public void whenTeacherEmailIsAlreadyExists_doNotRegisterNewUserAccount() throws EmailExistsException {
+        // GIVEN
+        String email = "user@example.com";
+        String firstName = "First";
+        String lastName = "Last";
+        String role = UserRole.STUDENT.getRoleString();
+        String password = "example";
+
+        RegistrationRequest req = new RegistrationRequest();
+        req.setEmail(email);
+        req.setFirstName(firstName);
+        req.setLastName(lastName);
+        req.setRole(role);
+        req.setPassword(password);
+        req.setPasswordConfirm(password);
+
+        Teacher teacher = new Teacher(email, password, firstName, lastName, List.of());
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.of(teacher));
+        this.userService.registerNewUserAccount(req);
+    }
+
+    @Test(expected = EmailExistsException.class)
+    public void whenStudentEmailIsAlreadyExists_doNotRegisterNewUserAccount() throws EmailExistsException {
         // GIVEN
         String email = "user@example.com";
         String firstName = "First";
@@ -72,11 +94,57 @@ public class UserServiceImplTest {
 
         Student student = new Student(email, password, firstName, lastName, List.of());
         when(studentRepository.findByEmail(any())).thenReturn(Optional.of(student));
+        this.userService.registerNewUserAccount(req);
+    }
+
+    @Test(expected = EmailExistsException.class)
+    public void whenAdminEmailIsAlreadyExists_doNotRegisterNewUserAccount() throws EmailExistsException {
+        // GIVEN
+        String email = "user@example.com";
+        String firstName = "First";
+        String lastName = "Last";
+        String role = UserRole.STUDENT.getRoleString();
+        String password = "example";
+
+        RegistrationRequest req = new RegistrationRequest();
+        req.setEmail(email);
+        req.setFirstName(firstName);
+        req.setLastName(lastName);
+        req.setRole(role);
+        req.setPassword(password);
+        req.setPasswordConfirm(password);
+
+        Admin admin = new Admin(email, password, firstName, lastName);
+        when(adminRepository.findByEmail(any())).thenReturn(Optional.of(admin));
+        this.userService.registerNewUserAccount(req);
+    }
+
+    @Test
+    public void whenEmailIsNotExists_registerNewAdminAccount() throws EmailExistsException {
+        // GIVEN
+
+        String email = "user@example.com";
+        String firstName = "First";
+        String lastName = "Last";
+        String role = UserRole.ADMIN.getRoleString();
+        String password = "example";
+
+        RegistrationRequest req = new RegistrationRequest();
+        req.setEmail(email);
+        req.setFirstName(firstName);
+        req.setLastName(lastName);
+        req.setRole(role);
+        req.setPassword(password);
+        req.setPasswordConfirm(password);
+
+        Admin admin = new Admin(email, password, firstName, lastName);
+        when(studentRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(adminRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(userFactory.create(req)).thenReturn(admin);
 
         //WHEN
         this.userService.registerNewUserAccount(req);
-
-        //THEN
     }
 
     @Test
@@ -545,21 +613,31 @@ public class UserServiceImplTest {
         Long courseId = 16L;
         Teacher teacher = new Teacher(userEmail, "psw1", "First1", "Last1", List.of(courseId, 18L, 22L));
         Student student = new Student(userEmail, "psw1", "First1", "Last1", List.of(courseId, 18L));
+        Admin admin = new Admin(userEmail, "psw1", "First1", "Last1");
 
+        // Teacher
+        when(adminRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(studentRepository.findByEmail(any())).thenReturn(Optional.empty());
         when(teacherRepository.findByEmail(any())).thenReturn(Optional.of(teacher));
+
         isRelatedToCourse = userService.isRelatedToCourse(userEmail, courseId);
-        verify(teacherRepository, times(1)).findByEmail(userEmail);
         Assertions.assertThat(isRelatedToCourse).isEqualTo(teacher.getCreatedCourseIds().contains(courseId));
 
+        // Student
+        when(adminRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.empty());
         when(studentRepository.findByEmail(any())).thenReturn(Optional.of(student));
+
         isRelatedToCourse = userService.isRelatedToCourse(userEmail, courseId);
-        verify(studentRepository, times(2)).findByEmail(userEmail);
         Assertions.assertThat(isRelatedToCourse).isEqualTo(student.getAssignedCourseIds().contains(courseId));
 
+        // Admin
         when(studentRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(teacherRepository.findByEmail(any())).thenReturn(Optional.empty());
+        when(adminRepository.findByEmail(any())).thenReturn(Optional.of(admin));
+
         isRelatedToCourse = userService.isRelatedToCourse(userEmail, courseId);
-        verify(studentRepository, times(3)).findByEmail(userEmail);
-        Assertions.assertThat(isRelatedToCourse).isEqualTo(true);
+        Assertions.assertThat(isRelatedToCourse).isEqualTo(false);
     }
 
     @Test(expected = UserNotFoundException.class)
@@ -665,5 +743,9 @@ public class UserServiceImplTest {
         boolean hasCourseIdTeacher = teacher.getCreatedCourseIds().contains(courseId);
         Assertions.assertThat(hasCourseIdStudent).isEqualTo(false);
         Assertions.assertThat(hasCourseIdTeacher).isEqualTo(false);
+
+        when(teacherRepository.findByCreatedCourseId(any())).thenReturn(Optional.empty());
+
+        userService.removeCourseIdFromRelatedLists(courseId);
     }
 }
