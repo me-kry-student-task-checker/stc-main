@@ -17,9 +17,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -27,6 +30,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation for FileDescription management service.
@@ -39,12 +45,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FileManagementServiceImplGoogleBucket implements FileManagementService {
 
-
     private static final Storage storage = StorageOptions.getDefaultInstance().getService();
     @Value("${google-cloud-bucket-name}")
     private String BUCKET_NAME;
 
+    private final RedisTemplate<String, List<Long>> redisTemplate;
     private final FileDescriptorRepository fileDescriptorRepository;
+
+    @PostConstruct
+    public void init() {
+        redisTemplate.setEnableTransactionSupport(true);
+    }
 
     /**
      * {@inheritDoc}
@@ -82,7 +93,7 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
             log.warn("User: {} a {} does not have the privilege: to delete file {}", email, userRole, id);
             throw new ForbiddenFileDeleteException();
         }
-        fileDescriptor.remove();
+        fileDescriptor.setRemoved(true);
         fileDescriptorRepository.save(fileDescriptor);
     }
 
@@ -140,11 +151,34 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
     }
 
     @Override
-    public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
-            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
-        for (FileDescriptor fileDescription : fileDescriptions) {
-            deleteFile(fileDescription.getId(), serviceType, email, userRole);
+    @Transactional
+    public String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, Long tagId) {
+        List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
+        fileDescriptors.forEach(fileDescriptor -> fileDescriptor.setRemoved(true));
+        fileDescriptorRepository.saveAll(fileDescriptors);
+        String transactionKey = UUID.randomUUID().toString();
+        List<Long> ids = fileDescriptors.stream().map(FileDescriptor::getId).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(transactionKey, ids);
+        return transactionKey;
+    }
+
+    @Override
+    public void commitRemoveFilesByServiceAndTagId(String transactionKey) {
+        Boolean result = redisTemplate.delete(transactionKey);
+        if (result == null || !result) {
+            throw new NoSuchElementException("Transaction key could not be deleted! (it may have not existed)");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void rollbackRemoveFilesByServiceAndTagId(String transactionKey) {
+        List<Long> ids = redisTemplate.opsForValue().get(transactionKey);
+        if (ids != null) {
+            List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllById(ids);
+            fileDescriptors.forEach(fileDescriptor -> fileDescriptor.setRemoved(false));
+            fileDescriptorRepository.saveAll(fileDescriptors);
+            redisTemplate.delete(transactionKey);
         }
     }
 }

@@ -35,8 +35,4 @@ public class FileDescriptor {
     private ServiceType serviceType;
     private Long tagId;
     private boolean removed;
-
-    public void remove() {
-        this.removed = true;
-    }
 }

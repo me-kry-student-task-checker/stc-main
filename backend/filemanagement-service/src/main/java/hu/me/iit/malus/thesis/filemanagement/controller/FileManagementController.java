@@ -71,11 +71,19 @@ public class FileManagementController {
         return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFileByName(name)));
     }
 
-    @DeleteMapping("/deleteAll/{serviceType}/{tagId}")
-    public void removeFilesByServiceAndTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId, Authentication authentication)
-            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        fileManagementService.deleteFilesByServiceAndTagId(
-                serviceType, tagId, authentication.getName(), authentication.getAuthorities().stream().findFirst().get().getAuthority());
+    @DeleteMapping("/prepare/removeAll/{serviceType}/{tagId}")
+    public String prepareRemoveFilesByServiceAndTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId) {
+        return fileManagementService.prepareRemoveFilesByServiceAndTagId(serviceType, tagId);
+    }
+
+    @PostMapping("/commit/removeAll/{transactionKey}")
+    public void commitRemoveFilesByServiceAndTagId(@PathVariable String transactionKey) {
+        fileManagementService.commitRemoveFilesByServiceAndTagId(transactionKey);
+    }
+
+    @PostMapping("/rollback/removeAll/{transactionKey}")
+    public void rollbackRemoveFilesByServiceAndTagId(@PathVariable String transactionKey) {
+        fileManagementService.rollbackRemoveFilesByServiceAndTagId(transactionKey);
     }
 
 }

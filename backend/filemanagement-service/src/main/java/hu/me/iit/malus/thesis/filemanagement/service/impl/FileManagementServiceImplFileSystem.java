@@ -12,15 +12,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Local filesystem based implementation for the File management service.
@@ -38,7 +43,13 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
     private static final String DOWNLOAD_LINK_PATTERN = "/api/filemanagement/download/link/%s";
 
     private final Environment env; // environment is used for retrieving the upload destination from cloud props file, because @Value sets null
+    private final RedisTemplate<String, List<Long>> redisTemplate;
     private final FileDescriptorRepository fileDescriptorRepository;
+
+    @PostConstruct
+    public void init() {
+        redisTemplate.setEnableTransactionSupport(true);
+    }
 
     /**
      * {@inheritDoc}
@@ -76,7 +87,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
             log.warn("User: {}, a(n) {} does not have the privilege to delete file {}", email, userRole, id);
             throw new ForbiddenFileDeleteException();
         }
-        fileDescriptor.remove();
+        fileDescriptor.setRemoved(true);
         fileDescriptorRepository.save(fileDescriptor);
     }
 
@@ -116,11 +127,34 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
     }
 
     @Override
-    public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
-            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
-        for (FileDescriptor fileDescription : fileDescriptions) {
-            deleteFile(fileDescription.getId(), serviceType, email, userRole);
+    @Transactional
+    public String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, Long tagId) {
+        List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
+        fileDescriptors.forEach(fileDescriptor -> fileDescriptor.setRemoved(true));
+        fileDescriptorRepository.saveAll(fileDescriptors);
+        String transactionKey = UUID.randomUUID().toString();
+        List<Long> ids = fileDescriptors.stream().map(FileDescriptor::getId).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(transactionKey, ids);
+        return transactionKey;
+    }
+
+    @Override
+    public void commitRemoveFilesByServiceAndTagId(String transactionKey) {
+        Boolean result = redisTemplate.delete(transactionKey);
+        if (result == null || !result) {
+            throw new NoSuchElementException("Transaction key could not be deleted! (it may have not existed)");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void rollbackRemoveFilesByServiceAndTagId(String transactionKey) {
+        List<Long> ids = redisTemplate.opsForValue().get(transactionKey);
+        if (ids != null) {
+            List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllById(ids);
+            fileDescriptors.forEach(fileDescriptor -> fileDescriptor.setRemoved(false));
+            fileDescriptorRepository.saveAll(fileDescriptors);
+            redisTemplate.delete(transactionKey);
         }
     }
 }

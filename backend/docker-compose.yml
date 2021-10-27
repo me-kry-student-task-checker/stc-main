@@ -125,7 +125,6 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
-      - redis
 
   task-service:
     container_name: task-service
@@ -140,7 +139,7 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
-      - redis
+      - redis-store
 
   feedback-service:
     container_name: feedback-service
@@ -155,7 +154,7 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
-      - redis
+      - redis-store
 
   user-service:
     container_name: user-service
@@ -170,7 +169,6 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
-      - redis
 
   filemanagement-service:
     container_name: filemanagement-service
@@ -189,4 +187,4 @@ services:
       - discovery-service-peer1
       - discovery-service-peer2
       - mysql-database
-      - redis
+      - redis-store

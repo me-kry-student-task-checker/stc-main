@@ -66,10 +66,25 @@ public interface FileManagementService {
     Path getFileByName(String name);
 
     /**
-     * Deletes files based on service and tag id.
+     * Prepares to delete files based on service and tag id.
      *
      * @param serviceType the service type
      * @param tagId       the tag id
+     * @return transaction key, it is use by other 2PC methods
      */
-    void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole) throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException;
+    String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, Long tagId);
+
+    /**
+     * Commits delete files operation based on service and tag id.
+     *
+     * @param transactionKey the transaction key
+     */
+    void commitRemoveFilesByServiceAndTagId(String transactionKey);
+
+    /**
+     * Rolls back delete files operation based on service and tag id.
+     *
+     * @param transactionKey the transaction key
+     */
+    void rollbackRemoveFilesByServiceAndTagId(String transactionKey);
 }
