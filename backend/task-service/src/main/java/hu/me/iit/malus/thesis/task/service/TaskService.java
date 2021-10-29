@@ -82,10 +82,9 @@ public interface TaskService {
      */
     void deleteTask(Long taskId) throws TaskNotFoundException;
 
-    /**
-     * Deletes tasks by course id.
-     *
-     * @param courseId the course id
-     */
-    void deleteTasksByCourseId(Long courseId);
+    String prepareRemoveTaskByCourseId(Long courseId);
+
+    void commitRemoveTaskByCourseId(String transactionKey);
+
+    void rollbackRemoveTaskByCourseId(String transactionKey);
 }

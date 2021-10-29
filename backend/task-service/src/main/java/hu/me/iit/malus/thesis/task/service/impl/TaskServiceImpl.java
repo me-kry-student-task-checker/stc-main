@@ -20,12 +20,15 @@ import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +45,12 @@ public class TaskServiceImpl implements TaskService {
     private final FeedbackClient feedbackClient;
     private final FileManagementClient fileManagementClient;
     private final UserClient userClient;
+    private final RedisTemplate<String, List<Long>> redisTemplate;
+
+    @PostConstruct
+    public void init() {
+        redisTemplate.setEnableTransactionSupport(true);
+    }
 
     /**
      * {@inheritDoc}
@@ -145,21 +154,41 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public void deleteTask(Long taskId) throws TaskNotFoundException {
         Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
-        task.remove();
+        task.setRemoved(true);
         repository.save(task);
         removeCommentsAndFiles(task.getId());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @Transactional
-    public void deleteTasksByCourseId(Long courseId) {
+    public String prepareRemoveTaskByCourseId(Long courseId) {
         List<Task> tasks = repository.findAllByCourseIdAndRemovedFalse(courseId);
-        tasks.forEach(Task::remove);
+        tasks.forEach(task -> task.setRemoved(true));
         repository.saveAll(tasks);
-        tasks.forEach(task -> removeCommentsAndFiles(task.getId()));
+        String uuid = UUID.randomUUID().toString();
+        List<Long> taskIds = tasks.stream().map(Task::getId).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(uuid, taskIds);
+        return uuid;
+    }
+
+    @Override
+    public void commitRemoveTaskByCourseId(String transactionKey) {
+        if (redisTemplate.hasKey(transactionKey)) {
+            redisTemplate.delete(transactionKey);
+        }
+        throw new RuntimeException("Key does not exist, something has gone terribly wrong!");
+    }
+
+    @Override
+    @Transactional
+    public void rollbackRemoveTaskByCourseId(String transactionKey) {
+        if (redisTemplate.hasKey(transactionKey)) {
+            List<Long> taskIds = redisTemplate.opsForValue().get(transactionKey);
+            List<Task> tasks = repository.findAllById(taskIds);
+            tasks.forEach(task -> task.setRemoved(false));
+            repository.saveAll(tasks);
+            redisTemplate.delete(transactionKey);
+        }
     }
 
     private DetailedTaskDto getDetailedTask(Task task) {

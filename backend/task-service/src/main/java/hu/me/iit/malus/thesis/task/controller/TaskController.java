@@ -75,9 +75,18 @@ public class TaskController {
         service.deleteTask(taskId);
     }
 
-    @DeleteMapping("/deleteTasksByCourseId/{courseId}")
-    @PreAuthorize("hasRole('ROLE_Teacher')")
-    public void removeTasksByCourseId(@PathVariable Long courseId) {
-        service.deleteTasksByCourseId(courseId);
+    @PostMapping("/prepare/remove/by/courseId/{courseId}")
+    public String prepareRemoveTaskByCourseId(@PathVariable Long courseId) {
+        return service.prepareRemoveTaskByCourseId(courseId);
+    }
+
+    @PostMapping("/commit/remove/{transactionKey}")
+    public void commitRemoveTaskByCourseId(@PathVariable String transactionKey) {
+        service.commitRemoveTaskByCourseId(transactionKey);
+    }
+
+    @PostMapping("/rollback/remove/{transactionKey}")
+    public void rollbackRemoveTaskByCourseId(@PathVariable String transactionKey) {
+        service.rollbackRemoveTaskByCourseId(transactionKey);
     }
 }
