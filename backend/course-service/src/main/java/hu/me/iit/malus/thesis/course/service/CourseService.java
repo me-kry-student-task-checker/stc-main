@@ -39,11 +39,10 @@ public interface CourseService {
     /**
      * Gets a course by it's id
      *
-     * @param courseId  the id of the course
-     * @param userEmail currently authenticated user's email
+     * @param courseId the id of the course
      * @return the course
      */
-    CourseFullDetailsDto get(Long courseId, String userEmail) throws CourseNotFoundException;
+    CourseFullDetailsDto get(Long courseId) throws CourseNotFoundException;
 
     /**
      * Lists all related courses, but only the most important infos.

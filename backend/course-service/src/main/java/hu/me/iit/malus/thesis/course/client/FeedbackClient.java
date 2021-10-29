@@ -2,9 +2,9 @@ package hu.me.iit.malus.thesis.course.client;
 
 import hu.me.iit.malus.thesis.dto.CourseComment;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -19,7 +19,21 @@ public interface FeedbackClient {
     @GetMapping("/api/feedback/getAllCourseComments/{courseId}")
     List<CourseComment> getAllCourseComments(@PathVariable Long courseId);
 
-    @DeleteMapping("/api/feedback/removeCourseCommentsByCourseId/{courseId}")
-    void removeCourseCommentsByCourseId(@PathVariable Long courseId);
+    @PostMapping("/api/feedback/prepare/task/remove/by/{taskIds}")
+    String prepareRemoveTaskCommentsByTaskIds(@PathVariable List<Long> taskIds);
 
+    @PostMapping("/api/feedback/prepare/course/remove/by/{courseId}")
+    String prepareRemoveCourseCommentsByCourseId(@PathVariable Long courseId);
+
+    @PostMapping("/api/feedback/commit/task/remove/{taskCommentTransactionKey}")
+    void commitRemoveTaskCommentsByTaskIds(@PathVariable String taskCommentTransactionKey);
+
+    @PostMapping("/api/feedback/commit/course/remove/{courseCommentTransactionKey}")
+    void commitRemoveCourseCommentsByCourseId(@PathVariable String courseCommentTransactionKey);
+
+    @PostMapping("/api/feedback/rollback/task/remove/{taskCommentTransactionKey}")
+    void rollbackRemoveTaskCommentsByTaskIds(@PathVariable String taskCommentTransactionKey);
+
+    @PostMapping("/api/feedback/rollback/course/remove/{courseCommentTransactionKey}")
+    void rollbackRemoveCourseCommentsByCourseId(@PathVariable String courseCommentTransactionKey);
 }

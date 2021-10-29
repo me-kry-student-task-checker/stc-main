@@ -44,4 +44,5 @@ public interface UserClient {
 
     @GetMapping("/api/user/me")
     User getMe();
+
 }

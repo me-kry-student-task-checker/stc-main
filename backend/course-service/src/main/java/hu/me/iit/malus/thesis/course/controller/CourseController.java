@@ -45,8 +45,8 @@ public class CourseController {
     }
 
     @GetMapping("/get/{courseId}")
-    public ResponseEntity<CourseFullDetailsDto> get(@PathVariable @Min(1) Long courseId, Principal principal) throws CourseNotFoundException {
-        return ResponseEntity.ok(service.get(courseId, principal.getName()));
+    public ResponseEntity<CourseFullDetailsDto> get(@PathVariable @Min(1) Long courseId) throws CourseNotFoundException {
+        return ResponseEntity.ok(service.get(courseId));
     }
 
     @GetMapping("/getAll")
