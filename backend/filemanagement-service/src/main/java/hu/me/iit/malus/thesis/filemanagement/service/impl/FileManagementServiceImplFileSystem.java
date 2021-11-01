@@ -17,13 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,11 +43,6 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
     private final Environment env; // environment is used for retrieving the upload destination from cloud props file, because @Value sets null
     private final FileDescriptorRepository fileDescriptorRepository;
     private final RedisTemplate<String, List<Long>> redisTemplate;
-
-    @PostConstruct
-    public void init() {
-        redisTemplate.setEnableTransactionSupport(true);
-    }
 
     /**
      * {@inheritDoc}
@@ -132,18 +125,17 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
         List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllByServiceTypeAndTagIdInAndRemovedFalse(serviceType, tagIds);
         fileDescriptors.forEach(fileDescriptor -> fileDescriptor.setRemoved(true));
         fileDescriptorRepository.saveAll(fileDescriptors);
-        String transactionKey = UUID.randomUUID().toString();
+        String uuid = UUID.randomUUID().toString();
         List<Long> fileDescriptorIds = fileDescriptors.stream().map(FileDescriptor::getId).collect(Collectors.toList());
-        redisTemplate.opsForValue().set(transactionKey, fileDescriptorIds);
-        return transactionKey;
+        redisTemplate.opsForValue().set(uuid, fileDescriptorIds);
+        log.info("Prepared ids: {}, for removal with {} transaction key!", fileDescriptorIds, uuid);
+        return uuid;
     }
 
     @Override
     public void commitRemoveFilesByServiceAndTagId(String transactionKey) {
-        if (redisTemplate.hasKey(transactionKey)) {
-            redisTemplate.delete(transactionKey);
-        }
-        throw new NoSuchElementException("Key does not exist, so transaction to commit does not exist!");
+        boolean success = redisTemplate.delete(transactionKey);
+        log.info("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
     @Override
@@ -155,6 +147,7 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
             fileDescriptors.forEach(task -> task.setRemoved(false));
             fileDescriptorRepository.saveAll(fileDescriptors);
             redisTemplate.delete(transactionKey);
+            log.info("Rolled back transaction with key: {}!", transactionKey);
         }
     }
 }

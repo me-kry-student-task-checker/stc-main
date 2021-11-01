@@ -24,8 +24,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -43,11 +45,6 @@ public class TaskServiceImpl implements TaskService {
     private final FileManagementClient fileManagementClient;
     private final UserClient userClient;
     private final RedisTemplate<String, List<Long>> redisTemplate;
-
-    @PostConstruct
-    public void init() {
-        redisTemplate.setEnableTransactionSupport(true);
-    }
 
     /**
      * {@inheritDoc}
@@ -165,15 +162,14 @@ public class TaskServiceImpl implements TaskService {
         String uuid = UUID.randomUUID().toString();
         List<Long> taskIds = tasks.stream().map(Task::getId).collect(Collectors.toList());
         redisTemplate.opsForValue().set(uuid, taskIds);
+        log.info("Prepared ids: {}, for removal with {} transaction key!", taskIds, uuid);
         return uuid;
     }
 
     @Override
     public void commitRemoveTaskByCourseId(String transactionKey) {
-        if (redisTemplate.hasKey(transactionKey)) {
-            redisTemplate.delete(transactionKey);
-        }
-        throw new NoSuchElementException("Key does not exist, so transaction to commit does not exist!");
+        boolean success = redisTemplate.delete(transactionKey);
+        log.info("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
     @Override
@@ -185,6 +181,7 @@ public class TaskServiceImpl implements TaskService {
             tasks.forEach(task -> task.setRemoved(false));
             repository.saveAll(tasks);
             redisTemplate.delete(transactionKey);
+            log.info("Rolled back transaction with key: {}!", transactionKey);
         }
     }
 

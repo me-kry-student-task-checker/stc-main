@@ -20,10 +20,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -41,11 +39,6 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final TaskCommentRepository taskCommentRepository;
     private final FileManagementClient fileManagementClient;
     private final RedisTemplate<String, List<Long>> redisTemplate;
-
-    @PostConstruct
-    public void init() {
-        redisTemplate.setEnableTransactionSupport(true);
-    }
 
     /**
      * {@inheritDoc}
@@ -136,15 +129,14 @@ public class FeedbackServiceImpl implements FeedbackService {
         String uuid = UUID.randomUUID().toString();
         List<Long> courseCommentIds = courseComments.stream().map(CourseComment::getId).collect(Collectors.toList());
         redisTemplate.opsForValue().set(uuid, courseCommentIds);
+        log.info("Prepared ids: {}, for removal with {} transaction key!", courseCommentIds, uuid);
         return uuid;
     }
 
     @Override
     public void commitRemoveCourseCommentsByCourseId(String transactionKey) {
-        if (redisTemplate.hasKey(transactionKey)) {
-            redisTemplate.delete(transactionKey);
-        }
-        throw new NoSuchElementException("Key does not exist, so transaction to commit does not exist!");
+        boolean success = redisTemplate.delete(transactionKey);
+        log.info("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
     @Override
@@ -156,6 +148,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             courseComments.forEach(task -> task.setRemoved(false));
             courseCommentRepository.saveAll(courseComments);
             redisTemplate.delete(transactionKey);
+            log.info("Rolled back transaction with key: {}!", transactionKey);
         }
     }
 
@@ -166,17 +159,16 @@ public class FeedbackServiceImpl implements FeedbackService {
         taskComments.forEach(taskComment -> taskComment.setRemoved(true));
         taskCommentRepository.saveAll(taskComments);
         String uuid = UUID.randomUUID().toString();
-        List<Long> courseCommentIds = taskComments.stream().map(TaskComment::getId).collect(Collectors.toList());
-        redisTemplate.opsForValue().set(uuid, courseCommentIds);
+        List<Long> taskCommentIds = taskComments.stream().map(TaskComment::getId).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(uuid, taskCommentIds);
+        log.info("Prepared ids: {}, for removal with {} transaction key!", taskCommentIds, uuid);
         return uuid;
     }
 
     @Override
     public void commitRemoveTaskCommentsByTaskIds(String transactionKey) {
-        if (redisTemplate.hasKey(transactionKey)) {
-            redisTemplate.delete(transactionKey);
-        }
-        throw new NoSuchElementException("Key does not exist, so transaction to commit does not exist!");
+        boolean success = redisTemplate.delete(transactionKey);
+        log.info("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
     @Override
@@ -188,6 +180,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             taskComments.forEach(task -> task.setRemoved(false));
             taskCommentRepository.saveAll(taskComments);
             redisTemplate.delete(transactionKey);
+            log.info("Rolled back transaction with key: {}!", transactionKey);
         }
     }
 }

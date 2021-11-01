@@ -117,9 +117,11 @@ public class CourseServiceImpl implements CourseService {
             log.warn("User is not related to this course {}!", course);
             throw new ForbiddenCourseEditException();
         }
+        log.info("start");
         course.setRemoved(true);
         courseRepository.save(course);
         fillCourseDetails(course);
+        log.info("course details got");
 
         String taskTransactionKey = "";
         String taskCommentTransactionKey = "";
@@ -129,6 +131,7 @@ public class CourseServiceImpl implements CourseService {
         String courseCommentFileTransactionKey = "";
         String courseFileTransactionKey = "";
         try {
+            log.info("try start");
             var taskIds = course.getTasks().stream().map(Task::getId).collect(Collectors.toList());
             var taskCommentIds = course.getTasks().stream()
                     .map(Task::getComments)
@@ -141,22 +144,38 @@ public class CourseServiceImpl implements CourseService {
             // Prepare phase
             // Removal of tasks and everything connected to it
             taskTransactionKey = taskClient.prepareRemoveTaskByCourseId(courseId);
+            log.info("task prepared {}", taskTransactionKey);
             taskCommentTransactionKey = feedbackClient.prepareRemoveTaskCommentsByTaskIds(taskIds);
+            log.info("task comment prepared {}", taskCommentTransactionKey);
             taskCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, taskCommentIds);
+            log.info("task comment files prepared {}", taskCommentFileTransactionKey);
             taskFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.TASK, taskIds);
+            log.info("task files prepared {}", taskFileTransactionKey);
             // Removal of course comments and everything connected to it
             courseCommentTransactionKey = feedbackClient.prepareRemoveCourseCommentsByCourseId(courseId);
+            log.info("course comment prepared {}", courseCommentTransactionKey);
             courseCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, courseCommentIds);
+            log.info("course comment file prepared {}", courseCommentFileTransactionKey);
             // Removal of course files
             courseFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.COURSE, List.of(courseId));
+            log.info("course file prepared {}", courseFileTransactionKey);
+
             // Commit Phase
             taskClient.commitRemoveTaskByCourseId(taskTransactionKey);
+            log.info("task commited");
             feedbackClient.commitRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
+            log.info("task comment commited");
             fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
+            log.info("task comment files commited");
             fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
+            log.info("task files commited");
             feedbackClient.commitRemoveCourseCommentsByCourseId(courseCommentTransactionKey);
+            log.info("course comment commited");
             fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(courseCommentFileTransactionKey);
+            log.info("course comment file commited");
             fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(courseFileTransactionKey);
+            log.info("course file commited");
+            log.info("Removed course with id {} and everything connected to it using 2PC!", courseId);
         } catch (FeignException e) {
             // Rollback Phase
             taskClient.rollbackRemoveTaskByCourseId(taskTransactionKey);
