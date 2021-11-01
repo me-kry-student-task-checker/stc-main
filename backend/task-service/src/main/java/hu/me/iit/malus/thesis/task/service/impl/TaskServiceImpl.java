@@ -25,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -176,7 +173,7 @@ public class TaskServiceImpl implements TaskService {
         if (redisTemplate.hasKey(transactionKey)) {
             redisTemplate.delete(transactionKey);
         }
-        throw new RuntimeException("Key does not exist, something has gone terribly wrong!");
+        throw new NoSuchElementException("Key does not exist, so transaction to commit does not exist!");
     }
 
     @Override

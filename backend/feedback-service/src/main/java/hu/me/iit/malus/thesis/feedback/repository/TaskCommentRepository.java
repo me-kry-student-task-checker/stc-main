@@ -10,4 +10,6 @@ public interface TaskCommentRepository extends CommentBaseRepository<TaskComment
     Optional<TaskComment> findByIdAndRemovedFalse(Long id);
 
     List<TaskComment> findAllByTaskIdAndRemovedFalse(Long courseId);
+
+    List<TaskComment> findAllByTaskIdInAndRemovedFalse(List<Long> taskIds);
 }

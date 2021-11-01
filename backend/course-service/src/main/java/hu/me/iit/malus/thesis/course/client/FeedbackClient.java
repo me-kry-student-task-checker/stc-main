@@ -19,21 +19,21 @@ public interface FeedbackClient {
     @GetMapping("/api/feedback/getAllCourseComments/{courseId}")
     List<CourseComment> getAllCourseComments(@PathVariable Long courseId);
 
-    @PostMapping("/api/feedback/prepare/task/remove/by/{taskIds}")
-    String prepareRemoveTaskCommentsByTaskIds(@PathVariable List<Long> taskIds);
-
     @PostMapping("/api/feedback/prepare/course/remove/by/{courseId}")
     String prepareRemoveCourseCommentsByCourseId(@PathVariable Long courseId);
-
-    @PostMapping("/api/feedback/commit/task/remove/{taskCommentTransactionKey}")
-    void commitRemoveTaskCommentsByTaskIds(@PathVariable String taskCommentTransactionKey);
 
     @PostMapping("/api/feedback/commit/course/remove/{courseCommentTransactionKey}")
     void commitRemoveCourseCommentsByCourseId(@PathVariable String courseCommentTransactionKey);
 
-    @PostMapping("/api/feedback/rollback/task/remove/{taskCommentTransactionKey}")
-    void rollbackRemoveTaskCommentsByTaskIds(@PathVariable String taskCommentTransactionKey);
-
     @PostMapping("/api/feedback/rollback/course/remove/{courseCommentTransactionKey}")
     void rollbackRemoveCourseCommentsByCourseId(@PathVariable String courseCommentTransactionKey);
+
+    @PostMapping("/api/feedback/prepare/task/remove/by/{taskIds}")
+    String prepareRemoveTaskCommentsByTaskIds(@PathVariable List<Long> taskIds);
+
+    @PostMapping("/api/feedback/commit/task/remove/{taskCommentTransactionKey}")
+    void commitRemoveTaskCommentsByTaskIds(@PathVariable String taskCommentTransactionKey);
+
+    @PostMapping("/api/feedback/rollback/task/remove/{taskCommentTransactionKey}")
+    void rollbackRemoveTaskCommentsByTaskIds(@PathVariable String taskCommentTransactionKey);
 }

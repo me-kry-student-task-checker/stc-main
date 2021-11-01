@@ -16,11 +16,15 @@ import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundExceptio
 import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +40,12 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final CourseCommentRepository courseCommentRepository;
     private final TaskCommentRepository taskCommentRepository;
     private final FileManagementClient fileManagementClient;
+    private final RedisTemplate<String, List<Long>> redisTemplate;
+
+    @PostConstruct
+    public void init() {
+        redisTemplate.setEnableTransactionSupport(true);
+    }
 
     /**
      * {@inheritDoc}
@@ -100,7 +110,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         if (!courseComment.getAuthorId().equals(authorId)) {
             throw new ForbiddenCommentEditException();
         }
-        courseComment.remove();
+        courseComment.setRemoved(true);
         courseCommentRepository.save(courseComment);
         fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
     }
@@ -112,34 +122,72 @@ public class FeedbackServiceImpl implements FeedbackService {
         if (!taskComment.getAuthorId().equals(authorId)) {
             throw new ForbiddenCommentEditException();
         }
-        taskComment.remove();
+        taskComment.setRemoved(true);
         taskCommentRepository.save(taskComment);
         fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
     }
 
     @Override
     @Transactional
-    public void removeCourseCommentsByCourseId(Long courseId) {
+    public String prepareRemoveCourseCommentsByCourseId(Long courseId) {
         List<CourseComment> courseComments = courseCommentRepository.findAllByCourseIdAndRemovedFalse(courseId);
-        courseComments.forEach(
-                courseComment -> {
-                    fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
-                    courseComment.remove();
-                }
-        );
+        courseComments.forEach(courseComment -> courseComment.setRemoved(true));
         courseCommentRepository.saveAll(courseComments);
+        String uuid = UUID.randomUUID().toString();
+        List<Long> courseCommentIds = courseComments.stream().map(CourseComment::getId).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(uuid, courseCommentIds);
+        return uuid;
+    }
+
+    @Override
+    public void commitRemoveCourseCommentsByCourseId(String transactionKey) {
+        if (redisTemplate.hasKey(transactionKey)) {
+            redisTemplate.delete(transactionKey);
+        }
+        throw new NoSuchElementException("Key does not exist, so transaction to commit does not exist!");
     }
 
     @Override
     @Transactional
-    public void removeTaskCommentsByTaskId(Long taskId) {
-        List<TaskComment> taskComments = taskCommentRepository.findAllByTaskIdAndRemovedFalse(taskId);
-        taskComments.forEach(
-                taskComment -> {
-                    fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
-                    taskComment.remove();
-                }
-        );
+    public void rollbackRemoveCourseCommentsByCourseId(String transactionKey) {
+        if (redisTemplate.hasKey(transactionKey)) {
+            List<Long> courseCommentIds = redisTemplate.opsForValue().get(transactionKey);
+            List<CourseComment> courseComments = courseCommentRepository.findAllById(courseCommentIds);
+            courseComments.forEach(task -> task.setRemoved(false));
+            courseCommentRepository.saveAll(courseComments);
+            redisTemplate.delete(transactionKey);
+        }
+    }
+
+    @Override
+    @Transactional
+    public String prepareRemoveTaskCommentsByTaskIds(List<Long> taskIds) {
+        List<TaskComment> taskComments = taskCommentRepository.findAllByTaskIdInAndRemovedFalse(taskIds);
+        taskComments.forEach(taskComment -> taskComment.setRemoved(true));
         taskCommentRepository.saveAll(taskComments);
+        String uuid = UUID.randomUUID().toString();
+        List<Long> courseCommentIds = taskComments.stream().map(TaskComment::getId).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(uuid, courseCommentIds);
+        return uuid;
+    }
+
+    @Override
+    public void commitRemoveTaskCommentsByTaskIds(String transactionKey) {
+        if (redisTemplate.hasKey(transactionKey)) {
+            redisTemplate.delete(transactionKey);
+        }
+        throw new NoSuchElementException("Key does not exist, so transaction to commit does not exist!");
+    }
+
+    @Override
+    @Transactional
+    public void rollbackRemoveTaskCommentsByTaskIds(String transactionKey) {
+        if (redisTemplate.hasKey(transactionKey)) {
+            List<Long> taskCommentIds = redisTemplate.opsForValue().get(transactionKey);
+            List<TaskComment> taskComments = taskCommentRepository.findAllById(taskCommentIds);
+            taskComments.forEach(task -> task.setRemoved(false));
+            taskCommentRepository.saveAll(taskComments);
+            redisTemplate.delete(transactionKey);
+        }
     }
 }

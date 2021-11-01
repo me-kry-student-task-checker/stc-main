@@ -67,17 +67,15 @@ public interface FeedbackService {
      */
     void removeTaskComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException;
 
-    /**
-     * Deletes all feedbacks of a course.
-     *
-     * @param courseId the course dd
-     */
-    void removeCourseCommentsByCourseId(Long courseId);
+    String prepareRemoveCourseCommentsByCourseId(Long courseId);
 
-    /**
-     * Deletes all feedbacks of a task.
-     *
-     * @param taskId the task id
-     */
-    void removeTaskCommentsByTaskId(Long taskId);
+    void commitRemoveCourseCommentsByCourseId(String transactionKey);
+
+    void rollbackRemoveCourseCommentsByCourseId(String transactionKey);
+
+    String prepareRemoveTaskCommentsByTaskIds(List<Long> taskIds);
+
+    void commitRemoveTaskCommentsByTaskIds(String transactionKey);
+
+    void rollbackRemoveTaskCommentsByTaskIds(String transactionKey);
 }
