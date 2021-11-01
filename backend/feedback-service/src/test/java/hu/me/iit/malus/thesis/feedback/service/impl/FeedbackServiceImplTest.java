@@ -205,33 +205,4 @@ public class FeedbackServiceImplTest {
         service.removeTaskComment(testId, "9SDL");
     }
 
-    @Test
-    public void removeFeedbacksByCourseId() {
-        long testCourseId = 598L;
-        CourseComment courseComment = new CourseComment();
-        courseComment.setId(testCourseId);
-        List<CourseComment> testList = List.of(courseComment, courseComment, courseComment);
-        when(courseCommentRepository.findAllByCourseIdAndRemovedFalse(testCourseId)).thenReturn(testList);
-        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
-
-        service.removeCourseCommentsByCourseId(testCourseId);
-
-        verify(courseCommentRepository).findAllByCourseIdAndRemovedFalse(testCourseId);
-        verify(fileManagementClient, times(3)).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testCourseId);
-    }
-
-    @Test
-    public void removeFeedbacksByTaskId() {
-        long testTaskId = 235L;
-        TaskComment taskComment = new TaskComment();
-        taskComment.setId(testTaskId);
-        List<TaskComment> testList = List.of(taskComment, taskComment, taskComment);
-        when(taskCommentRepository.findAllByTaskIdAndRemovedFalse(testTaskId)).thenReturn(testList);
-        doNothing().when(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
-
-        service.removeTaskCommentsByTaskId(testTaskId);
-
-        verify(taskCommentRepository).findAllByTaskIdAndRemovedFalse(testTaskId);
-        verify(fileManagementClient, times(3)).removeFilesByServiceAndTagId(ServiceType.FEEDBACK, testTaskId);
-    }
 }

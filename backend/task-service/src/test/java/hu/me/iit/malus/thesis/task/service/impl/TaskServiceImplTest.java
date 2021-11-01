@@ -372,21 +372,4 @@ public class TaskServiceImplTest {
         service.deleteTask(taskId);
     }
 
-    @Test
-    public void deleteTasksByCourseId() {
-        long courseId = 953L;
-        long taskId = 323L;
-        Task task = new Task();
-        task.setId(taskId);
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(task);
-        tasks.add(task);
-        when(repository.findAllByCourseIdAndRemovedFalse(courseId)).thenReturn(tasks);
-
-        service.deleteTasksByCourseId(courseId);
-
-        verify(repository).findAllByCourseIdAndRemovedFalse(courseId);
-        verify(feedbackClient, times(2)).removeTaskCommentsByTaskId(taskId);
-        verify(fileManagementClient, times(2)).removeFilesByServiceAndTagId(ServiceType.TASK, taskId);
-    }
 }

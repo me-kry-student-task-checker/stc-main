@@ -162,23 +162,4 @@ public class FeedbackControllerTest {
         verify(service).removeTaskComment(commentId, principal.getName());
     }
 
-    @Test
-    public void removeCourseCommentsByCourseId() {
-        long courseId = 187L;
-        doNothing().when(service).removeCourseCommentsByCourseId(courseId);
-
-        controller.removeCourseCommentsByCourseId(courseId);
-
-        verify(service).removeCourseCommentsByCourseId(courseId);
-    }
-
-    @Test
-    public void removeTaskCommentsByTaskId() {
-        long taskId = 469L;
-        doNothing().when(service).removeTaskCommentsByTaskId(taskId);
-
-        controller.removeTaskCommentsByTaskId(taskId);
-
-        verify(service).removeTaskCommentsByTaskId(taskId);
-    }
 }
