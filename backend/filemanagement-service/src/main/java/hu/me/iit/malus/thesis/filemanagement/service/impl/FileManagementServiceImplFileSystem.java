@@ -43,8 +43,8 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
     private static final String DOWNLOAD_LINK_PATTERN = "/api/filemanagement/download/link/%s";
 
     private final Environment env; // environment is used for retrieving the upload destination from cloud props file, because @Value sets null
-    private final RedisTemplate<String, List<Long>> redisTemplate;
     private final FileDescriptorRepository fileDescriptorRepository;
+    private final RedisTemplate<String, List<Long>> redisTemplate;
 
     @PostConstruct
     public void init() {
@@ -128,31 +128,31 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
     @Override
     @Transactional
-    public String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, Long tagId) {
-        List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
+    public String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, List<Long> tagIds) {
+        List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllByServiceTypeAndTagIdInAndRemovedFalse(serviceType, tagIds);
         fileDescriptors.forEach(fileDescriptor -> fileDescriptor.setRemoved(true));
         fileDescriptorRepository.saveAll(fileDescriptors);
         String transactionKey = UUID.randomUUID().toString();
-        List<Long> ids = fileDescriptors.stream().map(FileDescriptor::getId).collect(Collectors.toList());
-        redisTemplate.opsForValue().set(transactionKey, ids);
+        List<Long> fileDescriptorIds = fileDescriptors.stream().map(FileDescriptor::getId).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(transactionKey, fileDescriptorIds);
         return transactionKey;
     }
 
     @Override
     public void commitRemoveFilesByServiceAndTagId(String transactionKey) {
-        Boolean result = redisTemplate.delete(transactionKey);
-        if (result == null || !result) {
-            throw new NoSuchElementException("Transaction key could not be deleted! (it may have not existed)");
+        if (redisTemplate.hasKey(transactionKey)) {
+            redisTemplate.delete(transactionKey);
         }
+        throw new NoSuchElementException("Key does not exist, so transaction to commit does not exist!");
     }
 
     @Override
     @Transactional
     public void rollbackRemoveFilesByServiceAndTagId(String transactionKey) {
-        List<Long> ids = redisTemplate.opsForValue().get(transactionKey);
-        if (ids != null) {
-            List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllById(ids);
-            fileDescriptors.forEach(fileDescriptor -> fileDescriptor.setRemoved(false));
+        if (redisTemplate.hasKey(transactionKey)) {
+            List<Long> taskIds = redisTemplate.opsForValue().get(transactionKey);
+            List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllById(taskIds);
+            fileDescriptors.forEach(task -> task.setRemoved(false));
             fileDescriptorRepository.saveAll(fileDescriptors);
             redisTemplate.delete(transactionKey);
         }

@@ -69,10 +69,10 @@ public interface FileManagementService {
      * Prepares to delete files based on service and tag id.
      *
      * @param serviceType the service type
-     * @param tagId       the tag id
+     * @param tagIds      the tag id list
      * @return transaction key, it is use by other 2PC methods
      */
-    String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, Long tagId);
+    String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, List<Long> tagIds);
 
     /**
      * Commits delete files operation based on service and tag id.

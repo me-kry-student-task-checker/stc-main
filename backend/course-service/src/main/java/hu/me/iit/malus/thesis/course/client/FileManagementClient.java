@@ -16,8 +16,8 @@ public interface FileManagementClient {
     @GetMapping("/api/filemanagement/download/getByTagId/{serviceType}/{tagId}")
     Set<File> getAllFilesByTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId);
 
-    @PostMapping("/api/filemanagement/prepare/remove/by/service/{service}/and/{taskCommentIds}")
-    String prepareRemoveFilesByServiceTypeAndTagIds(@PathVariable ServiceType service, @PathVariable List<Long> taskCommentIds);
+    @PostMapping("/api/filemanagement/prepare/remove/by/service/{service}/and/{tagIds}")
+    String prepareRemoveFilesByServiceTypeAndTagIds(@PathVariable ServiceType service, @PathVariable List<Long> tagIds);
 
     @PostMapping("/api/filemanagement/commit/remove/{fileTransactionKey}")
     void commitRemoveFilesByServiceTypeAndTagIds(@PathVariable String fileTransactionKey);

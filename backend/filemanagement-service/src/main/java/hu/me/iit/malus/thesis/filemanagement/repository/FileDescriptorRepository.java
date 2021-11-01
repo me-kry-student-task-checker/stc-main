@@ -20,4 +20,6 @@ public interface FileDescriptorRepository extends JpaRepository<FileDescriptor, 
     List<FileDescriptor> findAllByUploadedByAndRemovedFalse(String uploadedBy);
 
     List<FileDescriptor> findAllByServiceTypeAndTagIdAndRemovedFalse(ServiceType serviceType, Long tagId);
+
+    List<FileDescriptor> findAllByServiceTypeAndTagIdInAndRemovedFalse(ServiceType serviceType, List<Long> tagIds);
 }

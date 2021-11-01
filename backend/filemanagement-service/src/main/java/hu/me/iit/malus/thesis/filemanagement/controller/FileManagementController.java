@@ -71,18 +71,18 @@ public class FileManagementController {
         return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFileByName(name)));
     }
 
-    @DeleteMapping("/prepare/removeAll/{serviceType}/{tagId}")
-    public String prepareRemoveFilesByServiceAndTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId) {
-        return fileManagementService.prepareRemoveFilesByServiceAndTagId(serviceType, tagId);
+    @PostMapping("/prepare/remove/by/service/{serviceType}/and/{tagIds}")
+    String prepareRemoveFilesByServiceTypeAndTagIds(@PathVariable ServiceType serviceType, @PathVariable List<Long> tagIds) {
+        return fileManagementService.prepareRemoveFilesByServiceAndTagId(serviceType, tagIds);
     }
 
-    @PostMapping("/commit/removeAll/{transactionKey}")
-    public void commitRemoveFilesByServiceAndTagId(@PathVariable String transactionKey) {
+    @PostMapping("/commit/remove/{transactionKey}")
+    void commitRemoveFilesByServiceTypeAndTagIds(@PathVariable String transactionKey) {
         fileManagementService.commitRemoveFilesByServiceAndTagId(transactionKey);
     }
 
-    @PostMapping("/rollback/removeAll/{transactionKey}")
-    public void rollbackRemoveFilesByServiceAndTagId(@PathVariable String transactionKey) {
+    @PostMapping("/rollback/remove/{transactionKey}")
+    void rollbackRemoveFilesByServiceTypeAndTagIds(@PathVariable String transactionKey) {
         fileManagementService.rollbackRemoveFilesByServiceAndTagId(transactionKey);
     }
 
