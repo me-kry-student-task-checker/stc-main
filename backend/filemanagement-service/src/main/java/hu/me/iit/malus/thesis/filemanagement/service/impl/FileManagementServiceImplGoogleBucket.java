@@ -90,6 +90,15 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         fileDescriptorRepository.save(fileDescriptor);
     }
 
+    @Override
+    public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
+            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
+        List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
+        for (FileDescriptor fileDescription : fileDescriptions) {
+            deleteFile(fileDescription.getId(), serviceType, email, userRole);
+        }
+    }
+
     /**
      * {@inheritDoc}
      *

@@ -6,6 +6,7 @@ import hu.me.iit.malus.thesis.task.controller.dto.DetailedTaskDto;
 import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.service.exception.ForbiddenTaskEditException;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
+import hu.me.iit.malus.thesis.task.service.exception.TaskDeleteRollbackException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 
 import java.util.Set;
@@ -80,7 +81,7 @@ public interface TaskService {
      * @param taskId the task id
      * @throws TaskNotFoundException the task not found exception
      */
-    void deleteTask(Long taskId) throws TaskNotFoundException;
+    void deleteTask(Long taskId) throws TaskNotFoundException, TaskDeleteRollbackException;
 
     String prepareRemoveTaskByCourseId(Long courseId);
 

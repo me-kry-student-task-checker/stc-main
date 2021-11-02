@@ -111,7 +111,7 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional(rollbackFor = CourseDeleteRollbackException.class)
+    @Transactional(rollbackFor = {CourseDeleteRollbackException.class})
     public void deleteCourse(Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException, CourseDeleteRollbackException {
         Course course = courseRepository.findByIdAndRemovedFalse(courseId).orElseThrow(CourseNotFoundException::new);
         if (!userClient.isRelated(courseId)) {

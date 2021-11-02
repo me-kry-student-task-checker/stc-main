@@ -58,17 +58,17 @@ public class FeedbackController {
     }
 
     @PostMapping("/prepare/course/remove/by/{courseId}")
-    String prepareRemoveCourseCommentsByCourseId(@PathVariable Long courseId) {
+    public String prepareRemoveCourseCommentsByCourseId(@PathVariable Long courseId) {
         return service.prepareRemoveCourseCommentsByCourseId(courseId);
     }
 
     @PostMapping("/commit/course/remove/{transactionKey}")
-    void commitRemoveCourseCommentsByCourseId(@PathVariable String transactionKey) {
+    public void commitRemoveCourseCommentsByCourseId(@PathVariable String transactionKey) {
         service.commitRemoveCourseCommentsByCourseId(transactionKey);
     }
 
     @PostMapping("/rollback/course/remove/{transactionKey}")
-    void rollbackRemoveCourseCommentsByCourseId(@PathVariable String transactionKey) {
+    public void rollbackRemoveCourseCommentsByCourseId(@PathVariable String transactionKey) {
         service.rollbackRemoveCourseCommentsByCourseId(transactionKey);
     }
 

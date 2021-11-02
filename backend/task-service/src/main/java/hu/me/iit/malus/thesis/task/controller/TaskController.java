@@ -7,6 +7,7 @@ import hu.me.iit.malus.thesis.task.controller.dto.EditTaskDto;
 import hu.me.iit.malus.thesis.task.service.TaskService;
 import hu.me.iit.malus.thesis.task.service.exception.ForbiddenTaskEditException;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
+import hu.me.iit.malus.thesis.task.service.exception.TaskDeleteRollbackException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -71,7 +72,7 @@ public class TaskController {
 
     @DeleteMapping("/delete/{taskId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public void removeTask(@PathVariable Long taskId) throws TaskNotFoundException {
+    public void removeTask(@PathVariable Long taskId) throws TaskNotFoundException, TaskDeleteRollbackException {
         service.deleteTask(taskId);
     }
 

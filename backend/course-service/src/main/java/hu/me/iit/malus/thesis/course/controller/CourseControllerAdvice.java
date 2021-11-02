@@ -27,6 +27,6 @@ public class CourseControllerAdvice {
 
     @ExceptionHandler(CourseDeleteRollbackException.class)
     public ResponseEntity<Map<String, String>> handle(CourseDeleteRollbackException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(MSG, e.getMessage()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(MSG, e.getMessage()));
     }
 }

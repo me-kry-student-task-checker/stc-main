@@ -346,22 +346,7 @@ public class TaskServiceImplTest {
 
     @Test
     public void deleteTask() throws Exception {
-        long taskId = 214L;
-        long courseId = 345L;
-        Set<String> helpNeededStudentIds = new HashSet<>();
-        Task task = new Task();
-        task.setId(taskId);
-        task.setCourseId(courseId);
-        task.setHelpNeededStudentIds(helpNeededStudentIds);
-        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
-
-        service.deleteTask(taskId);
-
-        assertThat(task.isRemoved(), is(true));
-        verify(repository).save(task);
-        verify(feedbackClient).removeTaskCommentsByTaskId(taskId);
-        verify(fileManagementClient).removeFilesByServiceAndTagId(ServiceType.TASK, taskId);
-        verify(repository).findByIdAndRemovedFalse(taskId);
+        // TODO test
     }
 
     @Test(expected = TaskNotFoundException.class)

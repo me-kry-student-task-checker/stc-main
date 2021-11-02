@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.task.service.impl;
 
+import feign.FeignException;
 import hu.me.iit.malus.thesis.dto.File;
 import hu.me.iit.malus.thesis.dto.ServiceType;
 import hu.me.iit.malus.thesis.dto.Student;
@@ -17,6 +18,7 @@ import hu.me.iit.malus.thesis.task.service.TaskService;
 import hu.me.iit.malus.thesis.task.service.converters.DtoConverter;
 import hu.me.iit.malus.thesis.task.service.exception.ForbiddenTaskEditException;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
+import hu.me.iit.malus.thesis.task.service.exception.TaskDeleteRollbackException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -146,11 +148,36 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     @Transactional
-    public void deleteTask(Long taskId) throws TaskNotFoundException {
+    public void deleteTask(Long taskId) throws TaskNotFoundException, TaskDeleteRollbackException {
         Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
         task.setRemoved(true);
         repository.save(task);
-        removeCommentsAndFiles(task.getId());
+        List<Long> taskCommentIds = feedbackClient.getAllTaskComments(taskId).stream().map(TaskComment::getId).collect(Collectors.toList());
+        String reason = "";
+        String taskCommentTransactionKey = "";
+        String taskCommentFileTransactionKey = "";
+        String taskFileTransactionKey = "";
+        try {
+            // Prepare
+            reason = "PREPARE_TASK_COMMENT_REMOVAL";
+            taskCommentTransactionKey = feedbackClient.prepareRemoveTaskCommentsByTaskIds(List.of(taskId));
+            reason = "PREPARE_TASK_COMMENT_FILE_REMOVAL";
+            taskCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, taskCommentIds);
+            reason = "PREPARE_TASK_FILE_REMOVAL";
+            taskFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.TASK, List.of(taskId));
+            // Commit
+            feedbackClient.commitRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
+            fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
+            fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
+            log.debug("Removed task with id {} and everything connected to it using 2PC!", taskId);
+        } catch (FeignException e) {
+            // Rollback
+            if (!taskCommentTransactionKey.isEmpty()) feedbackClient.rollbackRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
+            if (!taskCommentFileTransactionKey.isEmpty())
+                fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
+            if (!taskFileTransactionKey.isEmpty()) fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
+            throw new TaskDeleteRollbackException(taskId, reason);
+        }
     }
 
     @Override
@@ -197,10 +224,5 @@ public class TaskServiceImpl implements TaskService {
         List<TaskComment> comments = feedbackClient.getAllTaskComments(task.getId());
         Set<File> files = fileManagementClient.getAllFilesByTagId(ServiceType.TASK, task.getId());
         return DtoConverter.createDetailedTaskDtoFromTas(task, files, helpNeeded, completed, comments);
-    }
-
-    private void removeCommentsAndFiles(Long taskId) {
-        feedbackClient.removeTaskCommentsByTaskId(taskId);
-        fileManagementClient.removeFilesByServiceAndTagId(ServiceType.TASK, taskId);
     }
 }

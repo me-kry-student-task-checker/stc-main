@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.Set;
 
 @FeignClient("filemanagement-service")
-
 public interface FileManagementClient {
     @GetMapping("/api/filemanagement/download/getByTagId/{serviceType}/{tagId}")
     Set<File> getAllFilesByTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId);

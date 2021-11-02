@@ -54,6 +54,13 @@ public class FileManagementController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/deleteAll/{serviceType}/{tagId}")
+    public void removeFilesByServiceAndTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId, Authentication authentication)
+            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
+        fileManagementService.deleteFilesByServiceAndTagId(
+                serviceType, tagId, authentication.getName(), authentication.getAuthorities().stream().findFirst().get().getAuthority());
+    }
+
     @GetMapping("/download/getByUser")
     public ResponseEntity<List<@Valid FileDescriptorDto>> getFilesByUser(Principal principal) {
         return ResponseEntity.ok(fileManagementService.getAllFilesByUser(principal.getName()));

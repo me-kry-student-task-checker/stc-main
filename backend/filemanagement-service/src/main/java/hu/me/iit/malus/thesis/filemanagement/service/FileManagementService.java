@@ -40,6 +40,8 @@ public interface FileManagementService {
      */
     void deleteFile(Long id, ServiceType serviceType, String username, String userRole) throws ForbiddenFileDeleteException, FileNotFoundException;
 
+    void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String name, String authority) throws FileNotFoundException, ForbiddenFileDeleteException;
+
     /**
      * Queries all uploaded files of a user.
      *
