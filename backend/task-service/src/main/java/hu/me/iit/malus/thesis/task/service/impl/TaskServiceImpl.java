@@ -161,13 +161,15 @@ public class TaskServiceImpl implements TaskService {
             // Prepare
             reason = "PREPARE_TASK_COMMENT_REMOVAL";
             taskCommentTransactionKey = feedbackClient.prepareRemoveTaskCommentsByTaskIds(List.of(taskId));
-            reason = "PREPARE_TASK_COMMENT_FILE_REMOVAL";
-            taskCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, taskCommentIds);
+            if (!taskCommentIds.isEmpty()) {
+                reason = "PREPARE_TASK_COMMENT_FILE_REMOVAL";
+                taskCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, taskCommentIds);
+            }
             reason = "PREPARE_TASK_FILE_REMOVAL";
             taskFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.TASK, List.of(taskId));
             // Commit
             feedbackClient.commitRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
-            fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
+            if (!taskCommentFileTransactionKey.isEmpty()) fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
             fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
             log.debug("Removed task with id {} and everything connected to it using 2PC!", taskId);
         } catch (FeignException e) {
