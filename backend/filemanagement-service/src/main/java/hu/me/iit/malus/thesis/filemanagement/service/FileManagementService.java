@@ -26,6 +26,7 @@ public interface FileManagementService {
      * @param file        The file to be uploaded
      * @param serviceType It defines the service, which the file has been uploaded from
      * @param userEmail   The email address of the userEmail, who uploaded the file
+     * @param tagId       the tag id
      * @return The object that represents the file which was uploaded and saved to database.
      * @throws IOException thrown when the file saving fails
      */
@@ -37,9 +38,23 @@ public interface FileManagementService {
      *
      * @param id          The ID of the file
      * @param serviceType The service that uploaded the file
+     * @param username    the username
+     * @param userRole    the user role
+     * @throws ForbiddenFileDeleteException the forbidden file delete exception
+     * @throws FileNotFoundException        the file not found exception
      */
     void deleteFile(Long id, ServiceType serviceType, String username, String userRole) throws ForbiddenFileDeleteException, FileNotFoundException;
 
+    /**
+     * Delete files by service and tag id.
+     *
+     * @param serviceType the service type
+     * @param tagId       the tag id
+     * @param name        the name
+     * @param authority   the authority
+     * @throws FileNotFoundException        the file not found exception
+     * @throws ForbiddenFileDeleteException the forbidden file delete exception
+     */
     void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String name, String authority) throws FileNotFoundException, ForbiddenFileDeleteException;
 
     /**
@@ -68,23 +83,23 @@ public interface FileManagementService {
     Path getFileByName(String name);
 
     /**
-     * Prepares to delete files based on service and tag id.
+     * 2PC prepare phase, prepares to delete files based on service and tag ids.
      *
      * @param serviceType the service type
      * @param tagIds      the tag id list
-     * @return transaction key, it is use by other 2PC methods
+     * @return the transaction key
      */
     String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, List<Long> tagIds);
 
     /**
-     * Commits delete files operation based on service and tag id.
+     * 2PC commit phase, commits delete files operation based on service and tag id.
      *
      * @param transactionKey the transaction key
      */
     void commitRemoveFilesByServiceAndTagId(String transactionKey);
 
     /**
-     * Rolls back delete files operation based on service and tag id.
+     * 2PC rollback phase, rolls back delete files operation based on service and tag id.
      *
      * @param transactionKey the transaction key
      */

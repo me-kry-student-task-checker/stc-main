@@ -55,7 +55,9 @@ public interface FeedbackService {
      * Removes a course comment.
      *
      * @param commentId the comment id
-     * @throws CommentNotFoundException the comment not found exception
+     * @param authorId  the author id
+     * @throws CommentNotFoundException      the comment not found exception
+     * @throws ForbiddenCommentEditException the forbidden comment edit exception
      */
     void removeCourseComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException;
 
@@ -63,19 +65,53 @@ public interface FeedbackService {
      * Removes a task comment.
      *
      * @param commentId the comment id
-     * @throws CommentNotFoundException the comment not found exception
+     * @param authorId  the author id
+     * @throws CommentNotFoundException      the comment not found exception
+     * @throws ForbiddenCommentEditException the forbidden comment edit exception
      */
     void removeTaskComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException;
 
+    /**
+     * 2PC prepare phase, prepares removal of course comments by the course id.
+     *
+     * @param courseId the course id
+     * @return the transaction key
+     */
     String prepareRemoveCourseCommentsByCourseId(Long courseId);
 
+    /**
+     * 2PC commit phase, commits removal of course comments by transaction key returned by prepare method.
+     *
+     * @param transactionKey the transaction key
+     */
     void commitRemoveCourseCommentsByCourseId(String transactionKey);
 
+    /**
+     * 2PC rollback phase, rolls back removal of course comments by transaction key returned by prepare method.
+     *
+     * @param transactionKey the transaction key
+     */
     void rollbackRemoveCourseCommentsByCourseId(String transactionKey);
 
+    /**
+     * 2PC prepare phase, prepares removal of task comments by the task ids.
+     *
+     * @param taskIds the task ids
+     * @return the transaction key
+     */
     String prepareRemoveTaskCommentsByTaskIds(List<Long> taskIds);
 
+    /**
+     * 2PC commit phase, commits removal of task comments by transaction key returned by prepare method.
+     *
+     * @param transactionKey the transaction key
+     */
     void commitRemoveTaskCommentsByTaskIds(String transactionKey);
 
+    /**
+     * 2PC rollback phase, rolls back removal of task comments by transaction key returned by prepare method.
+     *
+     * @param transactionKey the transaction key
+     */
     void rollbackRemoveTaskCommentsByTaskIds(String transactionKey);
 }

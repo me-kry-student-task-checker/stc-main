@@ -52,8 +52,6 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public FileDescriptorDto uploadFile(MultipartFile file, ServiceType serviceType, String userEmail, Long tagId) throws IOException {
@@ -90,6 +88,9 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         fileDescriptorRepository.save(fileDescriptor);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
             throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
@@ -101,8 +102,6 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public List<FileDescriptorDto> getAllFilesByUser(String userEmail) {
@@ -113,8 +112,6 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public List<FileDescriptorDto> getAllFilesByServiceTypeAndTagId(Long tagId, ServiceType serviceType) {
@@ -123,6 +120,9 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Path getFileByName(String name) {
         // no implementation as it is not needed nor called when google buckets are used
@@ -152,6 +152,9 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         return stringBuilder.toString();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, List<Long> tagIds) {
@@ -165,12 +168,18 @@ public class FileManagementServiceImplGoogleBucket implements FileManagementServ
         return uuid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void commitRemoveFilesByServiceAndTagId(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
         log.debug("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void rollbackRemoveFilesByServiceAndTagId(String transactionKey) {

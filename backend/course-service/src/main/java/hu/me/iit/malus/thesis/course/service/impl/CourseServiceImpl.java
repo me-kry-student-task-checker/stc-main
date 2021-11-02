@@ -197,6 +197,11 @@ public class CourseServiceImpl implements CourseService {
         }
     }
 
+    /**
+     * Fills in the details of a course by making requests to other services.
+     *
+     * @param course the course
+     */
     private void fillCourseDetails(Course course) {
         course.setCreator(userClient.getTeacherByCreatedCourseId(course.getId()));
         course.setStudents(userClient.getStudentsByAssignedCourseId(course.getId()));

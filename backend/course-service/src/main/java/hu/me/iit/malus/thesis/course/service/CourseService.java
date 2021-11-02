@@ -34,6 +34,8 @@ public interface CourseService {
      * @param dto          the modified course which will be saved
      * @param editorsEmail the email address of the editor
      * @return the saved course
+     * @throws ForbiddenCourseEditException the forbidden course edit exception
+     * @throws CourseNotFoundException      the course not found exception
      */
     CourseOverviewDto edit(CourseModificationDto dto, String editorsEmail) throws ForbiddenCourseEditException, CourseNotFoundException;
 
@@ -42,6 +44,7 @@ public interface CourseService {
      *
      * @param courseId the id of the course
      * @return the course
+     * @throws CourseNotFoundException the course not found exception
      */
     CourseFullDetailsDto get(Long courseId) throws CourseNotFoundException;
 
@@ -54,9 +57,12 @@ public interface CourseService {
     Set<CourseOverviewDto> getAll(String userEmail);
 
     /**
-     * Deletes a course.
+     * Deletes a course, uses 2PC.
      *
      * @param courseId the course id
+     * @throws CourseNotFoundException       the course not found exception
+     * @throws ForbiddenCourseEditException  the forbidden course edit exception
+     * @throws CourseDeleteRollbackException the course delete rollback exception
      */
     void deleteCourse(Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException, CourseDeleteRollbackException;
 }

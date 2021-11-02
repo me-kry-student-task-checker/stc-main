@@ -182,6 +182,9 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public String prepareRemoveTaskByCourseId(Long courseId) {
@@ -195,12 +198,18 @@ public class TaskServiceImpl implements TaskService {
         return uuid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void commitRemoveTaskByCourseId(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
         log.debug("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void rollbackRemoveTaskByCourseId(String transactionKey) {
@@ -217,6 +226,12 @@ public class TaskServiceImpl implements TaskService {
 
     }
 
+    /**
+     * Gets task details
+     *
+     * @param task the task
+     * @return dto
+     */
     private DetailedTaskDto getDetailedTask(Task task) {
         Set<Student> allStudentsInCourse = userClient.getStudentsByAssignedCourseId(task.getCourseId());
         Set<Student> completed = allStudentsInCourse.stream()

@@ -46,8 +46,6 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public FileDescriptorDto uploadFile(MultipartFile file, ServiceType serviceType, String userEmail, Long tagId) throws IOException {
@@ -95,8 +93,6 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public List<FileDescriptorDto> getAllFilesByUser(String userEmail) {
@@ -107,8 +103,6 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public List<FileDescriptorDto> getAllFilesByServiceTypeAndTagId(Long tagId, ServiceType serviceType) {
@@ -119,8 +113,6 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public Path getFileByName(String name) {
@@ -128,6 +120,9 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
         return Path.of(uploadDir, name);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public String prepareRemoveFilesByServiceAndTagId(ServiceType serviceType, List<Long> tagIds) {
@@ -141,12 +136,18 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
         return uuid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void commitRemoveFilesByServiceAndTagId(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
         log.debug("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void rollbackRemoveFilesByServiceAndTagId(String transactionKey) {

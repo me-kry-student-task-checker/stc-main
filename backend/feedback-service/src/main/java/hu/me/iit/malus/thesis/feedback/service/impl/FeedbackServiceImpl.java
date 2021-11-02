@@ -68,8 +68,6 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public List<CourseCommentDetailsDto> getAllCourseComments(Long courseId) {
@@ -83,8 +81,6 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public List<TaskCommentDetailsDto> getAllTaskComments(Long taskId) {
@@ -96,6 +92,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         return results.stream().map(DtoConverter::taskCommentToTaskCommentDetailsDto).collect(Collectors.toList());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void removeCourseComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
@@ -108,6 +107,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void removeTaskComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
@@ -120,6 +122,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public String prepareRemoveCourseCommentsByCourseId(Long courseId) {
@@ -133,12 +138,18 @@ public class FeedbackServiceImpl implements FeedbackService {
         return uuid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void commitRemoveCourseCommentsByCourseId(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
         log.debug("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void rollbackRemoveCourseCommentsByCourseId(String transactionKey) {
@@ -154,6 +165,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         log.debug("Rolled back transaction with key: {}!", transactionKey);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public String prepareRemoveTaskCommentsByTaskIds(List<Long> taskIds) {
@@ -167,12 +181,18 @@ public class FeedbackServiceImpl implements FeedbackService {
         return uuid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void commitRemoveTaskCommentsByTaskIds(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
         log.debug("Committed transaction with key: {}, Redis delete successful: {}!", transactionKey, success);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void rollbackRemoveTaskCommentsByTaskIds(String transactionKey) {
