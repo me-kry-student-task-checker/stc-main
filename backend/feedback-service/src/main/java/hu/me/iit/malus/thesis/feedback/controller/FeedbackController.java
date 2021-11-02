@@ -73,17 +73,17 @@ public class FeedbackController {
     }
 
     @PostMapping("/prepare/task/remove/by/{taskIds}")
-    String prepareRemoveTaskCommentsByTaskIds(@PathVariable List<Long> taskIds) {
+    public String prepareRemoveTaskCommentsByTaskIds(@PathVariable List<Long> taskIds) {
         return service.prepareRemoveTaskCommentsByTaskIds(taskIds);
     }
 
     @PostMapping("/commit/task/remove/{transactionKey}")
-    void commitRemoveTaskCommentsByTaskIds(@PathVariable String transactionKey) {
+    public void commitRemoveTaskCommentsByTaskIds(@PathVariable String transactionKey) {
         service.commitRemoveTaskCommentsByTaskIds(transactionKey);
     }
 
     @PostMapping("/rollback/task/remove/{transactionKey}")
-    void rollbackRemoveTaskCommentsByTaskIds(@PathVariable String transactionKey) {
+    public void rollbackRemoveTaskCommentsByTaskIds(@PathVariable String transactionKey) {
         service.rollbackRemoveTaskCommentsByTaskIds(transactionKey);
     }
 }

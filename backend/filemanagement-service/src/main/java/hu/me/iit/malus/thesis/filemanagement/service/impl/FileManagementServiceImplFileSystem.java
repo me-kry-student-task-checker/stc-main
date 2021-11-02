@@ -141,13 +141,15 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
     @Override
     @Transactional
     public void rollbackRemoveFilesByServiceAndTagId(String transactionKey) {
-        if (redisTemplate.hasKey(transactionKey)) {
-            List<Long> taskIds = redisTemplate.opsForValue().get(transactionKey);
-            List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllById(taskIds);
-            fileDescriptors.forEach(task -> task.setRemoved(false));
-            fileDescriptorRepository.saveAll(fileDescriptors);
-            redisTemplate.delete(transactionKey);
-            log.info("Rolled back transaction with key: {}!", transactionKey);
+        List<Long> fileDescriptorIds = redisTemplate.opsForValue().get(transactionKey);
+        if (fileDescriptorIds == null) {
+            log.info("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            return;
         }
+        List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllById(fileDescriptorIds);
+        fileDescriptors.forEach(task -> task.setRemoved(false));
+        fileDescriptorRepository.saveAll(fileDescriptors);
+        redisTemplate.delete(transactionKey);
+        log.info("Rolled back transaction with key: {}!", transactionKey);
     }
 }

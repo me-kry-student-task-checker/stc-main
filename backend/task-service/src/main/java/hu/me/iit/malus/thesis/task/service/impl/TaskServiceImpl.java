@@ -175,14 +175,17 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public void rollbackRemoveTaskByCourseId(String transactionKey) {
-        if (redisTemplate.hasKey(transactionKey)) {
-            List<Long> taskIds = redisTemplate.opsForValue().get(transactionKey);
-            List<Task> tasks = repository.findAllById(taskIds);
-            tasks.forEach(task -> task.setRemoved(false));
-            repository.saveAll(tasks);
-            redisTemplate.delete(transactionKey);
-            log.info("Rolled back transaction with key: {}!", transactionKey);
+        List<Long> taskIds = redisTemplate.opsForValue().get(transactionKey);
+        if (taskIds == null) {
+            log.info("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            return;
         }
+        List<Task> tasks = repository.findAllById(taskIds);
+        tasks.forEach(task -> task.setRemoved(false));
+        repository.saveAll(tasks);
+        redisTemplate.delete(transactionKey);
+        log.info("Rolled back transaction with key: {}!", transactionKey);
+
     }
 
     private DetailedTaskDto getDetailedTask(Task task) {

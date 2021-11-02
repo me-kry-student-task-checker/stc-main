@@ -142,14 +142,16 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     @Transactional
     public void rollbackRemoveCourseCommentsByCourseId(String transactionKey) {
-        if (redisTemplate.hasKey(transactionKey)) {
-            List<Long> courseCommentIds = redisTemplate.opsForValue().get(transactionKey);
-            List<CourseComment> courseComments = courseCommentRepository.findAllById(courseCommentIds);
-            courseComments.forEach(task -> task.setRemoved(false));
-            courseCommentRepository.saveAll(courseComments);
-            redisTemplate.delete(transactionKey);
-            log.info("Rolled back transaction with key: {}!", transactionKey);
+        List<Long> courseCommentIds = redisTemplate.opsForValue().get(transactionKey);
+        if (courseCommentIds == null) {
+            log.info("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            return;
         }
+        List<CourseComment> courseComments = courseCommentRepository.findAllById(courseCommentIds);
+        courseComments.forEach(task -> task.setRemoved(false));
+        courseCommentRepository.saveAll(courseComments);
+        redisTemplate.delete(transactionKey);
+        log.info("Rolled back transaction with key: {}!", transactionKey);
     }
 
     @Override
@@ -168,19 +170,21 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public void commitRemoveTaskCommentsByTaskIds(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
-        log.info("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
+        log.info("Committed transaction with key: {}, Redis delete successful: {}!", transactionKey, success);
     }
 
     @Override
     @Transactional
     public void rollbackRemoveTaskCommentsByTaskIds(String transactionKey) {
-        if (redisTemplate.hasKey(transactionKey)) {
-            List<Long> taskCommentIds = redisTemplate.opsForValue().get(transactionKey);
-            List<TaskComment> taskComments = taskCommentRepository.findAllById(taskCommentIds);
-            taskComments.forEach(task -> task.setRemoved(false));
-            taskCommentRepository.saveAll(taskComments);
-            redisTemplate.delete(transactionKey);
-            log.info("Rolled back transaction with key: {}!", transactionKey);
+        List<Long> taskCommentIds = redisTemplate.opsForValue().get(transactionKey);
+        if (taskCommentIds == null) {
+            log.info("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            return;
         }
+        List<TaskComment> taskComments = taskCommentRepository.findAllById(taskCommentIds);
+        taskComments.forEach(task -> task.setRemoved(false));
+        taskCommentRepository.saveAll(taskComments);
+        redisTemplate.delete(transactionKey);
+        log.info("Rolled back transaction with key: {}!", transactionKey);
     }
 }
