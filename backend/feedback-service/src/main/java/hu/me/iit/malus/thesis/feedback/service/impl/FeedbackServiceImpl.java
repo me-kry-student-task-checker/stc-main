@@ -129,14 +129,14 @@ public class FeedbackServiceImpl implements FeedbackService {
         String uuid = UUID.randomUUID().toString();
         List<Long> courseCommentIds = courseComments.stream().map(CourseComment::getId).collect(Collectors.toList());
         redisTemplate.opsForValue().set(uuid, courseCommentIds);
-        log.info("Prepared ids: {}, for removal with {} transaction key!", courseCommentIds, uuid);
+        log.debug("Prepared ids: {}, for removal with {} transaction key!", courseCommentIds, uuid);
         return uuid;
     }
 
     @Override
     public void commitRemoveCourseCommentsByCourseId(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
-        log.info("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
+        log.debug("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
     @Override
@@ -144,14 +144,14 @@ public class FeedbackServiceImpl implements FeedbackService {
     public void rollbackRemoveCourseCommentsByCourseId(String transactionKey) {
         List<Long> courseCommentIds = redisTemplate.opsForValue().get(transactionKey);
         if (courseCommentIds == null) {
-            log.info("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            log.debug("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
             return;
         }
         List<CourseComment> courseComments = courseCommentRepository.findAllById(courseCommentIds);
         courseComments.forEach(task -> task.setRemoved(false));
         courseCommentRepository.saveAll(courseComments);
         redisTemplate.delete(transactionKey);
-        log.info("Rolled back transaction with key: {}!", transactionKey);
+        log.debug("Rolled back transaction with key: {}!", transactionKey);
     }
 
     @Override
@@ -163,14 +163,14 @@ public class FeedbackServiceImpl implements FeedbackService {
         String uuid = UUID.randomUUID().toString();
         List<Long> taskCommentIds = taskComments.stream().map(TaskComment::getId).collect(Collectors.toList());
         redisTemplate.opsForValue().set(uuid, taskCommentIds);
-        log.info("Prepared ids: {}, for removal with {} transaction key!", taskCommentIds, uuid);
+        log.debug("Prepared ids: {}, for removal with {} transaction key!", taskCommentIds, uuid);
         return uuid;
     }
 
     @Override
     public void commitRemoveTaskCommentsByTaskIds(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
-        log.info("Committed transaction with key: {}, Redis delete successful: {}!", transactionKey, success);
+        log.debug("Committed transaction with key: {}, Redis delete successful: {}!", transactionKey, success);
     }
 
     @Override
@@ -178,13 +178,13 @@ public class FeedbackServiceImpl implements FeedbackService {
     public void rollbackRemoveTaskCommentsByTaskIds(String transactionKey) {
         List<Long> taskCommentIds = redisTemplate.opsForValue().get(transactionKey);
         if (taskCommentIds == null) {
-            log.info("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            log.debug("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
             return;
         }
         List<TaskComment> taskComments = taskCommentRepository.findAllById(taskCommentIds);
         taskComments.forEach(task -> task.setRemoved(false));
         taskCommentRepository.saveAll(taskComments);
         redisTemplate.delete(transactionKey);
-        log.info("Rolled back transaction with key: {}!", transactionKey);
+        log.debug("Rolled back transaction with key: {}!", transactionKey);
     }
 }

@@ -4,6 +4,7 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseCreateDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseFullDetailsDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
+import hu.me.iit.malus.thesis.course.service.exception.CourseDeleteRollbackException;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
 
@@ -57,5 +58,5 @@ public interface CourseService {
      *
      * @param courseId the course id
      */
-    void deleteCourse(Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException;
+    void deleteCourse(Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException, CourseDeleteRollbackException;
 }

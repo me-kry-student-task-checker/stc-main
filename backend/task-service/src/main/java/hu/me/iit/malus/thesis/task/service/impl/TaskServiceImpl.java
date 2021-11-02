@@ -162,14 +162,14 @@ public class TaskServiceImpl implements TaskService {
         String uuid = UUID.randomUUID().toString();
         List<Long> taskIds = tasks.stream().map(Task::getId).collect(Collectors.toList());
         redisTemplate.opsForValue().set(uuid, taskIds);
-        log.info("Prepared ids: {}, for removal with {} transaction key!", taskIds, uuid);
+        log.debug("Prepared ids: {}, for removal with {} transaction key!", taskIds, uuid);
         return uuid;
     }
 
     @Override
     public void commitRemoveTaskByCourseId(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
-        log.info("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
+        log.debug("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
     @Override
@@ -177,14 +177,14 @@ public class TaskServiceImpl implements TaskService {
     public void rollbackRemoveTaskByCourseId(String transactionKey) {
         List<Long> taskIds = redisTemplate.opsForValue().get(transactionKey);
         if (taskIds == null) {
-            log.info("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            log.debug("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
             return;
         }
         List<Task> tasks = repository.findAllById(taskIds);
         tasks.forEach(task -> task.setRemoved(false));
         repository.saveAll(tasks);
         redisTemplate.delete(transactionKey);
-        log.info("Rolled back transaction with key: {}!", transactionKey);
+        log.debug("Rolled back transaction with key: {}!", transactionKey);
 
     }
 

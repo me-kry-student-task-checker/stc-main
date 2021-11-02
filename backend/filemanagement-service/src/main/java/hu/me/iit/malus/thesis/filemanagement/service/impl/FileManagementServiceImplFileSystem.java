@@ -128,14 +128,14 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
         String uuid = UUID.randomUUID().toString();
         List<Long> fileDescriptorIds = fileDescriptors.stream().map(FileDescriptor::getId).collect(Collectors.toList());
         redisTemplate.opsForValue().set(uuid, fileDescriptorIds);
-        log.info("Prepared ids: {}, for removal with {} transaction key!", fileDescriptorIds, uuid);
+        log.debug("Prepared ids: {}, for removal with {} transaction key!", fileDescriptorIds, uuid);
         return uuid;
     }
 
     @Override
     public void commitRemoveFilesByServiceAndTagId(String transactionKey) {
         boolean success = redisTemplate.delete(transactionKey);
-        log.info("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
+        log.debug("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
     }
 
     @Override
@@ -143,13 +143,13 @@ public class FileManagementServiceImplFileSystem implements FileManagementServic
     public void rollbackRemoveFilesByServiceAndTagId(String transactionKey) {
         List<Long> fileDescriptorIds = redisTemplate.opsForValue().get(transactionKey);
         if (fileDescriptorIds == null) {
-            log.info("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            log.debug("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
             return;
         }
         List<FileDescriptor> fileDescriptors = fileDescriptorRepository.findAllById(fileDescriptorIds);
         fileDescriptors.forEach(task -> task.setRemoved(false));
         fileDescriptorRepository.saveAll(fileDescriptors);
         redisTemplate.delete(transactionKey);
-        log.info("Rolled back transaction with key: {}!", transactionKey);
+        log.debug("Rolled back transaction with key: {}!", transactionKey);
     }
 }
