@@ -206,6 +206,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public boolean isRelatedToCourse(String email, Long courseId) throws UserNotFoundException {
+        // TODO check whether course is deleted, if so return false
         User user = getAnyUserByEmail(email);
         if (user instanceof Student) {
             return ((Student) user).getAssignedCourseIds().contains(courseId);
