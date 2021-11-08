@@ -5,6 +5,7 @@ import hu.me.iit.malus.thesis.filemanagement.model.ServiceType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * File Description Repository that handles the database operations
@@ -14,9 +15,11 @@ import java.util.List;
  */
 public interface FileDescriptorRepository extends JpaRepository<FileDescriptor, Long> {
 
-    List<FileDescriptor> findAllByUploadedBy(String uploadedBy);
+    Optional<FileDescriptor> findByIdAndRemovedFalse(Long id);
 
-    List<FileDescriptor> findAllByTagId(Long tagId);
+    List<FileDescriptor> findAllByUploadedByAndRemovedFalse(String uploadedBy);
 
-    List<FileDescriptor> findAllByServiceTypeAndTagId(ServiceType serviceType, Long tagId);
+    List<FileDescriptor> findAllByServiceTypeAndTagIdAndRemovedFalse(ServiceType serviceType, Long tagId);
+
+    List<FileDescriptor> findAllByServiceTypeAndTagIdInAndRemovedFalse(ServiceType serviceType, List<Long> tagIds);
 }

@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.course.controller;
 
+import hu.me.iit.malus.thesis.course.service.exception.CourseDeleteRollbackException;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
 import org.springframework.http.HttpStatus;
@@ -22,5 +23,10 @@ public class CourseControllerAdvice {
     @ExceptionHandler(ForbiddenCourseEditException.class)
     public ResponseEntity<Map<String, String>> handle(ForbiddenCourseEditException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(MSG, e.getMessage()));
+    }
+
+    @ExceptionHandler(CourseDeleteRollbackException.class)
+    public ResponseEntity<Map<String, String>> handle(CourseDeleteRollbackException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(MSG, e.getMessage()));
     }
 }

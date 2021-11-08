@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.feedback.model;
 
 import hu.me.iit.malus.thesis.dto.File;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -17,7 +17,11 @@ import java.util.Set;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "comment_type", discriminatorType = DiscriminatorType.STRING)
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Comment {
 
     @Id
@@ -27,6 +31,7 @@ public class Comment {
     private String authorId;
     private String text;
     private Date createDate;
+    private boolean removed;
 
     @Transient
     private Set<File> files;
