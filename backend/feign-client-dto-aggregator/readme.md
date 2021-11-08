@@ -1,0 +1,1 @@
+This module contains every dto, used by the Feign http clients. Services use these to communicate and fill out details which other services store.

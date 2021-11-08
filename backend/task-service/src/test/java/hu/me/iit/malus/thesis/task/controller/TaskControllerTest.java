@@ -194,13 +194,4 @@ public class TaskControllerTest {
         controller.removeTask(taskId);
     }
 
-    @Test
-    public void removeTasksByCourseId() {
-        long courseId = 961L;
-        doNothing().when(service).deleteTasksByCourseId(courseId);
-
-        controller.removeTasksByCourseId(courseId);
-
-        verify(service).deleteTasksByCourseId(courseId);
-    }
 }

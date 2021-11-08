@@ -4,12 +4,11 @@ import hu.me.iit.malus.thesis.task.model.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    Set<Task> findAllByCourseId(Long courseId);
+    Optional<Task> findByIdAndRemovedFalse(Long id);
 
-    List<Task> deleteByCourseId(Long courseId);
-
+    List<Task> findAllByCourseIdAndRemovedFalse(Long courseId);
 }

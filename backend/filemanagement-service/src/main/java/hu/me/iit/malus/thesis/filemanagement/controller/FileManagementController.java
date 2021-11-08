@@ -53,6 +53,13 @@ public class FileManagementController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/deleteAll/{serviceType}/{tagId}")
+    public void removeFilesByServiceAndTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId, Authentication authentication)
+            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
+        fileManagementService.deleteFilesByServiceAndTagId(
+                serviceType, tagId, authentication.getName(), authentication.getAuthorities().stream().findFirst().get().getAuthority());
+    }
+
     @GetMapping("/download/getByUser")
     public ResponseEntity<List<@Valid FileDescriptorDto>> getFilesByUser(Principal principal) {
         return ResponseEntity.ok(fileManagementService.getAllFilesByUser(principal.getName()));
@@ -70,11 +77,19 @@ public class FileManagementController {
         return ResponseEntity.ok(new FileSystemResource(fileManagementService.getFileByName(name)));
     }
 
-    @DeleteMapping("/deleteAll/{serviceType}/{tagId}")
-    public void removeFilesByServiceAndTagId(@PathVariable ServiceType serviceType, @PathVariable Long tagId, Authentication authentication)
-            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        fileManagementService.deleteFilesByServiceAndTagId(
-                serviceType, tagId, authentication.getName(), authentication.getAuthorities().stream().findFirst().orElseThrow().getAuthority());
+    @PostMapping("/prepare/remove/by/service/{serviceType}/and/{tagIds}")
+    public String prepareRemoveFilesByServiceTypeAndTagIds(@PathVariable ServiceType serviceType, @PathVariable List<Long> tagIds) {
+        return fileManagementService.prepareRemoveFilesByServiceAndTagId(serviceType, tagIds);
+    }
+
+    @PostMapping("/commit/remove/{transactionKey}")
+    public void commitRemoveFilesByServiceTypeAndTagIds(@PathVariable String transactionKey) {
+        fileManagementService.commitRemoveFilesByServiceAndTagId(transactionKey);
+    }
+
+    @PostMapping("/rollback/remove/{transactionKey}")
+    public void rollbackRemoveFilesByServiceTypeAndTagIds(@PathVariable String transactionKey) {
+        fileManagementService.rollbackRemoveFilesByServiceAndTagId(transactionKey);
     }
 
 }

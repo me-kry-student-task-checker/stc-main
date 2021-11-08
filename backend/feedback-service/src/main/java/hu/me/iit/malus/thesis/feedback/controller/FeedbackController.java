@@ -8,7 +8,6 @@ import hu.me.iit.malus.thesis.feedback.service.FeedbackService;
 import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
 import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -58,15 +57,33 @@ public class FeedbackController {
         service.removeTaskComment(commentId, principal.getName());
     }
 
-    @DeleteMapping("/removeCourseCommentsByCourseId/{courseId}")
-    @PreAuthorize("hasRole('ROLE_Teacher')")
-    public void removeCourseCommentsByCourseId(@PathVariable Long courseId) {
-        service.removeFeedbacksByCourseId(courseId);
+    @PostMapping("/prepare/course/remove/by/{courseId}")
+    public String prepareRemoveCourseCommentsByCourseId(@PathVariable Long courseId) {
+        return service.prepareRemoveCourseCommentsByCourseId(courseId);
     }
 
-    @DeleteMapping("/removeTaskCommentsByTaskId/{taskId}")
-    @PreAuthorize("hasRole('ROLE_Teacher')")
-    public void removeTaskCommentsByTaskId(@PathVariable Long taskId) {
-        service.removeFeedbacksByTaskId(taskId);
+    @PostMapping("/commit/course/remove/{transactionKey}")
+    public void commitRemoveCourseCommentsByCourseId(@PathVariable String transactionKey) {
+        service.commitRemoveCourseCommentsByCourseId(transactionKey);
+    }
+
+    @PostMapping("/rollback/course/remove/{transactionKey}")
+    public void rollbackRemoveCourseCommentsByCourseId(@PathVariable String transactionKey) {
+        service.rollbackRemoveCourseCommentsByCourseId(transactionKey);
+    }
+
+    @PostMapping("/prepare/task/remove/by/{taskIds}")
+    public String prepareRemoveTaskCommentsByTaskIds(@PathVariable List<Long> taskIds) {
+        return service.prepareRemoveTaskCommentsByTaskIds(taskIds);
+    }
+
+    @PostMapping("/commit/task/remove/{transactionKey}")
+    public void commitRemoveTaskCommentsByTaskIds(@PathVariable String transactionKey) {
+        service.commitRemoveTaskCommentsByTaskIds(transactionKey);
+    }
+
+    @PostMapping("/rollback/task/remove/{transactionKey}")
+    public void rollbackRemoveTaskCommentsByTaskIds(@PathVariable String transactionKey) {
+        service.rollbackRemoveTaskCommentsByTaskIds(transactionKey);
     }
 }
