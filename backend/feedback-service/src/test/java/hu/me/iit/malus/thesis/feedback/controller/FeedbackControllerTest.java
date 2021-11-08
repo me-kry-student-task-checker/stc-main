@@ -161,5 +161,38 @@ public class FeedbackControllerTest {
         verify(principal).getName();
         verify(service).removeTaskComment(commentId, principal.getName());
     }
+    
+    @Test
+    public void prepareRemoveCourseCommentsByCourseId() {
+    	long testCourseId = 938L;
+    	String testUuid = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	
+    	when(service.prepareRemoveCourseCommentsByCourseId(testCourseId)).thenReturn(testUuid);
+    	
+    	String result = controller.prepareRemoveCourseCommentsByCourseId(testCourseId);
+    	
+    	assertThat(testUuid , is(result));
+    	verify(service).prepareRemoveCourseCommentsByCourseId(testCourseId);
+    }
+    
+    @Test
+    public void commitRemoveCourseCommentsByCourseId() {
+    	String transactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	doNothing().when(service).commitRemoveCourseCommentsByCourseId(transactionKey);
+    	
+    	controller.commitRemoveCourseCommentsByCourseId(transactionKey);
+    	
+    	verify(service).commitRemoveCourseCommentsByCourseId(transactionKey);
+    }
+    
+    @Test
+    public void rollbackRemoveCourseCommentsByCourseId() {
+    	String transactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	doNothing().when(service).rollbackRemoveCourseCommentsByCourseId(transactionKey);
+    	
+    	controller.rollbackRemoveCourseCommentsByCourseId(transactionKey);
+    	
+    	verify(service).rollbackRemoveCourseCommentsByCourseId(transactionKey);
+    }
 
 }
