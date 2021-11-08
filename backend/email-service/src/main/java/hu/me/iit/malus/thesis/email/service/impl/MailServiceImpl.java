@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
 
-    public static final String FROM = "STC Email Service";
+    public static final String FROM = "STC-Email-Service";
 
     private final JavaMailSender javaMailSender;
 

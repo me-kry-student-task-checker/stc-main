@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.course.service.impl;
 
+import feign.FeignException;
 import hu.me.iit.malus.thesis.course.client.FeedbackClient;
 import hu.me.iit.malus.thesis.course.client.FileManagementClient;
 import hu.me.iit.malus.thesis.course.client.TaskClient;
@@ -12,15 +13,21 @@ import hu.me.iit.malus.thesis.course.model.Course;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.converters.Converter;
+import hu.me.iit.malus.thesis.course.service.exception.CourseDeleteRollbackException;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
+import hu.me.iit.malus.thesis.dto.CourseComment;
 import hu.me.iit.malus.thesis.dto.ServiceType;
+import hu.me.iit.malus.thesis.dto.Task;
+import hu.me.iit.malus.thesis.dto.TaskComment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,7 +66,7 @@ public class CourseServiceImpl implements CourseService {
      */
     @Override
     public CourseOverviewDto edit(CourseModificationDto dto, String editorsEmail) throws ForbiddenCourseEditException, CourseNotFoundException {
-        Course course = courseRepository.findById(dto.getId()).orElseThrow(CourseNotFoundException::new);
+        Course course = courseRepository.findByIdAndRemovedFalse(dto.getId()).orElseThrow(CourseNotFoundException::new);
         if (!userClient.isRelated(course.getId())) {
             log.warn("Creator of this course {} is not the editor: {}!", course, editorsEmail);
             throw new ForbiddenCourseEditException();
@@ -74,18 +81,13 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    public CourseFullDetailsDto get(Long courseId, String userEmail) throws CourseNotFoundException {
-        Course course = courseRepository.findById(courseId).orElseThrow(CourseNotFoundException::new);
-        if (!userClient.isRelated(course.getId())) {
-            log.warn("User {} is not realated to this course {}!", userEmail, course);
+    public CourseFullDetailsDto get(Long courseId) throws CourseNotFoundException {
+        Course course = courseRepository.findByIdAndRemovedFalse(courseId).orElseThrow(CourseNotFoundException::new);
+        if (!userClient.isRelated(courseId)) {
+            log.warn("User is not related to this course {}!", course);
             throw new CourseNotFoundException();
         }
-        //TODO: We should find a way to fire these as async requests
-        course.setCreator(userClient.getTeacherByCreatedCourseId(courseId));
-        course.setStudents(userClient.getStudentsByAssignedCourseId(courseId));
-        course.setTasks(taskClient.getAllTasks(courseId));
-        course.setFiles(fileManagementClient.getAllFilesByTagId(ServiceType.COURSE, courseId));
-        course.setComments(feedbackClient.getAllCourseComments(courseId));
+        fillCourseDetails(course);
         log.debug("Course found: {}", courseId);
         return Converter.createCourseFullDetailsDtoFromCourse(course);
     }
@@ -96,7 +98,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Set<CourseOverviewDto> getAll(String userEmail) {
         Set<Long> relatedCourseIds = userClient.getRelatedCourseIds();
-        Set<Course> relatedCourses = courseRepository.findAllByIdIsIn(relatedCourseIds);
+        Set<Course> relatedCourses = courseRepository.findAllByIdIsInAndRemovedFalse(relatedCourseIds);
 
         for (Course course : relatedCourses) {
             course.setCreator(userClient.getTeacherByCreatedCourseId(course.getId()));
@@ -109,21 +111,102 @@ public class CourseServiceImpl implements CourseService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional
-    public void deleteCourse(Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException {
-        boolean isRelated = userClient.isRelated(courseId);
-        if (!isRelated) {
-            log.warn("Only the creator can delete a course!");
+    @Transactional(rollbackFor = {CourseDeleteRollbackException.class})
+    public void deleteCourse(Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException, CourseDeleteRollbackException {
+        Course course = courseRepository.findByIdAndRemovedFalse(courseId).orElseThrow(CourseNotFoundException::new);
+        if (!userClient.isRelated(courseId)) {
+            log.debug("User is not related to this course {}!", course);
             throw new ForbiddenCourseEditException();
         }
-        if (courseRepository.existsById(courseId)) {
-            courseRepository.deleteById(courseId);
-            userClient.removeCourseIdFromRelatedUserLists(courseId);
-            taskClient.removeTasksByCourseId(courseId);
-            fileManagementClient.removeFilesByServiceAndTagId(ServiceType.COURSE, courseId);
-            feedbackClient.removeCourseCommentsByCourseId(courseId);
-            return;
+        course.setRemoved(true);
+        courseRepository.save(course);
+        fillCourseDetails(course);
+
+        String reason = "";
+        String taskTransactionKey = "";
+        String taskCommentTransactionKey = "";
+        String taskCommentFileTransactionKey = "";
+        String taskFileTransactionKey = "";
+        String courseCommentTransactionKey = "";
+        String courseCommentFileTransactionKey = "";
+        String courseFileTransactionKey = "";
+
+        List<Long> taskIds = course.getTasks().stream().map(Task::getId).collect(Collectors.toList());
+        List<Long> taskCommentIds = course.getTasks().stream()
+                .map(Task::getComments)
+                .flatMap(Collection::stream)
+                .map(TaskComment::getId)
+                .collect(Collectors.toList());
+        List<Long> courseCommentIds = course.getComments().stream()
+                .map(CourseComment::getId)
+                .collect(Collectors.toList());
+        try {
+            // Prepare phase
+            // Removal of tasks and everything connected to it
+            if (!course.getTasks().isEmpty()) {
+                reason = "PREPARE_TASK_REMOVAL";
+                taskTransactionKey = taskClient.prepareRemoveTaskByCourseId(courseId);
+            }
+            if (!taskIds.isEmpty()) {
+                reason = "PREPARE_TASK_COMMENT_REMOVAL";
+                taskCommentTransactionKey = feedbackClient.prepareRemoveTaskCommentsByTaskIds(taskIds);
+                reason = "PREPARE_TASK_FILE_REMOVAL";
+                taskFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.TASK, taskIds);
+            }
+            if (!taskCommentIds.isEmpty()) {
+                reason = "PREPARE_TASK_COMMENT_FILE_REMOVAL";
+                taskCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, taskCommentIds);
+            }
+            // Removal of course comments and everything connected to it
+            if (!course.getComments().isEmpty()) {
+                reason = "PREPARE_COURSE_COMMENT_REMOVAL";
+                courseCommentTransactionKey = feedbackClient.prepareRemoveCourseCommentsByCourseId(courseId);
+            }
+            if (!courseCommentIds.isEmpty()) {
+                reason = "PREPARE_COURSE_COMMENT_FILE_REMOVAL";
+                courseCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, courseCommentIds);
+            }
+            // Removal of course files
+            if (!course.getFiles().isEmpty()) {
+                reason = "PREPARE_COURSE_FILE_REMOVAL";
+                courseFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.COURSE, List.of(courseId));
+            }
+
+            // Commit Phase
+            if (!taskTransactionKey.isEmpty()) taskClient.commitRemoveTaskByCourseId(taskTransactionKey);
+            if (!taskCommentTransactionKey.isEmpty()) feedbackClient.commitRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
+            if (!taskFileTransactionKey.isEmpty()) fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
+            if (!taskCommentFileTransactionKey.isEmpty()) fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
+            if (!courseCommentTransactionKey.isEmpty()) feedbackClient.commitRemoveCourseCommentsByCourseId(courseCommentTransactionKey);
+            if (!courseCommentFileTransactionKey.isEmpty())
+                fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(courseCommentFileTransactionKey);
+            if (!courseFileTransactionKey.isEmpty()) fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(courseFileTransactionKey);
+            log.debug("Removed course with id {} and everything connected to it using 2PC!", courseId);
+        } catch (FeignException e) {
+            // Rollback Phase
+            if (!taskTransactionKey.isEmpty()) taskClient.rollbackRemoveTaskByCourseId(taskTransactionKey);
+            if (!taskCommentTransactionKey.isEmpty()) feedbackClient.rollbackRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
+            if (!taskFileTransactionKey.isEmpty()) fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
+            if (!taskCommentFileTransactionKey.isEmpty())
+                fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
+            if (!courseCommentTransactionKey.isEmpty()) feedbackClient.rollbackRemoveCourseCommentsByCourseId(courseCommentTransactionKey);
+            if (!courseCommentFileTransactionKey.isEmpty())
+                fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(courseCommentFileTransactionKey);
+            if (!courseFileTransactionKey.isEmpty()) fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(courseFileTransactionKey);
+            throw new CourseDeleteRollbackException(course.getId(), reason); // to trigger transactional annotation rollback
         }
-        throw new CourseNotFoundException();
+    }
+
+    /**
+     * Fills in the details of a course by making requests to other services.
+     *
+     * @param course the course
+     */
+    private void fillCourseDetails(Course course) {
+        course.setCreator(userClient.getTeacherByCreatedCourseId(course.getId()));
+        course.setStudents(userClient.getStudentsByAssignedCourseId(course.getId()));
+        course.setTasks(taskClient.getAllTasks(course.getId()));
+        course.setFiles(fileManagementClient.getAllFilesByTagId(ServiceType.COURSE, course.getId()));
+        course.setComments(feedbackClient.getAllCourseComments(course.getId()));
     }
 }
