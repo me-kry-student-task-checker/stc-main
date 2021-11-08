@@ -2,7 +2,6 @@ package hu.me.iit.malus.thesis.course.service.converters;
 
 import hu.me.iit.malus.thesis.course.controller.dto.CourseCreateDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseFullDetailsDto;
-import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
 
@@ -12,14 +11,6 @@ import hu.me.iit.malus.thesis.course.model.Course;
  * @author Javorek Dénes
  */
 public class Converter {
-
-    public static Course createCourseModificationDtoFromCourse(CourseModificationDto courseModificationDto) {
-        Course course = new Course();
-        course.setId(courseModificationDto.getId());
-        course.setName(courseModificationDto.getName());
-        course.setDescription(courseModificationDto.getDescription());
-        return course;
-    }
 
     public static Course createCourseFromCourseCreateDto(CourseCreateDto dto) {
         Course course = new Course();

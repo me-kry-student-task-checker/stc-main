@@ -16,11 +16,13 @@ import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundExceptio
 import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +38,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final CourseCommentRepository courseCommentRepository;
     private final TaskCommentRepository taskCommentRepository;
     private final FileManagementClient fileManagementClient;
+    private final RedisTemplate<String, List<Long>> redisTemplate;
 
     /**
      * {@inheritDoc}
@@ -65,12 +68,10 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public List<CourseCommentDetailsDto> getAllCourseComments(Long courseId) {
-        List<CourseComment> results = courseCommentRepository.findAllByCourseId(courseId);
+        List<CourseComment> results = courseCommentRepository.findAllByCourseIdAndRemovedFalse(courseId);
         results.forEach(courseComment -> courseComment.setFiles(
                 fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, courseComment.getId()))
         );
@@ -80,12 +81,10 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     /**
      * {@inheritDoc}
-     *
-     * @return
      */
     @Override
     public List<TaskCommentDetailsDto> getAllTaskComments(Long taskId) {
-        List<TaskComment> results = taskCommentRepository.findAllByTaskId(taskId);
+        List<TaskComment> results = taskCommentRepository.findAllByTaskIdAndRemovedFalse(taskId);
         results.forEach(taskComment -> taskComment.setFiles(
                 fileManagementClient.getAllFilesByTagId(ServiceType.FEEDBACK, taskComment.getId()))
         );
@@ -93,43 +92,119 @@ public class FeedbackServiceImpl implements FeedbackService {
         return results.stream().map(DtoConverter::taskCommentToTaskCommentDetailsDto).collect(Collectors.toList());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void removeCourseComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
-        CourseComment courseComment = courseCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        CourseComment courseComment = courseCommentRepository.findByIdAndRemovedFalse(commentId).orElseThrow(CommentNotFoundException::new);
         if (!courseComment.getAuthorId().equals(authorId)) {
             throw new ForbiddenCommentEditException();
         }
-        courseCommentRepository.delete(courseComment);
+        courseComment.setRemoved(true);
+        courseCommentRepository.save(courseComment);
         fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void removeTaskComment(Long commentId, String authorId) throws CommentNotFoundException, ForbiddenCommentEditException {
-        TaskComment taskComment = taskCommentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        TaskComment taskComment = taskCommentRepository.findByIdAndRemovedFalse(commentId).orElseThrow(CommentNotFoundException::new);
         if (!taskComment.getAuthorId().equals(authorId)) {
             throw new ForbiddenCommentEditException();
         }
-        taskCommentRepository.delete(taskComment);
+        taskComment.setRemoved(true);
+        taskCommentRepository.save(taskComment);
         fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
-    public void removeFeedbacksByCourseId(Long courseId) {
-        List<CourseComment> courseComments = courseCommentRepository.deleteByCourseId(courseId);
-        courseComments.forEach(
-                courseComment -> fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, courseComment.getId())
-        );
+    public String prepareRemoveCourseCommentsByCourseId(Long courseId) {
+        List<CourseComment> courseComments = courseCommentRepository.findAllByCourseIdAndRemovedFalse(courseId);
+        courseComments.forEach(courseComment -> courseComment.setRemoved(true));
+        courseCommentRepository.saveAll(courseComments);
+        String uuid = UUID.randomUUID().toString();
+        List<Long> courseCommentIds = courseComments.stream().map(CourseComment::getId).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(uuid, courseCommentIds);
+        log.debug("Prepared ids: {}, for removal with {} transaction key!", courseCommentIds, uuid);
+        return uuid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void commitRemoveCourseCommentsByCourseId(String transactionKey) {
+        boolean success = redisTemplate.delete(transactionKey);
+        log.debug("Committed transaction with key: {}, delete successful: {}!", transactionKey, success);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
-    public void removeFeedbacksByTaskId(Long taskId) {
-        List<TaskComment> taskComments = taskCommentRepository.deleteByTaskId(taskId);
-        taskComments.forEach(
-                taskComment -> fileManagementClient.removeFilesByServiceAndTagId(ServiceType.FEEDBACK, taskComment.getId())
-        );
+    public void rollbackRemoveCourseCommentsByCourseId(String transactionKey) {
+        List<Long> courseCommentIds = redisTemplate.opsForValue().get(transactionKey);
+        if (courseCommentIds == null) {
+            log.debug("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            return;
+        }
+        List<CourseComment> courseComments = courseCommentRepository.findAllById(courseCommentIds);
+        courseComments.forEach(task -> task.setRemoved(false));
+        courseCommentRepository.saveAll(courseComments);
+        redisTemplate.delete(transactionKey);
+        log.debug("Rolled back transaction with key: {}!", transactionKey);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public String prepareRemoveTaskCommentsByTaskIds(List<Long> taskIds) {
+        List<TaskComment> taskComments = taskCommentRepository.findAllByTaskIdInAndRemovedFalse(taskIds);
+        taskComments.forEach(taskComment -> taskComment.setRemoved(true));
+        taskCommentRepository.saveAll(taskComments);
+        String uuid = UUID.randomUUID().toString();
+        List<Long> taskCommentIds = taskComments.stream().map(TaskComment::getId).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(uuid, taskCommentIds);
+        log.debug("Prepared ids: {}, for removal with {} transaction key!", taskCommentIds, uuid);
+        return uuid;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void commitRemoveTaskCommentsByTaskIds(String transactionKey) {
+        boolean success = redisTemplate.delete(transactionKey);
+        log.debug("Committed transaction with key: {}, Redis delete successful: {}!", transactionKey, success);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void rollbackRemoveTaskCommentsByTaskIds(String transactionKey) {
+        List<Long> taskCommentIds = redisTemplate.opsForValue().get(transactionKey);
+        if (taskCommentIds == null) {
+            log.debug("Cannot find transaction key in Redis, like this: '{}'!", transactionKey);
+            return;
+        }
+        List<TaskComment> taskComments = taskCommentRepository.findAllById(taskCommentIds);
+        taskComments.forEach(task -> task.setRemoved(false));
+        taskCommentRepository.saveAll(taskComments);
+        redisTemplate.delete(transactionKey);
+        log.debug("Rolled back transaction with key: {}!", transactionKey);
     }
 }

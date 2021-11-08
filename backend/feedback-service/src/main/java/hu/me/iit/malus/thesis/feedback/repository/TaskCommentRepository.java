@@ -3,10 +3,13 @@ package hu.me.iit.malus.thesis.feedback.repository;
 import hu.me.iit.malus.thesis.feedback.model.TaskComment;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TaskCommentRepository extends CommentBaseRepository<TaskComment> {
 
-    List<TaskComment> findAllByTaskId(Long courseId);
+    Optional<TaskComment> findByIdAndRemovedFalse(Long id);
 
-    List<TaskComment> deleteByTaskId(Long taskId);
+    List<TaskComment> findAllByTaskIdAndRemovedFalse(Long courseId);
+
+    List<TaskComment> findAllByTaskIdInAndRemovedFalse(List<Long> taskIds);
 }

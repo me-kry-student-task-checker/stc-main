@@ -1,6 +1,7 @@
 package hu.me.iit.malus.thesis.task.controller;
 
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
+import hu.me.iit.malus.thesis.task.service.exception.TaskDeleteRollbackException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,5 +23,10 @@ public class TaskControllerAdvice {
     @ExceptionHandler(StudentIdNotFoundException.class)
     public ResponseEntity<Map<String, String>> handle(StudentIdNotFoundException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(MSG, e.getMessage()));
+    }
+
+    @ExceptionHandler(TaskDeleteRollbackException.class)
+    public ResponseEntity<Map<String, String>> handle(TaskDeleteRollbackException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(MSG, e.getMessage()));
     }
 }

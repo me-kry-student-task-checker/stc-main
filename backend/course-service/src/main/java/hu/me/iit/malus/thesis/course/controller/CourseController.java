@@ -6,6 +6,7 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseFullDetailsDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.service.CourseService;
+import hu.me.iit.malus.thesis.course.service.exception.CourseDeleteRollbackException;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
 import lombok.RequiredArgsConstructor;
@@ -45,8 +46,8 @@ public class CourseController {
     }
 
     @GetMapping("/get/{courseId}")
-    public ResponseEntity<CourseFullDetailsDto> get(@PathVariable @Min(1) Long courseId, Principal principal) throws CourseNotFoundException {
-        return ResponseEntity.ok(service.get(courseId, principal.getName()));
+    public ResponseEntity<CourseFullDetailsDto> get(@PathVariable @Min(1) Long courseId) throws CourseNotFoundException {
+        return ResponseEntity.ok(service.get(courseId));
     }
 
     @GetMapping("/getAll")
@@ -56,7 +57,7 @@ public class CourseController {
 
     @DeleteMapping("/delete/{courseId}")
     @PreAuthorize("hasRole('ROLE_Teacher')")
-    public void deleteCourse(@PathVariable Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException {
+    public void deleteCourse(@PathVariable Long courseId) throws CourseNotFoundException, ForbiddenCourseEditException, CourseDeleteRollbackException {
         service.deleteCourse(courseId);
     }
 }
