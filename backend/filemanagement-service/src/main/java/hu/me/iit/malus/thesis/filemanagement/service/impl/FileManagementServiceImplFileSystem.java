@@ -7,6 +7,7 @@ import hu.me.iit.malus.thesis.filemanagement.repository.FileDescriptorRepository
 import hu.me.iit.malus.thesis.filemanagement.service.converters.Converter;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.FileNotFoundException;
 import hu.me.iit.malus.thesis.filemanagement.service.exceptions.ForbiddenFileDeleteException;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
@@ -83,35 +84,6 @@ public class FileManagementServiceImplFileSystem extends FileManagementServiceIm
         }
         fileDescriptor.setRemoved(true);
         fileDescriptorRepository.save(fileDescriptor);
-    }
-
-    @Override
-    public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
-            throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-        List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
-        for (FileDescriptor fileDescription : fileDescriptions) {
-            deleteFile(fileDescription.getId(), serviceType, email, userRole);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<FileDescriptorDto> getAllFilesByUser(String userEmail) {
-        List<FileDescriptor> results = fileDescriptorRepository.findAllByUploadedByAndRemovedFalse(userEmail);
-        log.debug("Files found by user {}: {}", userEmail, results);
-        return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<FileDescriptorDto> getAllFilesByServiceTypeAndTagId(Long tagId, ServiceType serviceType) {
-        List<FileDescriptor> results = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
-        log.debug("Files found by file service {} and tagId {}: {}", serviceType, tagId, results);
-        return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
     }
 
     /**

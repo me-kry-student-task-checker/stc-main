@@ -25,7 +25,7 @@ public abstract class FileManagementServiceImplBase implements FileManagementSer
    */
   @Override
   public List<FileDescriptorDto> getAllFilesByUser(String userEmail) {
-    List<FileDescriptor> results = fileDescriptorRepository.findAllByUploadedBy(userEmail);
+    List<FileDescriptor> results = fileDescriptorRepository.findAllByUploadedByAndRemovedFalse(userEmail);
     log.debug("Files found by user {}: {}", userEmail, results);
     return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
   }
@@ -38,7 +38,7 @@ public abstract class FileManagementServiceImplBase implements FileManagementSer
    */
   @Override
   public List<FileDescriptorDto> getAllFilesByServiceTypeAndTagId(Long tagId, ServiceType serviceType) {
-    List<FileDescriptor> results = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
+    List<FileDescriptor> results = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
     log.debug("Files found by file service {} and tagId {}: {}", serviceType, tagId, results);
     return Converter.createFileDescriptorDtoListFromFileDescriptorList(results);
   }
@@ -47,7 +47,7 @@ public abstract class FileManagementServiceImplBase implements FileManagementSer
   @Override
   public void deleteFilesByServiceAndTagId(ServiceType serviceType, Long tagId, String email, String userRole)
       throws FileNotFoundException, UnsupportedOperationException, ForbiddenFileDeleteException {
-    List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagId(serviceType, tagId);
+    List<FileDescriptor> fileDescriptions = fileDescriptorRepository.findAllByServiceTypeAndTagIdAndRemovedFalse(serviceType, tagId);
     for (FileDescriptor fileDescription : fileDescriptions) {
       deleteFile(fileDescription.getId(), serviceType, email, userRole);
     }
