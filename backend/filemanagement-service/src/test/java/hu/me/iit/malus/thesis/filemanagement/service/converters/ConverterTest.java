@@ -20,7 +20,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 
 public class ConverterTest {
-/*
+
   @Test
   public void testCreateFileDescriptorDtoFromFileDescriptor_ok() throws ParseException {
 
@@ -28,16 +28,17 @@ public class ConverterTest {
     Long testId = 1L;
     String testName = "testName";
     String testLink = "testLink";
-    Long testSize = 1024L;
+    long testSize = 1024L;
     Date testUploadDate = new DateTime(2021, 10, 11, 0, 0).toDate();
     String testUploader = "testUploader";
     String testContentType = "testContentType";
     ServiceType testServiceType = ServiceType.COURSE;
     Long testTagId = 12L;
+    boolean testRemoved = false;
 
     FileDescriptor fileDescriptor = new FileDescriptor(testId, testName, testLink, testSize,
         testUploadDate, testUploader,
-        testContentType, testServiceType, testTagId);
+        testContentType, testServiceType, testTagId,testRemoved);
 
     // WHEN
     FileDescriptorDto result = Converter.createFileDescriptorDtoFromFileDescriptor(fileDescriptor);
@@ -85,10 +86,11 @@ public class ConverterTest {
     String testContentType = "testContentType";
     ServiceType testServiceType = ServiceType.COURSE;
     Long testTagId = 12L;
+    boolean testRemoved = false;
 
     FileDescriptor fileDescriptor = new FileDescriptor(testId, testName, testLink, testSize,
         testUploadDate, testUploader,
-        testContentType, testServiceType, testTagId);
+        testContentType, testServiceType, testTagId, testRemoved);
 
     List<FileDescriptor> fileDescriptorList = new ArrayList<>();
     fileDescriptorList.add(fileDescriptor);
@@ -142,5 +144,5 @@ public class ConverterTest {
     }
 
     // THEN
-  }*/
+  }
 }
