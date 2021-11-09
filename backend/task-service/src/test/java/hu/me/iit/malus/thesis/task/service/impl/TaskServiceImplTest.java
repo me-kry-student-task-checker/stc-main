@@ -153,7 +153,7 @@ public class TaskServiceImplTest {
         task.setCourseId(courseId);
         task.setCompletedStudentIds(new HashSet<>());
         task.setHelpNeededStudentIds(new HashSet<>());
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
 
         when(userClient.isRelated(courseId)).thenReturn(true);
         when(userClient.getStudentsByAssignedCourseId(courseId)).thenReturn(students);
@@ -172,7 +172,7 @@ public class TaskServiceImplTest {
         assertThat(dto.getHelpNeededStudents().size(), is(0));
         assertThat(dto.getComments().size(), is(0));
         assertThat(dto.getFiles().size(), is(0));
-        verify(repository).findById(taskId);
+        verify(repository).findByIdAndRemovedFalse(taskId);
         verify(userClient).isRelated(courseId);
         verify(feedbackClient).getAllTaskComments(taskId);
         verify(fileManagementClient).getAllFilesByTagId(ServiceType.TASK, taskId);
@@ -195,7 +195,7 @@ public class TaskServiceImplTest {
         task.setCourseId(courseId);
         task.setCompletedStudentIds(new HashSet<>());
         task.setHelpNeededStudentIds(new HashSet<>());
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
         when(userClient.isRelated(courseId)).thenReturn(true);
         when(userClient.getStudentsByAssignedCourseId(courseId)).thenReturn(new HashSet<>());
         when(feedbackClient.getAllTaskComments(taskId)).thenReturn(new ArrayList<>());
@@ -273,11 +273,11 @@ public class TaskServiceImplTest {
         task.setDone(done);
 
 
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
 
         service.changeDoneStatus(taskId);
 
-        verify(repository).findById(taskId);
+        verify(repository).findByIdAndRemovedFalse(taskId);
         verify(repository).save(captor.capture());
         assertThat(captor.getValue().isDone(), is(!done));
     }
@@ -290,7 +290,7 @@ public class TaskServiceImplTest {
         task.setId(taskId);
         task.setDone(done);
 
-        when(repository.findById(taskId)).thenReturn(Optional.of(task));
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
 
         service.changeDoneStatus(taskId);
 
