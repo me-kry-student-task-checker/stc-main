@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.user.service.impl;
 
+import hu.me.iit.malus.thesis.user.model.UserRole;
 import hu.me.iit.malus.thesis.user.model.Admin;
 import hu.me.iit.malus.thesis.user.service.UserService;
 import hu.me.iit.malus.thesis.user.service.exception.UserNotFoundException;
@@ -9,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,5 +47,12 @@ public class UserDetailsServiceImplTest {
 
         // THEN
         Assertions.assertThat(userDetails.getUsername()).isEqualTo(admin.getEmail());
+        Assertions.assertThat(userDetails.getPassword()).isEqualTo(admin.getPassword());
+        Assertions.assertThat(userDetails.isEnabled()).isEqualTo(admin.isEnabled());
+        Assertions.assertThat(userDetails.isAccountNonExpired()).isTrue();
+        Assertions.assertThat(userDetails.isCredentialsNonExpired()).isTrue();
+        Assertions.assertThat(userDetails.isAccountNonLocked()).isTrue();
+        Assertions.assertThat(userDetails.getAuthorities()).hasSize(1);
+        Assertions.assertThat(userDetails.getAuthorities().iterator().next().getAuthority()).isEqualTo(UserRole.ADMIN.getRoleString());
     }
 }

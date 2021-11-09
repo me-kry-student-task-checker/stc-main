@@ -6,8 +6,7 @@ import org.junit.Test;
 import javax.validation.ConstraintValidatorContext;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class PasswordValidatorTest {
 
@@ -37,6 +36,8 @@ public class PasswordValidatorTest {
 
         // THEN
         Assertions.assertThat(isValid).isFalse();
+        verify(context, times(1)).disableDefaultConstraintViolation();
+        verify(context, times(1)).buildConstraintViolationWithTemplate(any());
     }
 
     @Test

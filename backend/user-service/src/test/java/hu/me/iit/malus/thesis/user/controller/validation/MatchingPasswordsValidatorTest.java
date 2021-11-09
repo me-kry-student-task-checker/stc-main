@@ -28,10 +28,9 @@ public class MatchingPasswordsValidatorTest {
         // GIVEN
         int registrationRequest = 5;
         MatchingPasswordsValidator validator = new MatchingPasswordsValidator();
-        ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
 
         // WHEN
-        validator.isValid(registrationRequest, context);
+        validator.isValid(registrationRequest, null);
 
         // THEN
     }
@@ -43,10 +42,9 @@ public class MatchingPasswordsValidatorTest {
         registrationRequest.setPassword(null);
         registrationRequest.setPasswordConfirm(null);
         MatchingPasswordsValidator validator = new MatchingPasswordsValidator();
-        ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
 
         // WHEN
-        boolean isValid = validator.isValid(registrationRequest, context);
+        boolean isValid = validator.isValid(registrationRequest, null);
 
         // THEN
         Assertions.assertThat(isValid).isFalse();
@@ -59,10 +57,9 @@ public class MatchingPasswordsValidatorTest {
         registrationRequest.setPassword("apple");
         registrationRequest.setPasswordConfirm("pear");
         MatchingPasswordsValidator validator = new MatchingPasswordsValidator();
-        ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
 
         // WHEN
-        boolean isValid = validator.isValid(registrationRequest, context);
+        boolean isValid = validator.isValid(registrationRequest, null);
 
         // THEN
         Assertions.assertThat(isValid).isFalse();
@@ -75,10 +72,9 @@ public class MatchingPasswordsValidatorTest {
         registrationRequest.setPassword("apple");
         registrationRequest.setPasswordConfirm("apple");
         MatchingPasswordsValidator validator = new MatchingPasswordsValidator();
-        ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
 
         // WHEN
-        boolean isValid = validator.isValid(registrationRequest, context);
+        boolean isValid = validator.isValid(registrationRequest, null);
 
         // THEN
         Assertions.assertThat(isValid).isTrue();
