@@ -8,6 +8,7 @@ import hu.me.iit.malus.thesis.course.client.UserClient;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.helper.JwtTestHelper;
 import hu.me.iit.malus.thesis.course.model.Course;
+import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommandListFactory;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.security.config.JwtAuthConfig;
 import hu.me.iit.malus.thesis.course.service.CourseService;
@@ -113,9 +114,10 @@ public class CourseControllerTest {
                 TaskClient taskClient,
                 FeedbackClient feedbackClient,
                 UserClient userClient,
-                FileManagementClient fileManagementClient
+                FileManagementClient fileManagementClient,
+                TransactionCommandListFactory factory
         ) {
-            return new CourseServiceImpl(courseRepository, taskClient, feedbackClient, userClient, fileManagementClient);
+            return new CourseServiceImpl(courseRepository, taskClient, feedbackClient, userClient, fileManagementClient, factory);
         }
 
     }

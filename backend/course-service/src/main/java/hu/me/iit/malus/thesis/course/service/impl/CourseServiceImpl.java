@@ -10,22 +10,20 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseFullDetailsDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
+import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommand;
+import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommandListFactory;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.converters.Converter;
 import hu.me.iit.malus.thesis.course.service.exception.CourseDeleteRollbackException;
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
-import hu.me.iit.malus.thesis.dto.CourseComment;
 import hu.me.iit.malus.thesis.dto.ServiceType;
-import hu.me.iit.malus.thesis.dto.Task;
-import hu.me.iit.malus.thesis.dto.TaskComment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +44,7 @@ public class CourseServiceImpl implements CourseService {
     private final FeedbackClient feedbackClient;
     private final UserClient userClient;
     private final FileManagementClient fileManagementClient;
+    private final TransactionCommandListFactory factory;
 
     /**
      * {@inheritDoc}
@@ -121,79 +120,17 @@ public class CourseServiceImpl implements CourseService {
         course.setRemoved(true);
         courseRepository.save(course);
         fillCourseDetails(course);
-
-        String reason = "";
-        String taskTransactionKey = "";
-        String taskCommentTransactionKey = "";
-        String taskCommentFileTransactionKey = "";
-        String taskFileTransactionKey = "";
-        String courseCommentTransactionKey = "";
-        String courseCommentFileTransactionKey = "";
-        String courseFileTransactionKey = "";
-
-        List<Long> taskIds = course.getTasks().stream().map(Task::getId).collect(Collectors.toList());
-        List<Long> taskCommentIds = course.getTasks().stream()
-                .map(Task::getComments)
-                .flatMap(Collection::stream)
-                .map(TaskComment::getId)
-                .collect(Collectors.toList());
-        List<Long> courseCommentIds = course.getComments().stream()
-                .map(CourseComment::getId)
-                .collect(Collectors.toList());
+        List<TransactionCommand> transactionCommandList = factory.create(course);
         try {
             // Prepare phase
-            // Removal of tasks and everything connected to it
-            if (!course.getTasks().isEmpty()) {
-                reason = "PREPARE_TASK_REMOVAL";
-                taskTransactionKey = taskClient.prepareRemoveTaskByTaskIds(taskIds);
-            }
-            if (!taskIds.isEmpty()) {
-                reason = "PREPARE_TASK_COMMENT_REMOVAL";
-                taskCommentTransactionKey = feedbackClient.prepareRemoveTaskCommentsByTaskIds(taskIds);
-                reason = "PREPARE_TASK_FILE_REMOVAL";
-                taskFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.TASK, taskIds);
-            }
-            if (!taskCommentIds.isEmpty()) {
-                reason = "PREPARE_TASK_COMMENT_FILE_REMOVAL";
-                taskCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, taskCommentIds);
-            }
-            // Removal of course comments and everything connected to it
-            if (!course.getComments().isEmpty()) {
-                reason = "PREPARE_COURSE_COMMENT_REMOVAL";
-                courseCommentTransactionKey = feedbackClient.prepareRemoveCourseCommentsByCourseIds(List.of(courseId));
-            }
-            if (!courseCommentIds.isEmpty()) {
-                reason = "PREPARE_COURSE_COMMENT_FILE_REMOVAL";
-                courseCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, courseCommentIds);
-            }
-            // Removal of course files
-            if (!course.getFiles().isEmpty()) {
-                reason = "PREPARE_COURSE_FILE_REMOVAL";
-                courseFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.COURSE, List.of(courseId));
-            }
-
+            transactionCommandList.forEach(TransactionCommand::prepare);
             // Commit Phase
-            if (!taskTransactionKey.isEmpty()) taskClient.commitRemoveTaskByCourseId(taskTransactionKey);
-            if (!taskCommentTransactionKey.isEmpty()) feedbackClient.commitRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
-            if (!taskFileTransactionKey.isEmpty()) fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
-            if (!taskCommentFileTransactionKey.isEmpty()) fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
-            if (!courseCommentTransactionKey.isEmpty()) feedbackClient.commitRemoveCourseCommentsByCourseId(courseCommentTransactionKey);
-            if (!courseCommentFileTransactionKey.isEmpty())
-                fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(courseCommentFileTransactionKey);
-            if (!courseFileTransactionKey.isEmpty()) fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(courseFileTransactionKey);
+            transactionCommandList.forEach(TransactionCommand::commit);
             log.debug("Removed course with id {} and everything connected to it using 2PC!", courseId);
         } catch (FeignException e) {
             // Rollback Phase
-            if (!taskTransactionKey.isEmpty()) taskClient.rollbackRemoveTaskByCourseId(taskTransactionKey);
-            if (!taskCommentTransactionKey.isEmpty()) feedbackClient.rollbackRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
-            if (!taskFileTransactionKey.isEmpty()) fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
-            if (!taskCommentFileTransactionKey.isEmpty())
-                fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
-            if (!courseCommentTransactionKey.isEmpty()) feedbackClient.rollbackRemoveCourseCommentsByCourseId(courseCommentTransactionKey);
-            if (!courseCommentFileTransactionKey.isEmpty())
-                fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(courseCommentFileTransactionKey);
-            if (!courseFileTransactionKey.isEmpty()) fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(courseFileTransactionKey);
-            throw new CourseDeleteRollbackException(course.getId(), reason); // to trigger transactional annotation rollback
+            transactionCommandList.forEach(TransactionCommand::rollback);
+            throw new CourseDeleteRollbackException(course.getId(), e); // to trigger transactional annotation rollback
         }
     }
 
