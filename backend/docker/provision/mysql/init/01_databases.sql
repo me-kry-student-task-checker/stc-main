@@ -23,4 +23,4 @@ CREATE USER 'userservice'@'%' IDENTIFIED BY 'user123';
 GRANT ALL PRIVILEGES ON users.* TO 'userservice'@'%';
 
 CREATE USER 'sourceservice'@'%' IDENTIFIED BY 'source';
-GRANT ALL PRIVILEGES ON users.* TO 'sourceservice'@'%';
+GRANT ALL PRIVILEGES ON stc_sources.* TO 'sourceservice'@'%';
