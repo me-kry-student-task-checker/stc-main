@@ -145,7 +145,7 @@ public class CourseServiceImpl implements CourseService {
             // Removal of tasks and everything connected to it
             if (!course.getTasks().isEmpty()) {
                 reason = "PREPARE_TASK_REMOVAL";
-                taskTransactionKey = taskClient.prepareRemoveTaskByCourseId(courseId);
+                taskTransactionKey = taskClient.prepareRemoveTaskByTaskIds(taskIds);
             }
             if (!taskIds.isEmpty()) {
                 reason = "PREPARE_TASK_COMMENT_REMOVAL";
@@ -160,7 +160,7 @@ public class CourseServiceImpl implements CourseService {
             // Removal of course comments and everything connected to it
             if (!course.getComments().isEmpty()) {
                 reason = "PREPARE_COURSE_COMMENT_REMOVAL";
-                courseCommentTransactionKey = feedbackClient.prepareRemoveCourseCommentsByCourseId(courseId);
+                courseCommentTransactionKey = feedbackClient.prepareRemoveCourseCommentsByCourseIds(List.of(courseId));
             }
             if (!courseCommentIds.isEmpty()) {
                 reason = "PREPARE_COURSE_COMMENT_FILE_REMOVAL";

@@ -187,12 +187,12 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     @Transactional
-    public String prepareRemoveTaskByCourseId(Long courseId) {
-        List<Task> tasks = repository.findAllByCourseIdAndRemovedFalse(courseId);
+    public String prepareRemoveTaskByTaskIds(List<Long> taskIds) {
+        List<Task> tasks = repository.findAllByIdInAndRemovedFalse(taskIds);
         tasks.forEach(task -> task.setRemoved(true));
         repository.saveAll(tasks);
         String uuid = UUID.randomUUID().toString();
-        List<Long> taskIds = tasks.stream().map(Task::getId).collect(Collectors.toList());
+        taskIds = tasks.stream().map(Task::getId).collect(Collectors.toList());
         redisTemplate.opsForValue().set(uuid, taskIds);
         log.debug("Prepared ids: {}, for removal with {} transaction key!", taskIds, uuid);
         return uuid;

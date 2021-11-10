@@ -9,6 +9,7 @@ import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskDeleteRollbackException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -100,7 +101,7 @@ public interface TaskService {
      * @param courseId the course id
      * @return the transaction key
      */
-    String prepareRemoveTaskByCourseId(Long courseId);
+    String prepareRemoveTaskByTaskIds(List<Long> courseId);
 
     /**
      * 2PC commit phase, commit removal of task by courseId.
