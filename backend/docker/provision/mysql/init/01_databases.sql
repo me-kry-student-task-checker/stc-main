@@ -4,6 +4,7 @@ CREATE DATABASE IF NOT EXISTS `files`;
 CREATE DATABASE IF NOT EXISTS `tasks`;
 CREATE DATABASE IF NOT EXISTS `feedback`;
 CREATE DATABASE IF NOT EXISTS `users`;
+CREATE DATABASE IF NOT EXISTS `stc_sources`;
 
 # create root user and grant rights
 CREATE USER 'courseservice'@'%' IDENTIFIED BY 'course';
@@ -20,3 +21,6 @@ GRANT ALL PRIVILEGES ON feedback.* TO 'feedbackservice'@'%';
 
 CREATE USER 'userservice'@'%' IDENTIFIED BY 'user123';
 GRANT ALL PRIVILEGES ON users.* TO 'userservice'@'%';
+
+CREATE USER 'sourceservice'@'%' IDENTIFIED BY 'source';
+GRANT ALL PRIVILEGES ON users.* TO 'sourceservice'@'%';
