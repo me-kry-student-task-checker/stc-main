@@ -1,12 +1,10 @@
 package hu.me.iit.malus.thesis.course.model.transaction;
 
-public interface TransactionCommand {
+public interface DistributedTransaction {
 
     void prepare();
 
     void commit();
 
     void rollback();
-
-    StepName getStepName();
 }

@@ -1,5 +1,6 @@
 package hu.me.iit.malus.thesis.course.model.transaction.impl;
 
+import hu.me.iit.malus.thesis.course.model.transaction.StepName;
 import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommand;
 import lombok.RequiredArgsConstructor;
 
@@ -8,8 +9,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
-public class RemoveCourseDataTransactionCommand implements TransactionCommand {
+public class RemoveByIdListTransactionCommand implements TransactionCommand {
 
+    private final StepName stepName;
     private final List<Long> ids;
     private final Function<List<Long>, String> prepare;
     private final Consumer<String> commit;
@@ -22,12 +24,17 @@ public class RemoveCourseDataTransactionCommand implements TransactionCommand {
     }
 
     @Override
-    public void commit() { // nincs param beallitottat hasznal
+    public void commit() {
         commit.accept(transactionKey);
     }
 
     @Override
     public void rollback() {
         rollback.accept(transactionKey);
+    }
+
+    @Override
+    public StepName getStepName() {
+        return stepName;
     }
 }

@@ -10,8 +10,8 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseFullDetailsDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
-import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommand;
-import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommandListFactory;
+import hu.me.iit.malus.thesis.course.model.transaction.DistributedTransaction;
+import hu.me.iit.malus.thesis.course.model.transaction.DistributedTransactionFactory;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.converters.Converter;
@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,7 +43,7 @@ public class CourseServiceImpl implements CourseService {
     private final FeedbackClient feedbackClient;
     private final UserClient userClient;
     private final FileManagementClient fileManagementClient;
-    private final TransactionCommandListFactory factory;
+    private final DistributedTransactionFactory factory;
 
     /**
      * {@inheritDoc}
@@ -120,16 +119,16 @@ public class CourseServiceImpl implements CourseService {
         course.setRemoved(true);
         courseRepository.save(course);
         fillCourseDetails(course);
-        List<TransactionCommand> transactionCommandList = factory.create(course);
+        DistributedTransaction distributedTransaction = factory.create(course);
         try {
             // Prepare phase
-            transactionCommandList.forEach(TransactionCommand::prepare);
+            distributedTransaction.prepare();
             // Commit Phase
-            transactionCommandList.forEach(TransactionCommand::commit);
+            distributedTransaction.commit();
             log.debug("Removed course with id {} and everything connected to it using 2PC!", courseId);
         } catch (FeignException e) {
             // Rollback Phase
-            transactionCommandList.forEach(TransactionCommand::rollback);
+            distributedTransaction.rollback();
             throw new CourseDeleteRollbackException(course.getId(), e); // to trigger transactional annotation rollback
         }
     }

@@ -4,8 +4,10 @@ import hu.me.iit.malus.thesis.course.client.FeedbackClient;
 import hu.me.iit.malus.thesis.course.client.FileManagementClient;
 import hu.me.iit.malus.thesis.course.client.TaskClient;
 import hu.me.iit.malus.thesis.course.model.Course;
+import hu.me.iit.malus.thesis.course.model.transaction.DistributedTransaction;
+import hu.me.iit.malus.thesis.course.model.transaction.DistributedTransactionFactory;
+import hu.me.iit.malus.thesis.course.model.transaction.StepName;
 import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommand;
-import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommandListFactory;
 import hu.me.iit.malus.thesis.dto.CourseComment;
 import hu.me.iit.malus.thesis.dto.ServiceType;
 import hu.me.iit.malus.thesis.dto.Task;
@@ -20,14 +22,15 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionCommandListFactoryImpl implements TransactionCommandListFactory {
+public class CourseDistributedTransactionFactory implements DistributedTransactionFactory {
 
     private final TaskClient taskClient;
     private final FeedbackClient feedbackClient;
     private final FileManagementClient fileManagementClient;
 
     @Override
-    public List<TransactionCommand> create(Course course) {
+    public DistributedTransaction create(Object object) {
+        Course course = (Course) object;
         List<TransactionCommand> commands = new ArrayList<>();
         Long courseId = course.getId();
         List<Long> taskIds = course.getTasks().stream().map(Task::getId).collect(Collectors.toList());
@@ -40,23 +43,24 @@ public class TransactionCommandListFactoryImpl implements TransactionCommandList
                 .map(CourseComment::getId)
                 .collect(Collectors.toList());
 
+        // Removal of tasks and everything connected to them
         if (!course.getTasks().isEmpty()) {
-            commands.add(new RemoveCourseDataTransactionCommand(
-                    taskIds,
+            commands.add(new RemoveByIdListTransactionCommand(
+                    StepName.TASK_REMOVAL, taskIds,
                     taskClient::prepareRemoveTaskByTaskIds,
                     taskClient::commitRemoveTaskByCourseId,
                     taskClient::rollbackRemoveTaskByCourseId)
             );
         }
         if (!taskIds.isEmpty()) {
-            commands.add(new RemoveCourseDataTransactionCommand(
-                    taskIds,
+            commands.add(new RemoveByIdListTransactionCommand(
+                    StepName.TASK_COMMENT_REMOVAL, taskIds,
                     feedbackClient::prepareRemoveTaskCommentsByTaskIds,
                     feedbackClient::commitRemoveTaskCommentsByTaskIds,
                     feedbackClient::rollbackRemoveTaskCommentsByTaskIds)
             );
             commands.add(new RemoveFileTransactionCommand(
-                    ServiceType.TASK, taskIds,
+                    StepName.TASK_FILE_REMOVAL, ServiceType.TASK, taskIds,
                     fileManagementClient::prepareRemoveFilesByServiceTypeAndTagIds,
                     fileManagementClient::commitRemoveFilesByServiceTypeAndTagIds,
                     fileManagementClient::rollbackRemoveFilesByServiceTypeAndTagIds)
@@ -64,7 +68,7 @@ public class TransactionCommandListFactoryImpl implements TransactionCommandList
         }
         if (!taskCommentIds.isEmpty()) {
             commands.add(new RemoveFileTransactionCommand(
-                    ServiceType.FEEDBACK, taskCommentIds,
+                    StepName.TASK_COMMENT_FILE_REMOVAL, ServiceType.FEEDBACK, taskCommentIds,
                     fileManagementClient::prepareRemoveFilesByServiceTypeAndTagIds,
                     fileManagementClient::commitRemoveFilesByServiceTypeAndTagIds,
                     fileManagementClient::rollbackRemoveFilesByServiceTypeAndTagIds)
@@ -72,8 +76,8 @@ public class TransactionCommandListFactoryImpl implements TransactionCommandList
         }
         // Removal of course comments and everything connected to it
         if (!course.getComments().isEmpty()) {
-            commands.add(new RemoveCourseDataTransactionCommand(
-                    List.of(courseId),
+            commands.add(new RemoveByIdListTransactionCommand(
+                    StepName.COURSE_COMMENT_REMOVAL, List.of(courseId),
                     feedbackClient::prepareRemoveCourseCommentsByCourseIds,
                     feedbackClient::commitRemoveCourseCommentsByCourseId,
                     feedbackClient::rollbackRemoveCourseCommentsByCourseId)
@@ -81,7 +85,7 @@ public class TransactionCommandListFactoryImpl implements TransactionCommandList
         }
         if (!courseCommentIds.isEmpty()) {
             commands.add(new RemoveFileTransactionCommand(
-                    ServiceType.FEEDBACK, courseCommentIds,
+                    StepName.COURSE_COMMENT_FILE_REMOVAL, ServiceType.FEEDBACK, courseCommentIds,
                     fileManagementClient::prepareRemoveFilesByServiceTypeAndTagIds,
                     fileManagementClient::commitRemoveFilesByServiceTypeAndTagIds,
                     fileManagementClient::rollbackRemoveFilesByServiceTypeAndTagIds)
@@ -90,12 +94,12 @@ public class TransactionCommandListFactoryImpl implements TransactionCommandList
         // Removal of course files
         if (!course.getFiles().isEmpty()) {
             commands.add(new RemoveFileTransactionCommand(
-                    ServiceType.COURSE, List.of(courseId),
+                    StepName.COURSE_FILE_REMOVAL, ServiceType.COURSE, List.of(courseId),
                     fileManagementClient::prepareRemoveFilesByServiceTypeAndTagIds,
                     fileManagementClient::commitRemoveFilesByServiceTypeAndTagIds,
                     fileManagementClient::rollbackRemoveFilesByServiceTypeAndTagIds)
             );
         }
-        return commands;
+        return new CourseDistributedTransaction(commands);
     }
 }
