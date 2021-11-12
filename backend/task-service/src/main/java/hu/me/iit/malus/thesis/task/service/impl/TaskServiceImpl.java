@@ -150,7 +150,7 @@ public class TaskServiceImpl implements TaskService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = {TaskDeleteRollbackException.class})
     public void deleteTask(Long taskId) throws TaskNotFoundException, TaskDeleteRollbackException {
         Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
         task.setRemoved(true);

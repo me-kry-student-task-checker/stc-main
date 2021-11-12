@@ -23,6 +23,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of DistributedTransactionFactory, specialized for Course objects.
+ *
+ * @author Attila Szőke
+ */
 @Component
 @RequiredArgsConstructor
 public class CourseDistributedTransactionFactory implements DistributedTransactionFactory {

@@ -1,5 +1,12 @@
 package hu.me.iit.malus.thesis.transaction;
 
+/**
+ * An enum class, specifying the steps of the transactions in the application.
+ * Mainly used for logging purposes.
+ * Can be extended if needed.
+ *
+ * @author Attila Szőke
+ */
 public enum StepName {
     // Shared
     START_TRANSACTION,

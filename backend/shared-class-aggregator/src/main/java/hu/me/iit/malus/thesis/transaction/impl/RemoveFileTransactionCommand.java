@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+/**
+ * Implementation of TransactionCommand interface.
+ * It's used when calling the 2PC methods of the file service.
+ *
+ * @author Attila Szőke
+ */
 @RequiredArgsConstructor
 public class RemoveFileTransactionCommand implements TransactionCommand {
 

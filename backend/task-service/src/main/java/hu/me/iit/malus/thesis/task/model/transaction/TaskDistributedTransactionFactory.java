@@ -19,6 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of DistributedTransactionFactory, specialized for Task objects.
+ *
+ * @author Attila Szőke
+ */
 @Component
 @RequiredArgsConstructor
 public class TaskDistributedTransactionFactory implements DistributedTransactionFactory {

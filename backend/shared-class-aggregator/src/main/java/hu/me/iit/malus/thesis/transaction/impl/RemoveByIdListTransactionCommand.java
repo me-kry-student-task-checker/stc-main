@@ -8,6 +8,12 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Implementation of TransactionCommand interface.
+ * It's used when calling the 2PC methods of other services, which need a Long List parameter.
+ *
+ * @author Attila Szőke
+ */
 @RequiredArgsConstructor
 public class RemoveByIdListTransactionCommand implements TransactionCommand {
 

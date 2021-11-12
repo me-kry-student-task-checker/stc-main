@@ -87,7 +87,7 @@ public interface TaskService {
 
 
     /**
-     * Deletes a task.
+     * Deletes a task, and everything connected to it using 2PC.
      *
      * @param taskId the task id
      * @throws TaskNotFoundException       the task not found exception
