@@ -9,11 +9,12 @@ import lombok.*;
  *
  * @author Javorek Dénes
  */
-@Getter @Setter
+@Getter
+@Setter
 @AllArgsConstructor
-@ToString @EqualsAndHashCode
-public class User
-{
+@ToString
+@EqualsAndHashCode
+public class User {
     private String email;
     private String password;
     private String firstName, lastName;

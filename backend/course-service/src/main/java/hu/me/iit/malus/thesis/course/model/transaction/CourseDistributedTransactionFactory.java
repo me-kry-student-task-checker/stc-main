@@ -1,17 +1,20 @@
-package hu.me.iit.malus.thesis.course.model.transaction.impl;
+package hu.me.iit.malus.thesis.course.model.transaction;
 
 import hu.me.iit.malus.thesis.course.client.FeedbackClient;
 import hu.me.iit.malus.thesis.course.client.FileManagementClient;
 import hu.me.iit.malus.thesis.course.client.TaskClient;
 import hu.me.iit.malus.thesis.course.model.Course;
-import hu.me.iit.malus.thesis.course.model.transaction.DistributedTransaction;
-import hu.me.iit.malus.thesis.course.model.transaction.DistributedTransactionFactory;
-import hu.me.iit.malus.thesis.course.model.transaction.StepName;
-import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommand;
 import hu.me.iit.malus.thesis.dto.CourseComment;
 import hu.me.iit.malus.thesis.dto.ServiceType;
 import hu.me.iit.malus.thesis.dto.Task;
 import hu.me.iit.malus.thesis.dto.TaskComment;
+import hu.me.iit.malus.thesis.transaction.DistributedTransaction;
+import hu.me.iit.malus.thesis.transaction.DistributedTransactionFactory;
+import hu.me.iit.malus.thesis.transaction.StepName;
+import hu.me.iit.malus.thesis.transaction.TransactionCommand;
+import hu.me.iit.malus.thesis.transaction.impl.DistributedTransactionImpl;
+import hu.me.iit.malus.thesis.transaction.impl.RemoveByIdListTransactionCommand;
+import hu.me.iit.malus.thesis.transaction.impl.RemoveFileTransactionCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -44,15 +47,13 @@ public class CourseDistributedTransactionFactory implements DistributedTransacti
                 .collect(Collectors.toList());
 
         // Removal of tasks and everything connected to them
-        if (!course.getTasks().isEmpty()) {
+        if (!taskIds.isEmpty()) {
             commands.add(new RemoveByIdListTransactionCommand(
                     StepName.TASK_REMOVAL, taskIds,
                     taskClient::prepareRemoveTaskByTaskIds,
                     taskClient::commitRemoveTaskByCourseId,
                     taskClient::rollbackRemoveTaskByCourseId)
             );
-        }
-        if (!taskIds.isEmpty()) {
             commands.add(new RemoveByIdListTransactionCommand(
                     StepName.TASK_COMMENT_REMOVAL, taskIds,
                     feedbackClient::prepareRemoveTaskCommentsByTaskIds,
@@ -75,15 +76,13 @@ public class CourseDistributedTransactionFactory implements DistributedTransacti
             );
         }
         // Removal of course comments and everything connected to it
-        if (!course.getComments().isEmpty()) {
+        if (!courseCommentIds.isEmpty()) {
             commands.add(new RemoveByIdListTransactionCommand(
                     StepName.COURSE_COMMENT_REMOVAL, List.of(courseId),
                     feedbackClient::prepareRemoveCourseCommentsByCourseIds,
                     feedbackClient::commitRemoveCourseCommentsByCourseId,
                     feedbackClient::rollbackRemoveCourseCommentsByCourseId)
             );
-        }
-        if (!courseCommentIds.isEmpty()) {
             commands.add(new RemoveFileTransactionCommand(
                     StepName.COURSE_COMMENT_FILE_REMOVAL, ServiceType.FEEDBACK, courseCommentIds,
                     fileManagementClient::prepareRemoveFilesByServiceTypeAndTagIds,
@@ -100,6 +99,6 @@ public class CourseDistributedTransactionFactory implements DistributedTransacti
                     fileManagementClient::rollbackRemoveFilesByServiceTypeAndTagIds)
             );
         }
-        return new CourseDistributedTransaction(commands);
+        return new DistributedTransactionImpl(commands);
     }
 }

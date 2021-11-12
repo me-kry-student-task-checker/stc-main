@@ -1,0 +1,1 @@
+This module contains every shared class, used by other service.

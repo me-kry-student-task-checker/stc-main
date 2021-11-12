@@ -10,8 +10,6 @@ import hu.me.iit.malus.thesis.course.controller.dto.CourseFullDetailsDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseModificationDto;
 import hu.me.iit.malus.thesis.course.controller.dto.CourseOverviewDto;
 import hu.me.iit.malus.thesis.course.model.Course;
-import hu.me.iit.malus.thesis.course.model.transaction.DistributedTransaction;
-import hu.me.iit.malus.thesis.course.model.transaction.DistributedTransactionFactory;
 import hu.me.iit.malus.thesis.course.repository.CourseRepository;
 import hu.me.iit.malus.thesis.course.service.CourseService;
 import hu.me.iit.malus.thesis.course.service.converters.Converter;
@@ -19,6 +17,8 @@ import hu.me.iit.malus.thesis.course.service.exception.CourseDeleteRollbackExcep
 import hu.me.iit.malus.thesis.course.service.exception.CourseNotFoundException;
 import hu.me.iit.malus.thesis.course.service.exception.ForbiddenCourseEditException;
 import hu.me.iit.malus.thesis.dto.ServiceType;
+import hu.me.iit.malus.thesis.transaction.DistributedTransaction;
+import hu.me.iit.malus.thesis.transaction.DistributedTransactionFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

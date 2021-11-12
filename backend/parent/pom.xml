@@ -109,7 +109,7 @@
             </dependency>
             <dependency>
                 <groupId>hu.me.iit.malus.thesis</groupId>
-                <artifactId>feign-client-dto-aggregator</artifactId>
+                <artifactId>shared-class-aggregator</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
         </dependencies>

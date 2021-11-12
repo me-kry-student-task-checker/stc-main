@@ -1,8 +1,8 @@
-package hu.me.iit.malus.thesis.course.model.transaction.impl;
+package hu.me.iit.malus.thesis.transaction.impl;
 
-import hu.me.iit.malus.thesis.course.model.transaction.StepName;
-import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommand;
 import hu.me.iit.malus.thesis.dto.ServiceType;
+import hu.me.iit.malus.thesis.transaction.StepName;
+import hu.me.iit.malus.thesis.transaction.TransactionCommand;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public class RemoveFileTransactionCommand implements TransactionCommand {
 
     private final StepName stepName;
     private final ServiceType serviceType;
-    private final List<Long> ids;
+    private final List<Long> tagIds;
     private final BiFunction<ServiceType, List<Long>, String> prepare;
     private final Consumer<String> commit;
     private final Consumer<String> rollback;
@@ -22,7 +22,7 @@ public class RemoveFileTransactionCommand implements TransactionCommand {
 
     @Override
     public void prepare() {
-        transactionKey = prepare.apply(serviceType, ids);
+        transactionKey = prepare.apply(serviceType, tagIds);
     }
 
     @Override

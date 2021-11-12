@@ -1,4 +1,4 @@
-package hu.me.iit.malus.thesis.course.model.transaction;
+package hu.me.iit.malus.thesis.transaction;
 
 public enum StepName {
     // Shared

@@ -1,7 +1,7 @@
-package hu.me.iit.malus.thesis.course.model.transaction.impl;
+package hu.me.iit.malus.thesis.transaction.impl;
 
-import hu.me.iit.malus.thesis.course.model.transaction.StepName;
-import hu.me.iit.malus.thesis.course.model.transaction.TransactionCommand;
+import hu.me.iit.malus.thesis.transaction.StepName;
+import hu.me.iit.malus.thesis.transaction.TransactionCommand;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
