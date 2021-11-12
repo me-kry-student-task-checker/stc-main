@@ -121,13 +121,10 @@ public class CourseServiceImpl implements CourseService {
         fillCourseDetails(course);
         DistributedTransaction distributedTransaction = factory.create(course);
         try {
-            // Prepare phase
             distributedTransaction.prepare();
-            // Commit Phase
             distributedTransaction.commit();
             log.debug("Removed course with id {} and everything connected to it using 2PC!", courseId);
         } catch (FeignException e) {
-            // Rollback Phase
             distributedTransaction.rollback();
             throw new CourseDeleteRollbackException(course.getId(), e); // to trigger transactional annotation rollback
         }

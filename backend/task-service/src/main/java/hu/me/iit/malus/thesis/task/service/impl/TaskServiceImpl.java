@@ -20,6 +20,8 @@ import hu.me.iit.malus.thesis.task.service.exception.ForbiddenTaskEditException;
 import hu.me.iit.malus.thesis.task.service.exception.StudentIdNotFoundException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskDeleteRollbackException;
 import hu.me.iit.malus.thesis.task.service.exception.TaskNotFoundException;
+import hu.me.iit.malus.thesis.transaction.DistributedTransaction;
+import hu.me.iit.malus.thesis.transaction.DistributedTransactionFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -47,6 +49,7 @@ public class TaskServiceImpl implements TaskService {
     private final FileManagementClient fileManagementClient;
     private final UserClient userClient;
     private final RedisTemplate<String, List<Long>> redisTemplate;
+    private final DistributedTransactionFactory factory;
 
     /**
      * {@inheritDoc}
@@ -152,33 +155,14 @@ public class TaskServiceImpl implements TaskService {
         Task task = repository.findByIdAndRemovedFalse(taskId).orElseThrow(TaskNotFoundException::new);
         task.setRemoved(true);
         repository.save(task);
-        List<Long> taskCommentIds = feedbackClient.getAllTaskComments(taskId).stream().map(TaskComment::getId).collect(Collectors.toList());
-        String reason = "";
-        String taskCommentTransactionKey = "";
-        String taskCommentFileTransactionKey = "";
-        String taskFileTransactionKey = "";
+        DistributedTransaction distributedTransaction = factory.create(task);
         try {
-            // Prepare
-            reason = "PREPARE_TASK_COMMENT_REMOVAL";
-            taskCommentTransactionKey = feedbackClient.prepareRemoveTaskCommentsByTaskIds(List.of(taskId));
-            if (!taskCommentIds.isEmpty()) {
-                reason = "PREPARE_TASK_COMMENT_FILE_REMOVAL";
-                taskCommentFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.FEEDBACK, taskCommentIds);
-            }
-            reason = "PREPARE_TASK_FILE_REMOVAL";
-            taskFileTransactionKey = fileManagementClient.prepareRemoveFilesByServiceTypeAndTagIds(ServiceType.TASK, List.of(taskId));
-            // Commit
-            feedbackClient.commitRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
-            if (!taskCommentFileTransactionKey.isEmpty()) fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
-            fileManagementClient.commitRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
+            distributedTransaction.prepare();
+            distributedTransaction.commit();
             log.debug("Removed task with id {} and everything connected to it using 2PC!", taskId);
         } catch (FeignException e) {
-            // Rollback
-            if (!taskCommentTransactionKey.isEmpty()) feedbackClient.rollbackRemoveTaskCommentsByTaskIds(taskCommentTransactionKey);
-            if (!taskCommentFileTransactionKey.isEmpty())
-                fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(taskCommentFileTransactionKey);
-            if (!taskFileTransactionKey.isEmpty()) fileManagementClient.rollbackRemoveFilesByServiceTypeAndTagIds(taskFileTransactionKey);
-            throw new TaskDeleteRollbackException(taskId, reason);
+            distributedTransaction.rollback();
+            throw new TaskDeleteRollbackException(taskId, e);
         }
     }
 
