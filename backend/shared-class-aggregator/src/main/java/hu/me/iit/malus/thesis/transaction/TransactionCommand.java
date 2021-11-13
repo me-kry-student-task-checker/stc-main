@@ -1,26 +1,11 @@
 package hu.me.iit.malus.thesis.transaction;
 
 /**
- * Symbolises a step in a distributed transaction. Should be used in conjunction with a DistributedTransaction class.
+ * Symbolises a step in a distributed transaction. Should be used in conjunction with a DistributedTransaction implementation.
  *
  * @author Attila Szőke
  */
-public interface TransactionCommand {
-
-    /**
-     * Prepares the transaction to commit.
-     */
-    void prepare();
-
-    /**
-     * Commits the transaction.
-     */
-    void commit();
-
-    /**
-     * Rolls back the transaction in case of error.
-     */
-    void rollback();
+public interface TransactionCommand extends DistributedTransaction {
 
     /**
      * Getter for the Command's step name. It is here, because this way every implementation should have a step variable, used for logging.
