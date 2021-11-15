@@ -228,6 +228,36 @@ public class FeedbackServiceImplTest {
     }
     
     @Test
+    public void rollbackRemoveCourseCommentsByCourseId() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	long testCourseId = 419L;
+        List<Long> testCourseIdList  = List.of(testCourseId);
+        
+        String testText = "KyuB9ZN6";
+        
+        CourseCommentCreateDto dto = new CourseCommentCreateDto(testText, testCourseId);
+        CourseComment shouldBeComment = DtoConverter.courseCommentCreateDtoToCourseComment(dto);
+        Long testId = 731L;
+        Date testDate = new Date();
+        String testAuthor = "uFB";
+        shouldBeComment.setId(testId);
+        shouldBeComment.setCreateDate(testDate);
+        shouldBeComment.setAuthorId(testAuthor);
+        List<CourseComment> testList = List.of(shouldBeComment, shouldBeComment);
+        
+    	when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    	when(valueOperations.get(testTransactionKey)).thenReturn(testCourseIdList);
+    	when(courseCommentRepository.findAllById(testCourseIdList)).thenReturn(testList);
+    	
+    	service.rollbackRemoveCourseCommentsByCourseId(testTransactionKey);
+    	
+    	verify(redisTemplate).opsForValue();
+    	verify(valueOperations).get(testTransactionKey);
+    	verify(courseCommentRepository).findAllById(testCourseIdList);
+    }
+    
+    
+    @Test
     public void commitRemoveTaskCommentsByTaskIds() {
     	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
     	boolean success = true;
