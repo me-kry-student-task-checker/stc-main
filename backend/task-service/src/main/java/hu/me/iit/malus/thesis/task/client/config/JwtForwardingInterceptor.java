@@ -5,6 +5,7 @@ import feign.RequestTemplate;
 import hu.me.iit.malus.thesis.task.security.config.JwtAuthConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -29,11 +30,13 @@ public class JwtForwardingInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate forwardedRequestTemplate) {
-        HttpServletRequest originalRequest = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
-        if (originalRequest == null) {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if(requestAttributes == null) {
             return;
         }
+
+        HttpServletRequest originalRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
+
         String token = originalRequest.getHeader(jwtConfig.getTokenHeader());
         if (token == null || token.length() == 0) {
             return;

@@ -134,7 +134,52 @@ public class TaskServiceImplTest {
     }
 
     @Test
-    public void get() throws Exception {
+    public void getWithStudents() throws Exception {
+        long taskId = 905L;
+        String name = "OQtk4GfT";
+        String description = "GE019SkC";
+        Date creationDate = new Date();
+        boolean done = true;
+        long courseId = 975L;
+        Set<Student> students = new HashSet<>();
+        Student student = new Student("email", "firstName", "lastName", new ArrayList<>(), true);
+        students.add(student);
+        Task task = new Task();
+        task.setId(taskId);
+        task.setName(name);
+        task.setDescription(description);
+        task.setCreationDate(creationDate);
+        task.setDone(done);
+        task.setCourseId(courseId);
+        task.setCompletedStudentIds(new HashSet<>());
+        task.setHelpNeededStudentIds(new HashSet<>());
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
+
+        when(userClient.isRelated(courseId)).thenReturn(true);
+        when(userClient.getStudentsByAssignedCourseId(courseId)).thenReturn(students);
+        when(feedbackClient.getAllTaskComments(taskId)).thenReturn(new ArrayList<>());
+        when(fileManagementClient.getAllFilesByTagId(ServiceType.TASK, taskId)).thenReturn(new HashSet<>());
+
+        DetailedTaskDto dto = service.get(taskId, "foIM");
+
+        assertThat(dto.getId(), is(taskId));
+        assertThat(dto.getName(), is(name));
+        assertThat(dto.getDescription(), is(description));
+        assertThat(dto.getCreationDate(), is(creationDate));
+        assertThat(dto.isDone(), is(done));
+        assertThat(dto.getCourseId(), is(courseId));
+        assertThat(dto.getCompletedStudents().size(), is(0));
+        assertThat(dto.getHelpNeededStudents().size(), is(0));
+        assertThat(dto.getComments().size(), is(0));
+        assertThat(dto.getFiles().size(), is(0));
+        verify(repository).findByIdAndRemovedFalse(taskId);
+        verify(userClient).isRelated(courseId);
+        verify(feedbackClient).getAllTaskComments(taskId);
+        verify(fileManagementClient).getAllFilesByTagId(ServiceType.TASK, taskId);
+    }
+
+    @Test
+    public void getNoStudents() throws Exception {
         long taskId = 905L;
         String name = "OQtk4GfT";
         String description = "GE019SkC";
@@ -148,8 +193,11 @@ public class TaskServiceImplTest {
         task.setCreationDate(creationDate);
         task.setDone(done);
         task.setCourseId(courseId);
+        task.setCompletedStudentIds(new HashSet<>());
+        task.setHelpNeededStudentIds(new HashSet<>());
         when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
         when(userClient.isRelated(courseId)).thenReturn(true);
+        when(userClient.getStudentsByAssignedCourseId(courseId)).thenReturn(new HashSet<>());
         when(feedbackClient.getAllTaskComments(taskId)).thenReturn(new ArrayList<>());
         when(fileManagementClient.getAllFilesByTagId(ServiceType.TASK, taskId)).thenReturn(new HashSet<>());
 
@@ -217,12 +265,31 @@ public class TaskServiceImplTest {
     }
 
     @Test
-    public void changeDoneStatus() throws Exception {
-        long taskId = 862L;
+    public void changeDoneStatusFromTrue() throws Exception {
+        long taskId = 89L;
         boolean done = true;
         Task task = new Task();
         task.setId(taskId);
         task.setDone(done);
+
+
+        when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
+
+        service.changeDoneStatus(taskId);
+
+        verify(repository).findByIdAndRemovedFalse(taskId);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().isDone(), is(!done));
+    }
+
+    @Test
+    public void changeDoneStatusFromFalse() throws Exception {
+        long taskId = 89L;
+        boolean done = false;
+        Task task = new Task();
+        task.setId(taskId);
+        task.setDone(done);
+
         when(repository.findByIdAndRemovedFalse(taskId)).thenReturn(Optional.of(task));
 
         service.changeDoneStatus(taskId);
