@@ -4,8 +4,8 @@ import hu.me.iit.malus.thesis.email.security.config.JwtAuthConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +16,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,13 +27,9 @@ import java.util.stream.Collectors;
  * @author Javorek Dénes
  */
 @Slf4j
+@RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
-    private JwtAuthConfig config;
-
-    @Autowired
-    public JwtAuthorizationFilter(JwtAuthConfig config) {
-        this.config = config;
-    }
+    private final JwtAuthConfig config;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
@@ -45,7 +42,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     .getBody();
 
             String email = claims.getSubject();
-            List<String> authorities = (List<String>) claims.get("roles");
+            List<String> authorities = (List<String>) claims.getOrDefault("roles", new ArrayList<String>());
 
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     email,
@@ -63,8 +60,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private String getTokenFromRequest(HttpServletRequest request)
-    {
+    private String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(config.getTokenHeader());
 
         if (token == null || token.length() == 0) {

@@ -1,7 +1,7 @@
 package hu.me.iit.malus.thesis.email.security;
 
 import hu.me.iit.malus.thesis.email.security.config.JwtAuthConfig;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,13 +12,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import javax.servlet.http.HttpServletResponse;
 
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private JwtAuthConfig jwtAuthConfig;
-
-    @Autowired
-    public WebSecurityConfig(JwtAuthConfig jwtAuthConfig) {
-        this.jwtAuthConfig = jwtAuthConfig;
-    }
+    private final JwtAuthConfig jwtAuthConfig;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
