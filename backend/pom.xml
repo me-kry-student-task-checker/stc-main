@@ -21,6 +21,6 @@
 		<module>feedback-service</module>
 		<module>filemanagement-service</module>
 		<module>user-service</module>
-		<module>feign-client-dto-aggregator</module>
+		<module>shared-class-aggregator</module>
 	</modules>
 </project>

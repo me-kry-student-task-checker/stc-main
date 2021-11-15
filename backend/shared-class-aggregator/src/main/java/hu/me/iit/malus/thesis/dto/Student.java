@@ -9,8 +9,11 @@ import java.util.List;
  *
  * @author Javorek Dénes
  */
-@Getter @Setter @NoArgsConstructor
-@ToString @EqualsAndHashCode
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class Student extends User {
 
     private List<Long> assignedCourseIds;

@@ -127,8 +127,8 @@ public class FeedbackServiceImpl implements FeedbackService {
      */
     @Override
     @Transactional
-    public String prepareRemoveCourseCommentsByCourseId(Long courseId) {
-        List<CourseComment> courseComments = courseCommentRepository.findAllByCourseIdAndRemovedFalse(courseId);
+    public String prepareRemoveCourseCommentsByCourseIds(List<Long> courseIds) {
+        List<CourseComment> courseComments = courseCommentRepository.findAllByCourseIdInAndRemovedFalse(courseIds);
         courseComments.forEach(courseComment -> courseComment.setRemoved(true));
         courseCommentRepository.saveAll(courseComments);
         String uuid = UUID.randomUUID().toString();

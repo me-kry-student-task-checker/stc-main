@@ -57,7 +57,7 @@ public interface CourseService {
     Set<CourseOverviewDto> getAll(String userEmail);
 
     /**
-     * Deletes a course, uses 2PC.
+     * Deletes a course, and everything connected to it using 2PC.
      *
      * @param courseId the course id
      * @throws CourseNotFoundException       the course not found exception
