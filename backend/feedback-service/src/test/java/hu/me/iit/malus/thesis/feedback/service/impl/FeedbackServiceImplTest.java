@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -319,6 +320,22 @@ public class FeedbackServiceImplTest {
     	verify(redisTemplate).opsForValue();
     	verify(valueOperations).get(testTransactionKey);
     	verify(taskCommentRepository).findAllById(testTaskIdList);
+    }
+    
+    @Test
+    public void rollbackRemoveTaskCommentsByTaskIdsWhenTaskIdsAreNull() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+        List<Long> testTaskIdList = null;
+        
+    	when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    	when(valueOperations.get(testTransactionKey)).thenReturn(testTaskIdList);
+    	
+    	service.rollbackRemoveTaskCommentsByTaskIds(testTransactionKey);
+    	
+    	assertNull(testTaskIdList);
+    	
+    	verify(redisTemplate).opsForValue();
+    	verify(valueOperations).get(testTransactionKey);
     }
     
     @Test
