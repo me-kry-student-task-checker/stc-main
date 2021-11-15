@@ -57,9 +57,9 @@ public class FeedbackController {
         service.removeTaskComment(commentId, principal.getName());
     }
 
-    @PostMapping("/prepare/course/remove/by/{courseId}")
-    public String prepareRemoveCourseCommentsByCourseId(@PathVariable Long courseId) {
-        return service.prepareRemoveCourseCommentsByCourseId(courseId);
+    @PostMapping("/prepare/course/remove/by/{courseIds}")
+    public String prepareRemoveCourseCommentsByCourseIds(@PathVariable List<Long> courseIds) {
+        return service.prepareRemoveCourseCommentsByCourseIds(courseIds);
     }
 
     @PostMapping("/commit/course/remove/{transactionKey}")

@@ -19,8 +19,8 @@ public interface FeedbackClient {
     @GetMapping("/api/feedback/getAllCourseComments/{courseId}")
     List<CourseComment> getAllCourseComments(@PathVariable Long courseId);
 
-    @PostMapping("/api/feedback/prepare/course/remove/by/{courseId}")
-    String prepareRemoveCourseCommentsByCourseId(@PathVariable Long courseId);
+    @PostMapping("/api/feedback/prepare/course/remove/by/{courseIds}")
+    String prepareRemoveCourseCommentsByCourseIds(@PathVariable List<Long> courseIds);
 
     @PostMapping("/api/feedback/commit/course/remove/{courseCommentTransactionKey}")
     void commitRemoveCourseCommentsByCourseId(@PathVariable String courseCommentTransactionKey);
