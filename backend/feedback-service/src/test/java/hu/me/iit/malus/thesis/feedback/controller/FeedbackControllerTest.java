@@ -161,5 +161,71 @@ public class FeedbackControllerTest {
         verify(principal).getName();
         verify(service).removeTaskComment(commentId, principal.getName());
     }
+    
+    @Test
+    public void prepareRemoveCourseCommentsByCourseId() {
+    	long testCourseId = 938L;
+        List<Long> testCourseIdList  = List.of(testCourseId);
+    	String testUuid = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	
+    	when(service.prepareRemoveCourseCommentsByCourseIds(testCourseIdList)).thenReturn(testUuid);
+    	
+    	String result = controller.prepareRemoveCourseCommentsByCourseIds(testCourseIdList);
+    	
+    	assertThat(testUuid , is(result));
+    	verify(service).prepareRemoveCourseCommentsByCourseIds(testCourseIdList);
+    }
+    
+    @Test
+    public void commitRemoveCourseCommentsByCourseId() {
+    	String transactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	doNothing().when(service).commitRemoveCourseCommentsByCourseId(transactionKey);
+    	
+    	controller.commitRemoveCourseCommentsByCourseId(transactionKey);
+    	
+    	verify(service).commitRemoveCourseCommentsByCourseId(transactionKey);
+    }
+    
+    @Test
+    public void rollbackRemoveCourseCommentsByCourseId() {
+    	String transactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	doNothing().when(service).rollbackRemoveCourseCommentsByCourseId(transactionKey);
+    	
+    	controller.rollbackRemoveCourseCommentsByCourseId(transactionKey);
+    	
+    	verify(service).rollbackRemoveCourseCommentsByCourseId(transactionKey);
+    }
+    
+    @Test
+    public void prepareRemoveTaskCommentsByTaskIds() {
+    	List<Long> testList = List.of();
+    	String testUuid = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	when(service.prepareRemoveTaskCommentsByTaskIds(testList)).thenReturn(testUuid);
+    	
+    	String result = controller.prepareRemoveTaskCommentsByTaskIds(testList);
+    	
+    	assertThat(testUuid, is(result));
+    	verify(service).prepareRemoveTaskCommentsByTaskIds(testList);
+    }
+    
+    @Test
+    public void commitRemoveTaskCommentsByTaskIds() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	doNothing().when(service).commitRemoveTaskCommentsByTaskIds(testTransactionKey);
+    	
+    	controller.commitRemoveTaskCommentsByTaskIds(testTransactionKey);
+    	
+    	verify(service).commitRemoveTaskCommentsByTaskIds(testTransactionKey);
+    }
+    
+    @Test
+    public void rollbackRemoveTaskCommentsByTaskIds() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	doNothing().when(service).rollbackRemoveTaskCommentsByTaskIds(testTransactionKey);
+    	
+    	controller.rollbackRemoveTaskCommentsByTaskIds(testTransactionKey);
+    	
+    	verify(service).rollbackRemoveTaskCommentsByTaskIds(testTransactionKey);
+    }
 
 }

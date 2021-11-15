@@ -86,5 +86,5 @@
 			<artifactId>shared-class-aggregator</artifactId>
 		</dependency>
 	</dependencies>
-
+	
 </project>

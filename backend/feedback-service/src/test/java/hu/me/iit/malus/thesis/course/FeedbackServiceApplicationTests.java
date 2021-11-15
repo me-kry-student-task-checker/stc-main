@@ -6,8 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class FeedbackServiceApplicationTests {
 
-	@Test
+	@Test(expected = Test.None.class /* no exception expected */)
 	public void contextLoads() {
+
 	}
 
 }

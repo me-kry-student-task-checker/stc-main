@@ -13,11 +13,14 @@ import hu.me.iit.malus.thesis.feedback.repository.TaskCommentRepository;
 import hu.me.iit.malus.thesis.feedback.service.converters.DtoConverter;
 import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
 import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Date;
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,7 +44,13 @@ public class FeedbackServiceImplTest {
 
     @Mock
     private FileManagementClient fileManagementClient;
-
+    
+    @Mock
+    private ValueOperations valueOperations;
+    
+    @Mock
+    private RedisTemplate<String, List<Long>> redisTemplate;
+    
     @InjectMocks
     private FeedbackServiceImpl service;
 
@@ -203,6 +213,171 @@ public class FeedbackServiceImplTest {
         when(taskCommentRepository.findByIdAndRemovedFalse(testId)).thenReturn(Optional.of(taskComment));
 
         service.removeTaskComment(testId, "9SDL");
+    }
+    
+    @Test
+    public void prepareRemoveCourseCommentsByCourseId() {
+    	long testCourseId = 419L;
+    	List<Long> testCourseIdList  = List.of(testCourseId);
+        String testText = "KyuB9ZN6";
+        CourseCommentCreateDto dto = new CourseCommentCreateDto(testText, testCourseId);
+        CourseComment shouldBeComment = DtoConverter.courseCommentCreateDtoToCourseComment(dto);
+        Long testId = 731L;
+        
+        Date testDate = new Date();
+        String testAuthor = "uFB";
+        shouldBeComment.setId(testId);
+        shouldBeComment.setCreateDate(testDate);
+        shouldBeComment.setAuthorId(testAuthor);
+        List<CourseComment> testList = List.of(shouldBeComment, shouldBeComment);
+        
+        when(courseCommentRepository.findAllByCourseIdInAndRemovedFalse(testCourseIdList)).thenReturn(testList);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+              
+        service.prepareRemoveCourseCommentsByCourseIds(testCourseIdList);
+               
+        verify(redisTemplate).opsForValue();
+    	verify(courseCommentRepository).findAllByCourseIdInAndRemovedFalse(testCourseIdList);
+    }
+    
+    @Test
+    public void commitRemoveCourseCommentsByCourseId() {
+    	String transactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	boolean success = true;
+
+        when(redisTemplate.delete(transactionKey)).thenReturn(success);
+        
+        service.commitRemoveCourseCommentsByCourseId(transactionKey);
+        
+        verify(redisTemplate).delete(transactionKey);
+    }
+    
+    @Test
+    public void rollbackRemoveCourseCommentsByCourseId() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	long testCourseId = 419L;
+        List<Long> testCourseIdList  = List.of(testCourseId);
+        
+        String testText = "KyuB9ZN6";
+        
+        CourseCommentCreateDto dto = new CourseCommentCreateDto(testText, testCourseId);
+        CourseComment shouldBeComment = DtoConverter.courseCommentCreateDtoToCourseComment(dto);
+        Long testId = 731L;
+        Date testDate = new Date();
+        String testAuthor = "uFB";
+        shouldBeComment.setId(testId);
+        shouldBeComment.setCreateDate(testDate);
+        shouldBeComment.setAuthorId(testAuthor);
+        List<CourseComment> testList = List.of(shouldBeComment, shouldBeComment);
+        
+    	when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    	when(valueOperations.get(testTransactionKey)).thenReturn(testCourseIdList);
+    	when(courseCommentRepository.findAllById(testCourseIdList)).thenReturn(testList);
+    	
+    	service.rollbackRemoveCourseCommentsByCourseId(testTransactionKey);
+    	
+    	verify(redisTemplate).opsForValue();
+    	verify(valueOperations).get(testTransactionKey);
+    	verify(courseCommentRepository).findAllById(testCourseIdList);
+    }
+    
+    @Test
+    public void rollbackRemoveCourseCommentsByCourseIdAreNull() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+        List<Long> testCourseIdList = null;
+        
+    	when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    	when(valueOperations.get(testTransactionKey)).thenReturn(testCourseIdList);
+    	
+    	service.rollbackRemoveCourseCommentsByCourseId(testTransactionKey);
+    	
+    	assertNull(testCourseIdList);
+    	
+    	verify(redisTemplate).opsForValue();
+    	verify(valueOperations).get(testTransactionKey);
+    }
+    
+    
+    @Test
+    public void commitRemoveTaskCommentsByTaskIds() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	boolean success = true;
+    	
+    	when(redisTemplate.delete(testTransactionKey)).thenReturn(success);
+    	
+    	service.commitRemoveTaskCommentsByTaskIds(testTransactionKey);
+    
+    	verify(redisTemplate).delete(testTransactionKey);
+    }
+    
+    
+    @Test
+    public void rollbackRemoveTaskCommentsByTaskIds() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	String testText = "P49J4F";
+    	long testTaskId = 389L;
+        List<Long> testTaskIdList = List.of(testTaskId);
+        
+        TaskCommentCreateDto dto = new TaskCommentCreateDto(testText, testTaskId);
+        TaskComment shouldBeComment = DtoConverter.taskCommentCreateDtoToTaskComment(dto);
+        Long testId = 247L;
+        Date testDate = new Date();
+        String testAuthor = "p541c5";
+        shouldBeComment.setId(testId);
+        shouldBeComment.setCreateDate(testDate);
+        shouldBeComment.setAuthorId(testAuthor);
+        List<TaskComment> testList = List.of(shouldBeComment, shouldBeComment);
+        
+    	when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    	when(valueOperations.get(testTransactionKey)).thenReturn(testTaskIdList);
+    	when(taskCommentRepository.findAllById(testTaskIdList)).thenReturn(testList);
+    	
+    	service.rollbackRemoveTaskCommentsByTaskIds(testTransactionKey);
+    	
+    	verify(redisTemplate).opsForValue();
+    	verify(valueOperations).get(testTransactionKey);
+    	verify(taskCommentRepository).findAllById(testTaskIdList);
+    }
+    
+    @Test
+    public void rollbackRemoveTaskCommentsByTaskIdsWhenTaskIdsAreNull() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+        List<Long> testTaskIdList = null;
+        
+    	when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    	when(valueOperations.get(testTransactionKey)).thenReturn(testTaskIdList);
+    	
+    	service.rollbackRemoveTaskCommentsByTaskIds(testTransactionKey);
+    	
+    	assertNull(testTaskIdList);
+    	
+    	verify(redisTemplate).opsForValue();
+    	verify(valueOperations).get(testTransactionKey);
+    }
+    
+    @Test
+    public void prepareRemoveTaskCommentsByTaskIds() {
+    	String testText = "P49J4F";
+        long testTaskId = 389L;
+        List<Long> testTaskIdList = List.of(testTaskId);
+        
+        TaskCommentCreateDto dto = new TaskCommentCreateDto(testText, testTaskId);
+        TaskComment shouldBeComment = DtoConverter.taskCommentCreateDtoToTaskComment(dto);
+        Long testId = 247L;
+        Date testDate = new Date();
+        String testAuthor = "p541c5";
+        shouldBeComment.setId(testId);
+        shouldBeComment.setCreateDate(testDate);
+        shouldBeComment.setAuthorId(testAuthor);
+        List<TaskComment> testList = List.of(shouldBeComment, shouldBeComment);
+        
+        when(taskCommentRepository.findAllByTaskIdInAndRemovedFalse(testTaskIdList)).thenReturn(testList);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+              
+        service.prepareRemoveTaskCommentsByTaskIds(testTaskIdList);
+               
+        verify(redisTemplate).opsForValue();
+    	verify(taskCommentRepository).findAllByTaskIdInAndRemovedFalse(testTaskIdList);
     }
 
 }
