@@ -74,10 +74,10 @@ public interface FeedbackService {
     /**
      * 2PC prepare phase, prepares removal of course comments by the course id.
      *
-     * @param courseId the course id
+     * @param courseIds the course ids
      * @return the transaction key
      */
-    String prepareRemoveCourseCommentsByCourseId(Long courseId);
+    String prepareRemoveCourseCommentsByCourseIds(List<Long> courseIds);
 
     /**
      * 2PC commit phase, commits removal of course comments by transaction key returned by prepare method.

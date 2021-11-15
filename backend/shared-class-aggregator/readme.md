@@ -1,0 +1,1 @@
+This module contains every shared class, used by other services. Future shared classes can be deposited here.

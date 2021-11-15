@@ -83,8 +83,8 @@
 		</dependency>
 		<dependency>
 			<groupId>hu.me.iit.malus.thesis</groupId>
-			<artifactId>feign-client-dto-aggregator</artifactId>
-        </dependency>
-    </dependencies>
+			<artifactId>shared-class-aggregator</artifactId>
+		</dependency>
+	</dependencies>
 
 </project>

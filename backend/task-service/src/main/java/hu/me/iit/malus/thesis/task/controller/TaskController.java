@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.security.Principal;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -76,9 +77,9 @@ public class TaskController {
         service.deleteTask(taskId);
     }
 
-    @PostMapping("/prepare/remove/by/courseId/{courseId}")
-    public String prepareRemoveTaskByCourseId(@PathVariable Long courseId) {
-        return service.prepareRemoveTaskByCourseId(courseId);
+    @PostMapping("/prepare/remove/by/taskIds/{taskIds}")
+    public String prepareRemoveTaskByTaskIds(@PathVariable List<Long> taskIds) {
+        return service.prepareRemoveTaskByTaskIds(taskIds);
     }
 
     @PostMapping("/commit/remove/{transactionKey}")

@@ -15,6 +15,7 @@ import hu.me.iit.malus.thesis.course.service.converters.Converter;
 import hu.me.iit.malus.thesis.course.service.impl.CourseServiceImpl;
 import hu.me.iit.malus.thesis.dto.Teacher;
 import hu.me.iit.malus.thesis.dto.UserRole;
+import hu.me.iit.malus.thesis.transaction.DistributedTransactionFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -113,9 +114,10 @@ public class CourseControllerTest {
                 TaskClient taskClient,
                 FeedbackClient feedbackClient,
                 UserClient userClient,
-                FileManagementClient fileManagementClient
+                FileManagementClient fileManagementClient,
+                DistributedTransactionFactory factory
         ) {
-            return new CourseServiceImpl(courseRepository, taskClient, feedbackClient, userClient, fileManagementClient);
+            return new CourseServiceImpl(courseRepository, taskClient, feedbackClient, userClient, fileManagementClient, factory);
         }
 
     }
