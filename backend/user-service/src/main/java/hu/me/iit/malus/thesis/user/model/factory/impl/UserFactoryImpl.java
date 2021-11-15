@@ -18,7 +18,7 @@ public class UserFactoryImpl implements UserFactory {
     private final AdminRepository adminRepository;
 
     @Override
-    public User create(RegistrationRequest registrationRequest) {
+    public User create(RegistrationRequest registrationRequest) throws IllegalStateException {
         var userRole = UserRole.fromString(registrationRequest.getRole());
         switch (userRole) {
             case ADMIN:
@@ -29,11 +29,10 @@ public class UserFactoryImpl implements UserFactory {
                 return new Teacher(
                         registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
                         registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
-            case STUDENT:
+            default:
                 return new Student(
                         registrationRequest.getEmail(), passwordEncoder.encode(registrationRequest.getPassword()),
                         registrationRequest.getFirstName(), registrationRequest.getLastName(), Collections.emptyList());
         }
-        throw new IllegalStateException("User type cannot be recognized");
     }
 }

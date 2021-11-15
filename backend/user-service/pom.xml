@@ -16,6 +16,67 @@
 	<name>user-service</name>
 	<description>User microservice, authentication, user management</description>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.7</version>
+				<configuration>
+					<excludes>
+						<exclude>**/dto/*</exclude>
+						<exclude>**/security/*</exclude>
+						<exclude>**/config/*</exclude>
+						<exclude>**/controller/*</exclude>
+						<exclude>**/error/*</exclude>
+						<exclude>**/validation/*</exclude>
+						<exclude>**/service/exception/*</exclude>
+						<exclude>**/model/User.class</exclude>
+						<exclude>**/model/ActivationToken.class</exclude>
+						<exclude>**/model/Student.class</exclude>
+						<exclude>**/model/Teacher.class</exclude>
+						<exclude>**/model/Admin.class</exclude>
+						<exclude>**/UserServiceApplication.class</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>PACKAGE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.8</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

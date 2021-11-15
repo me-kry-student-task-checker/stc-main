@@ -30,4 +30,20 @@ public class Student extends User {
         super(email, password, firstName, lastName, UserRole.STUDENT, false);
         this.assignedCourseIds = assignedCourseIds;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        Student student = (Student) o;
+
+        return assignedCourseIds.equals(student.assignedCourseIds);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

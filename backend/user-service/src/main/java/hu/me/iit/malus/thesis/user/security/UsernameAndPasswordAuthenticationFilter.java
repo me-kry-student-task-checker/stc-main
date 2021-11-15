@@ -4,6 +4,7 @@ package hu.me.iit.malus.thesis.user.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hu.me.iit.malus.thesis.user.controller.dto.LoginRequest;
 import hu.me.iit.malus.thesis.user.security.config.JwtAuthConfig;
+import hu.me.iit.malus.thesis.user.service.exception.CannotReadLoginRequestException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class UsernameAndPasswordAuthenticationFilter extends UsernamePasswordAut
             return authManager.authenticate(authToken);
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CannotReadLoginRequestException(e);
         }
     }
 

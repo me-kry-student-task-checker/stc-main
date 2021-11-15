@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtAuthConfig {
     @Value("${security.jwt.uri}")
-    private String Uri;
+    private String uri;
 
     @Value("${security.jwt.expiration}")
     private int expiration;

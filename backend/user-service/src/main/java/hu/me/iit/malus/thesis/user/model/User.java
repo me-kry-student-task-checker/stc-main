@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import java.io.Serializable;
 
 import javax.persistence.*;
 
@@ -22,19 +23,20 @@ import javax.persistence.*;
 @Getter @Setter
 @AllArgsConstructor
 @ToString
-public abstract class User
+public abstract class User implements Serializable
 {
     @Id
     private final String email;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
-    private String firstName, lastName;
+    private String firstName;
+    private String lastName;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private boolean enabled;
 
-    public User() {
+    protected User() {
         super();
         this.email = null;
         this.enabled = false;
