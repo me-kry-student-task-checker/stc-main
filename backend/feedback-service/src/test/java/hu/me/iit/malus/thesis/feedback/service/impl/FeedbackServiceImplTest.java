@@ -217,8 +217,6 @@ public class FeedbackServiceImplTest {
     @Test
     public void prepareRemoveCourseCommentsByCourseId() {
     	long testCourseId = 419L;
-        List<Long> testCourseIdList  = List.of(testCourseId);
-        
         String testText = "KyuB9ZN6";
         
         CourseCommentCreateDto dto = new CourseCommentCreateDto(testText, testCourseId);
