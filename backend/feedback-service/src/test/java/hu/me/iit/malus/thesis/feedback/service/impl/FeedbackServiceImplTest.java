@@ -214,7 +214,32 @@ public class FeedbackServiceImplTest {
         service.removeTaskComment(testId, "9SDL");
     }
     
-
+    @Test
+    public void prepareRemoveCourseCommentsByCourseId() {
+    	long testCourseId = 419L;
+        List<Long> testCourseIdList  = List.of(testCourseId);
+        
+        String testText = "KyuB9ZN6";
+        
+        CourseCommentCreateDto dto = new CourseCommentCreateDto(testText, testCourseId);
+        CourseComment shouldBeComment = DtoConverter.courseCommentCreateDtoToCourseComment(dto);
+        Long testId = 731L;
+        Date testDate = new Date();
+        String testAuthor = "uFB";
+        shouldBeComment.setId(testId);
+        shouldBeComment.setCreateDate(testDate);
+        shouldBeComment.setAuthorId(testAuthor);
+        List<CourseComment> testList = List.of(shouldBeComment, shouldBeComment);
+        
+        when(courseCommentRepository.findAllByCourseIdAndRemovedFalse(testCourseId)).thenReturn(testList);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+              
+        service.prepareRemoveCourseCommentsByCourseId(testCourseId);
+               
+        verify(redisTemplate).opsForValue();
+    	verify(courseCommentRepository).findAllByCourseIdAndRemovedFalse(testCourseId);
+    }
+    
     @Test
     public void commitRemoveCourseCommentsByCourseId() {
     	String transactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
