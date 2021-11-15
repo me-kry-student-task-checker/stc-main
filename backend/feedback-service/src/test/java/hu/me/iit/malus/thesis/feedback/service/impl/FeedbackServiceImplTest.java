@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Date;
 import java.util.List;
@@ -42,6 +43,9 @@ public class FeedbackServiceImplTest {
 
     @Mock
     private FileManagementClient fileManagementClient;
+    
+    @Mock
+    private ValueOperations valueOperations;
     
     @Mock
     private RedisTemplate<String, List<Long>> redisTemplate;
@@ -233,6 +237,35 @@ public class FeedbackServiceImplTest {
     	service.commitRemoveTaskCommentsByTaskIds(testTransactionKey);
     
     	verify(redisTemplate).delete(testTransactionKey);
+    }
+    
+    
+    @Test
+    public void rollbackRemoveTaskCommentsByTaskIds() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	String testText = "P49J4F";
+    	long testTaskId = 389L;
+        List<Long> testTaskIdList = List.of(testTaskId);
+        
+        TaskCommentCreateDto dto = new TaskCommentCreateDto(testText, testTaskId);
+        TaskComment shouldBeComment = DtoConverter.taskCommentCreateDtoToTaskComment(dto);
+        Long testId = 247L;
+        Date testDate = new Date();
+        String testAuthor = "p541c5";
+        shouldBeComment.setId(testId);
+        shouldBeComment.setCreateDate(testDate);
+        shouldBeComment.setAuthorId(testAuthor);
+        List<TaskComment> testList = List.of(shouldBeComment, shouldBeComment);
+        
+    	when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    	when(valueOperations.get(testTransactionKey)).thenReturn(testTaskIdList);
+    	when(taskCommentRepository.findAllById(testTaskIdList)).thenReturn(testList);
+    	
+    	service.rollbackRemoveTaskCommentsByTaskIds(testTransactionKey);
+    	
+    	verify(redisTemplate).opsForValue();
+    	verify(valueOperations).get(testTransactionKey);
+    	verify(taskCommentRepository).findAllById(testTaskIdList);
     }
 
 }
