@@ -165,14 +165,15 @@ public class FeedbackControllerTest {
     @Test
     public void prepareRemoveCourseCommentsByCourseId() {
     	long testCourseId = 938L;
+        List<Long> testCourseIdList  = List.of(testCourseId);
     	String testUuid = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
     	
-    	when(service.prepareRemoveCourseCommentsByCourseId(testCourseId)).thenReturn(testUuid);
+    	when(service.prepareRemoveCourseCommentsByCourseIds(testCourseIdList)).thenReturn(testUuid);
     	
-    	String result = controller.prepareRemoveCourseCommentsByCourseId(testCourseId);
+    	String result = controller.prepareRemoveCourseCommentsByCourseIds(testCourseIdList);
     	
     	assertThat(testUuid , is(result));
-    	verify(service).prepareRemoveCourseCommentsByCourseId(testCourseId);
+    	verify(service).prepareRemoveCourseCommentsByCourseIds(testCourseIdList);
     }
     
     @Test

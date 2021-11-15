@@ -218,11 +218,12 @@ public class FeedbackServiceImplTest {
     @Test
     public void prepareRemoveCourseCommentsByCourseId() {
     	long testCourseId = 419L;
+    	List<Long> testCourseIdList  = List.of(testCourseId);
         String testText = "KyuB9ZN6";
-        
         CourseCommentCreateDto dto = new CourseCommentCreateDto(testText, testCourseId);
         CourseComment shouldBeComment = DtoConverter.courseCommentCreateDtoToCourseComment(dto);
         Long testId = 731L;
+        
         Date testDate = new Date();
         String testAuthor = "uFB";
         shouldBeComment.setId(testId);
@@ -230,13 +231,13 @@ public class FeedbackServiceImplTest {
         shouldBeComment.setAuthorId(testAuthor);
         List<CourseComment> testList = List.of(shouldBeComment, shouldBeComment);
         
-        when(courseCommentRepository.findAllByCourseIdAndRemovedFalse(testCourseId)).thenReturn(testList);
+        when(courseCommentRepository.findAllByCourseIdInAndRemovedFalse(testCourseIdList)).thenReturn(testList);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
               
-        service.prepareRemoveCourseCommentsByCourseId(testCourseId);
+        service.prepareRemoveCourseCommentsByCourseIds(testCourseIdList);
                
         verify(redisTemplate).opsForValue();
-    	verify(courseCommentRepository).findAllByCourseIdAndRemovedFalse(testCourseId);
+    	verify(courseCommentRepository).findAllByCourseIdInAndRemovedFalse(testCourseIdList);
     }
     
     @Test
