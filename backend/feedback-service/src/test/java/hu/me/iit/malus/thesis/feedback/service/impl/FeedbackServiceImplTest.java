@@ -280,6 +280,22 @@ public class FeedbackServiceImplTest {
     	verify(courseCommentRepository).findAllById(testCourseIdList);
     }
     
+    @Test
+    public void rollbackRemoveCourseCommentsByCourseIdAreNull() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+        List<Long> testCourseIdList = null;
+        
+    	when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    	when(valueOperations.get(testTransactionKey)).thenReturn(testCourseIdList);
+    	
+    	service.rollbackRemoveCourseCommentsByCourseId(testTransactionKey);
+    	
+    	assertNull(testCourseIdList);
+    	
+    	verify(redisTemplate).opsForValue();
+    	verify(valueOperations).get(testTransactionKey);
+    }
+    
     
     @Test
     public void commitRemoveTaskCommentsByTaskIds() {
