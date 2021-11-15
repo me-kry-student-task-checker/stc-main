@@ -14,15 +14,12 @@ import hu.me.iit.malus.thesis.feedback.service.converters.DtoConverter;
 import hu.me.iit.malus.thesis.feedback.service.exception.CommentNotFoundException;
 import hu.me.iit.malus.thesis.feedback.service.exception.ForbiddenCommentEditException;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Date;
 import java.util.List;
@@ -48,22 +45,6 @@ public class FeedbackServiceImplTest {
     
     @Mock
     private RedisTemplate<String, List<Long>> redisTemplate;
-    
-    /*
-    @Mock
-    private ValueOperations<String, List<Long>> valueOperations;
-    
-
-    @Before
-    public void setUp() {
-    	
-    	MockitoAnnotations.initMocks(this);
-    	when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-    	doNothing().when(valueOperations).set("KyuB9ZN6", List.of(419L, 429L));
-    }
-    */
-
-    
     
     @InjectMocks
     private FeedbackServiceImpl service;
@@ -240,6 +221,18 @@ public class FeedbackServiceImplTest {
         service.commitRemoveCourseCommentsByCourseId(transactionKey);
         
         verify(redisTemplate).delete(transactionKey);
+    }
+    
+    @Test
+    public void commitRemoveTaskCommentsByTaskIds() {
+    	String testTransactionKey = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+    	boolean success = true;
+    	
+    	when(redisTemplate.delete(testTransactionKey)).thenReturn(success);
+    	
+    	service.commitRemoveTaskCommentsByTaskIds(testTransactionKey);
+    
+    	verify(redisTemplate).delete(testTransactionKey);
     }
 
 }
