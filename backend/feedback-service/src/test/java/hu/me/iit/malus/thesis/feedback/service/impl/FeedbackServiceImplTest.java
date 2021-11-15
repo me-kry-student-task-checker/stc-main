@@ -297,5 +297,30 @@ public class FeedbackServiceImplTest {
     	verify(valueOperations).get(testTransactionKey);
     	verify(taskCommentRepository).findAllById(testTaskIdList);
     }
+    
+    @Test
+    public void prepareRemoveTaskCommentsByTaskIds() {
+    	String testText = "P49J4F";
+        long testTaskId = 389L;
+        List<Long> testTaskIdList = List.of(testTaskId);
+        
+        TaskCommentCreateDto dto = new TaskCommentCreateDto(testText, testTaskId);
+        TaskComment shouldBeComment = DtoConverter.taskCommentCreateDtoToTaskComment(dto);
+        Long testId = 247L;
+        Date testDate = new Date();
+        String testAuthor = "p541c5";
+        shouldBeComment.setId(testId);
+        shouldBeComment.setCreateDate(testDate);
+        shouldBeComment.setAuthorId(testAuthor);
+        List<TaskComment> testList = List.of(shouldBeComment, shouldBeComment);
+        
+        when(taskCommentRepository.findAllByTaskIdInAndRemovedFalse(testTaskIdList)).thenReturn(testList);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+              
+        service.prepareRemoveTaskCommentsByTaskIds(testTaskIdList);
+               
+        verify(redisTemplate).opsForValue();
+    	verify(taskCommentRepository).findAllByTaskIdInAndRemovedFalse(testTaskIdList);
+    }
 
 }
